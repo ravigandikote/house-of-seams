@@ -1,0 +1,58 @@
+[
+  {
+    "id": 1,
+    "name": "Custom Blouses",
+    "description": "Tailored to perfection, our custom blouses are designed to reflect your unique style and personality.",
+    "image": "/images/categories/custom-blouses.jpg",
+    "imageUrl": "/images/categories/custom-blouses.jpg"
+  },
+  {
+    "id": 2,
+    "name": "Bridal Blouses",
+    "description": "Exquisite bridal blouses that complement your wedding attire, crafted with intricate details and luxurious fabrics.",
+    "image": "/images/categories/bridal-blouses.jpg",
+    "imageUrl": "/images/categories/bridal-blouses.jpg"
+  },
+  {
+    "id": 3,
+    "name": "Bridal Wear",
+    "description": "Elegant lehengas and sarees styled to perfection for your special day, ensuring you look stunning.",
+    "image": "/images/categories/bridal-wear.jpg",
+    "imageUrl": "/images/categories/bridal-wear.jpg"
+  },
+  {
+    "id": 4,
+    "name": "Occasion Wear",
+    "description": "Chic and stylish outfits for every occasion, designed to make you stand out.",
+    "image": "/images/categories/occasion-wear.jpg",
+    "imageUrl": "/images/categories/occasion-wear.jpg"
+  },
+  {
+    "id": 5,
+    "name": "Contemporary Everyday Wear",
+    "description": "Comfortable yet stylish everyday wear that blends modern aesthetics with traditional craftsmanship.",
+    "image": "/images/categories/everyday-wear.jpg",
+    "imageUrl": "/images/categories/everyday-wear.jpg"
+  },
+  {
+    "id": 6,
+    "name": "Luxury Embroidered Pieces",
+    "description": "Opulent embroidered garments that showcase the artistry of our skilled artisans.",
+    "image": "/images/categories/luxury-embroidered.jpg",
+    "imageUrl": "/images/categories/luxury-embroidered.jpg"
+  },
+  {
+    "id": 7,
+    "name": "Jewellery",
+    "description": "Curated statement jewellery pieces that add the perfect finishing touch to your outfit.",
+    "image": "/images/categories/jewellery.jpg",
+    "imageUrl": "/images/categories/jewellery.jpg"
+  },
+  {
+    "id": 8,
+    "name": "Alterations & Refinements",
+    "description": "Expert alterations to ensure your garments fit perfectly, enhancing your overall look.",
+    "image": "/images/categories/alterations.jpg",
+    "imageUrl": "/images/categories/alterations.jpg"
+  }
+]

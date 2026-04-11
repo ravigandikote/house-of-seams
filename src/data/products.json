@@ -1,0 +1,82 @@
+[
+  {
+    "id": "1",
+    "name": "Custom Blouse Design",
+    "description": "A personalized blouse designed to fit your unique style and measurements, crafted with exquisite attention to detail.",
+    "price": 150,
+    "category": "Custom Blouses",
+    "image": "/images/products/custom-blouse.jpg",
+    "imageUrl": "/images/products/custom-blouse.jpg",
+    "isFeatured": true
+  },
+  {
+    "id": "2",
+    "name": "Bridal Couture",
+    "description": "Elegant bridal wear that combines tradition with modern aesthetics, tailored to make your special day unforgettable.",
+    "price": 1200,
+    "category": "Bridal Wear",
+    "image": "/images/products/bridal-couture.jpg",
+    "imageUrl": "/images/products/bridal-couture.jpg",
+    "isFeatured": true
+  },
+  {
+    "id": "3",
+    "name": "Luxury Embroidered Saree",
+    "description": "A stunning saree adorned with intricate embroidery, perfect for special occasions and celebrations.",
+    "price": 800,
+    "category": "Luxury Embroidered Pieces",
+    "image": "/images/products/luxury-saree.jpg",
+    "imageUrl": "/images/products/luxury-saree.jpg",
+    "isFeatured": true
+  },
+  {
+    "id": "4",
+    "name": "Contemporary Everyday Wear",
+    "description": "Chic and comfortable everyday wear that blends style with functionality, perfect for modern lifestyles.",
+    "price": 100,
+    "category": "Contemporary Everyday Wear",
+    "image": "/images/products/everyday-wear.jpg",
+    "imageUrl": "/images/products/everyday-wear.jpg",
+    "isFeatured": false
+  },
+  {
+    "id": "5",
+    "name": "Statement Jewellery",
+    "description": "Curated jewellery pieces that make a statement, adding a touch of elegance to any outfit.",
+    "price": 250,
+    "category": "Jewellery",
+    "image": "/images/products/statement-jewellery.jpg",
+    "imageUrl": "/images/products/statement-jewellery.jpg",
+    "isFeatured": false
+  },
+  {
+    "id": "6",
+    "name": "Bridal Lehenga",
+    "description": "A beautifully crafted lehenga that embodies grace and elegance, designed for brides who want to stand out.",
+    "price": 1500,
+    "category": "Bridal Wear",
+    "image": "/images/products/bridal-lehenga.jpg",
+    "imageUrl": "/images/products/bridal-lehenga.jpg",
+    "isFeatured": false
+  },
+  {
+    "id": "7",
+    "name": "Alterations & Refinements",
+    "description": "Expert alterations and refinements to ensure your garments fit perfectly and look stunning.",
+    "price": 50,
+    "category": "Alterations",
+    "image": "/images/products/alterations.jpg",
+    "imageUrl": "/images/products/alterations.jpg",
+    "isFeatured": false
+  },
+  {
+    "id": "8",
+    "name": "Designer Blouse",
+    "description": "Ready-to-wear designer blouses that combine style and comfort, perfect for any occasion.",
+    "price": 200,
+    "category": "Designer Blouses",
+    "image": "/images/products/designer-blouse.jpg",
+    "imageUrl": "/images/products/designer-blouse.jpg",
+    "isFeatured": false
+  }
+]

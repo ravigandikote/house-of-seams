@@ -1,0 +1,44 @@
+[
+  {
+    "id": "1",
+    "service": "Custom Blouse Design",
+    "priceRange": "$150 - $300",
+    "description": "Tailored to your specifications, our custom blouses are designed to fit perfectly and reflect your unique style."
+  },
+  {
+    "id": "2",
+    "service": "Bridal Couture",
+    "priceRange": "$800 - $2000",
+    "description": "Exquisite bridal wear crafted with the finest materials, ensuring you look stunning on your special day."
+  },
+  {
+    "id": "3",
+    "service": "Occasion Wear",
+    "priceRange": "$200 - $600",
+    "description": "Elegant outfits for any occasion, designed to make you stand out while providing comfort and style."
+  },
+  {
+    "id": "4",
+    "service": "Contemporary Everyday Wear",
+    "priceRange": "$100 - $300",
+    "description": "Chic and modern pieces that blend comfort with style for your everyday wardrobe."
+  },
+  {
+    "id": "5",
+    "service": "Luxury Embroidered Pieces",
+    "priceRange": "$300 - $700",
+    "description": "Intricately embroidered garments that showcase craftsmanship and attention to detail."
+  },
+  {
+    "id": "6",
+    "service": "Jewellery (Curated / Statement)",
+    "priceRange": "$50 - $500",
+    "description": "A selection of curated and statement jewellery pieces to complement your outfits."
+  },
+  {
+    "id": "7",
+    "service": "Alterations & Refinements",
+    "priceRange": "$30 - $150",
+    "description": "Professional alterations to ensure your garments fit perfectly and meet your expectations."
+  }
+]

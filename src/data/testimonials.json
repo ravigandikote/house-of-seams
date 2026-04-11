@@ -1,0 +1,42 @@
+[
+  {
+    "id": "1",
+    "name": "Aisha Khan",
+    "quote": "House of Seams transformed my bridal outfit into a masterpiece. The attention to detail and craftsmanship is unparalleled!",
+    "role": "Bride, Mumbai",
+    "rating": 5,
+    "date": "2023-09-15"
+  },
+  {
+    "id": "2",
+    "name": "Priya Sharma",
+    "quote": "I love my custom blouse! The fit is perfect, and the fabric is so luxurious. Highly recommend their services!",
+    "role": "Fashion Enthusiast, Delhi",
+    "rating": 5,
+    "date": "2023-08-22"
+  },
+  {
+    "id": "3",
+    "name": "Meera Patel",
+    "quote": "The experience was wonderful from start to finish. The team listened to my ideas and brought them to life beautifully.",
+    "role": "Entrepreneur, Bangalore",
+    "rating": 5,
+    "date": "2023-07-30"
+  },
+  {
+    "id": "4",
+    "name": "Sofia Ali",
+    "quote": "I had a fantastic experience with House of Seams. Their bridal couture is simply stunning, and I felt like a queen on my wedding day!",
+    "role": "Bride, Hyderabad",
+    "rating": 5,
+    "date": "2023-06-10"
+  },
+  {
+    "id": "5",
+    "name": "Nisha Verma",
+    "quote": "The alterations I needed were done perfectly. I couldn't be happier with the results!",
+    "role": "Client, Pune",
+    "rating": 4,
+    "date": "2023-05-05"
+  }
+]

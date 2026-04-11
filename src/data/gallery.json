@@ -1,0 +1,74 @@
+[
+  {
+    "id": "1",
+    "url": "/images/ig-1.jpg",
+    "alt": "Bridal elegance redefined",
+    "category": "Bridal"
+  },
+  {
+    "id": "2",
+    "url": "/images/ig-2.jpg",
+    "alt": "Luxury embroidered saree collection",
+    "category": "Luxury"
+  },
+  {
+    "id": "3",
+    "url": "/images/ig-3.jpg",
+    "alt": "Custom blouse craftsmanship",
+    "category": "Custom"
+  },
+  {
+    "id": "4",
+    "url": "/images/ig-4.jpg",
+    "alt": "Statement jewellery pieces",
+    "category": "Jewellery"
+  },
+  {
+    "id": "5",
+    "url": "/images/ig-5.jpg",
+    "alt": "Bridal couture details",
+    "category": "Bridal"
+  },
+  {
+    "id": "6",
+    "url": "/images/ig-6.jpg",
+    "alt": "Everyday elegance",
+    "category": "Everyday"
+  },
+  {
+    "id": "7",
+    "url": "/images/ig-7.jpg",
+    "alt": "Designer blouse collection",
+    "category": "Custom"
+  },
+  {
+    "id": "8",
+    "url": "/images/ig-8.jpg",
+    "alt": "Occasion wear inspirations",
+    "category": "Occasion"
+  },
+  {
+    "id": "9",
+    "url": "/images/products/custom-blouse.jpg",
+    "alt": "Custom blouse design",
+    "category": "Custom"
+  },
+  {
+    "id": "10",
+    "url": "/images/products/bridal-couture.jpg",
+    "alt": "Bridal couture",
+    "category": "Bridal"
+  },
+  {
+    "id": "11",
+    "url": "/images/products/luxury-saree.jpg",
+    "alt": "Luxury embroidered saree",
+    "category": "Luxury"
+  },
+  {
+    "id": "12",
+    "url": "/images/products/designer-blouse.jpg",
+    "alt": "Designer blouse",
+    "category": "Custom"
+  }
+]

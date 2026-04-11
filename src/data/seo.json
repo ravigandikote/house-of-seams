@@ -1,0 +1,30 @@
+{
+  "title": "House of Seams - A Contemporary Expression of Lifestyle and Jewellery",
+  "description": "Discover the elegance of custom blouse design, bridal couture, and luxury embroidered pieces at House of Seams. Experience personalized craftsmanship and modern refinement.",
+  "keywords": [
+    "Custom blouse stitching near me",
+    "Bridal blouse designer",
+    "Boutique in Bangalore",
+    "Designer blouses Bangalore",
+    "Bridal wear stitching",
+    "Luxury blouse designs",
+    "Saree blouse stitching",
+    "Bridal boutique near me",
+    "Contemporary ethnic wear",
+    "Designer boutique for women"
+  ],
+  "author": "House of Seams",
+  "og": {
+    "title": "House of Seams",
+    "description": "A Contemporary Expression of Lifestyle and Jewellery",
+    "image": "/images/hero.jpg",
+    "url": "https://www.houseofseams.com"
+  },
+  "twitter": {
+    "card": "summary_large_image",
+    "site": "@houseofseams",
+    "title": "House of Seams",
+    "description": "A Contemporary Expression of Lifestyle and Jewellery",
+    "image": "/images/hero.jpg"
+  }
+}
