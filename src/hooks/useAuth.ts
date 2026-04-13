@@ -9,9 +9,11 @@ const supabase = createClient();
 const useAuth = () => {
     const [user, setUser] = useState<User | null>(null);
     const [session, setSession] = useState<Session | null>(null);
-    const [loading, setLoading] = useState(true);
+    const [loading, setLoading] = useState(!supabase ? false : true);
 
     useEffect(() => {
+        if (!supabase) return;
+
         supabase.auth.getSession().then(({ data: { session } }) => {
             setSession(session);
             setUser(session?.user ?? null);
@@ -30,6 +32,7 @@ const useAuth = () => {
     }, []);
 
     const signInWithGoogle = useCallback(async () => {
+        if (!supabase) return { data: null, error: new Error('Supabase not configured') };
         setLoading(true);
         const { data, error } = await supabase.auth.signInWithOAuth({
             provider: 'google',
@@ -42,6 +45,7 @@ const useAuth = () => {
     }, []);
 
     const signInWithEmail = useCallback(async (email: string, password: string) => {
+        if (!supabase) return { data: null, error: new Error('Supabase not configured') };
         setLoading(true);
         const { data, error } = await supabase.auth.signInWithPassword({ email, password });
         setUser(data.user);
@@ -51,6 +55,7 @@ const useAuth = () => {
     }, []);
 
     const signUp = useCallback(async (email: string, password: string, fullName?: string) => {
+        if (!supabase) return { data: null, error: new Error('Supabase not configured') };
         setLoading(true);
         const { data, error } = await supabase.auth.signUp({
             email,
@@ -64,6 +69,7 @@ const useAuth = () => {
     }, []);
 
     const signOut = useCallback(async () => {
+        if (!supabase) return { error: new Error('Supabase not configured') };
         setLoading(true);
         const { error } = await supabase.auth.signOut();
         setUser(null);

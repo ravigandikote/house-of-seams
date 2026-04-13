@@ -2,11 +2,18 @@ import React from 'react';
 import { createClient } from '@/lib/supabase/server';
 import { toCamelCase } from '@/lib/caseTransform';
 import TestimonialCard from '../../components/testimonials/TestimonialCard';
+import testimonialsJson from '@/data/testimonials.json';
 
 const TestimonialsPage = async () => {
     const supabase = createClient();
-    const { data } = await supabase.from('testimonials').select('*').order('date', { ascending: false });
-    const testimonials = toCamelCase(data || []) as any[];
+    let testimonials: any[] = [];
+
+    if (supabase) {
+        const { data } = await supabase.from('testimonials').select('*').order('date', { ascending: false });
+        testimonials = toCamelCase(data || []) as any[];
+    } else {
+        testimonials = testimonialsJson as any[];
+    }
 
     return (
         <div className="max-w-5xl mx-auto px-4 py-12">

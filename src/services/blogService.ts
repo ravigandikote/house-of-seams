@@ -5,11 +5,13 @@ import { Blog } from '../types/blog';
 const supabase = createClient();
 
 export const fetchBlogs = async (): Promise<Blog[]> => {
+    if (!supabase) return [];
     const { data } = await supabase.from('blog_posts').select('*').order('published_date', { ascending: false });
     return (toCamelCase(data || []) as Blog[]);
 };
 
 export const fetchBlogBySlug = async (slug: string): Promise<Blog | null> => {
+    if (!supabase) return null;
     const { data } = await supabase.from('blog_posts').select('*').eq('slug', slug).single();
     return data ? (toCamelCase(data) as Blog) : null;
 };

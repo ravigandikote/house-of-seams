@@ -2,11 +2,18 @@ import React from 'react';
 import { createClient } from '@/lib/supabase/server';
 import { toCamelCase } from '@/lib/caseTransform';
 import BlogCard from '../../components/blog/BlogCard';
+import blogJson from '@/data/blog.json';
 
 const BlogPage = async () => {
     const supabase = createClient();
-    const { data } = await supabase.from('blog_posts').select('*').order('published_date', { ascending: false });
-    const blogs = toCamelCase(data || []) as any[];
+    let blogs: any[] = [];
+
+    if (supabase) {
+        const { data } = await supabase.from('blog_posts').select('*').order('published_date', { ascending: false });
+        blogs = toCamelCase(data || []) as any[];
+    } else {
+        blogs = blogJson as any[];
+    }
 
     return (
         <div className="max-w-5xl mx-auto px-4 py-12">

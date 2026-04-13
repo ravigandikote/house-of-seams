@@ -1,11 +1,18 @@
 import React from 'react';
 import { createClient } from '@/lib/supabase/server';
 import { toCamelCase } from '@/lib/caseTransform';
+import faqsJson from '@/data/faqs.json';
 
 const FAQsPage = async () => {
     const supabase = createClient();
-    const { data } = await supabase.from('faqs').select('*').order('sort_order', { ascending: true });
-    const faqs = toCamelCase(data || []) as any[];
+    let faqs: any[] = [];
+
+    if (supabase) {
+        const { data } = await supabase.from('faqs').select('*').order('sort_order', { ascending: true });
+        faqs = toCamelCase(data || []) as any[];
+    } else {
+        faqs = faqsJson as any[];
+    }
 
     return (
         <div className="max-w-5xl mx-auto px-4 py-12">

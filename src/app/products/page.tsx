@@ -2,11 +2,18 @@ import React from 'react';
 import { createClient } from '@/lib/supabase/server';
 import { toCamelCase } from '@/lib/caseTransform';
 import ProductGrid from '../../components/products/ProductGrid';
+import productsJson from '@/data/products.json';
 
 const ProductsPage = async () => {
     const supabase = createClient();
-    const { data } = await supabase.from('products').select('*').order('created_at', { ascending: false });
-    const products = toCamelCase(data || []) as any[];
+    let products: any[] = [];
+
+    if (supabase) {
+        const { data } = await supabase.from('products').select('*').order('created_at', { ascending: false });
+        products = toCamelCase(data || []) as any[];
+    } else {
+        products = productsJson as any[];
+    }
 
     return (
         <div className="max-w-5xl mx-auto px-4 py-12">

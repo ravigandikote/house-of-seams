@@ -2,11 +2,18 @@ import React from 'react';
 import { createClient } from '@/lib/supabase/server';
 import { toCamelCase } from '@/lib/caseTransform';
 import CollectionGrid from '../../components/collections/CollectionGrid';
+import categoriesJson from '@/data/categories.json';
 
 const CollectionsPage = async () => {
     const supabase = createClient();
-    const { data } = await supabase.from('categories').select('*').order('created_at', { ascending: false });
-    const categories = toCamelCase(data || []) as any[];
+    let categories: any[] = [];
+
+    if (supabase) {
+        const { data } = await supabase.from('categories').select('*').order('created_at', { ascending: false });
+        categories = toCamelCase(data || []) as any[];
+    } else {
+        categories = categoriesJson as any[];
+    }
 
     return (
         <div className="max-w-5xl mx-auto px-4 py-12">

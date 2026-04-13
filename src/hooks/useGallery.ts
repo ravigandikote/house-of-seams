@@ -2,9 +2,10 @@
 
 import { useState, useEffect } from 'react';
 import { createClient } from '../lib/supabase/client';
+import { GalleryItem } from '../types/gallery';
+import galleryJson from '@/data/gallery.json';
 
 const supabase = createClient();
-import { GalleryItem } from '../types/gallery';
 
 export const useGallery = () => {
   const [images, setImages] = useState<GalleryItem[]>([]);
@@ -14,6 +15,10 @@ export const useGallery = () => {
   useEffect(() => {
     const fetchGallery = async () => {
       try {
+        if (!supabase) {
+          setImages(galleryJson as GalleryItem[]);
+          return;
+        }
         const { data, error: fetchError } = await supabase
           .from('gallery')
           .select('*');
@@ -21,6 +26,7 @@ export const useGallery = () => {
         setImages(data as GalleryItem[]);
       } catch (err: any) {
         setError(err.message);
+        setImages(galleryJson as GalleryItem[]);
       } finally {
         setLoading(false);
       }
