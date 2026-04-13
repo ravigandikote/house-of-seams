@@ -3,6 +3,17 @@ import type { NextRequest } from 'next/server';
 import { updateSession } from '@/lib/supabase/middleware';
 
 export async function middleware(request: NextRequest) {
+  // Skip Supabase session refresh if credentials aren't configured
+  if (
+    !process.env.NEXT_PUBLIC_SUPABASE_URL ||
+    !process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY ||
+    process.env.NEXT_PUBLIC_SUPABASE_URL.includes('placeholder')
+  ) {
+    const response = NextResponse.next();
+    response.headers.set('x-pathname', request.nextUrl.pathname);
+    return response;
+  }
+
   const response = await updateSession(request);
 
   // Set pathname header for admin layout detection
@@ -13,8 +24,6 @@ export async function middleware(request: NextRequest) {
   const isProtected = protectedPaths.some((p) => request.nextUrl.pathname.startsWith(p));
 
   if (isProtected) {
-    const supabaseResponse = response;
-    // Check for auth cookie presence (session refresh already happened in updateSession)
     const hasAuthCookie = request.cookies.getAll().some((c) => c.name.startsWith('sb-'));
     if (!hasAuthCookie) {
       const loginUrl = new URL('/login', request.url);
