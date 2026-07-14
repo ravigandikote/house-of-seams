@@ -94,3 +94,25 @@ INSERT INTO pricing (service, price_range, description) VALUES
 ('Luxury Embroidered Pieces', '$300 - $700', 'Intricately embroidered garments that showcase craftsmanship and attention to detail.'),
 ('Jewellery (Curated / Statement)', '$50 - $500', 'A selection of curated and statement jewellery pieces to complement your outfits.'),
 ('Alterations & Refinements', '$30 - $150', 'Professional alterations to ensure your garments fit perfectly and meet your expectations.');
+
+-- ============================================================
+-- BLOUSE CUSTOMIZER (requires migrations/002_blouse_customizer.sql)
+-- ============================================================
+
+-- BLOUSE DESIGNS
+INSERT INTO blouse_designs (name, slug, description, neck_style, back_style, sleeve_style, closure, embellishment, base_color, is_active, sort_order) VALUES
+('Classic Round', 'classic-round', 'A timeless everyday silhouette with a modest round neckline and short sleeves.', 'round', 'round', 'short', 'hook', 'plain', '#D6A6B1', true, 1),
+('Elegant Sweetheart', 'elegant-sweetheart', 'A romantic sweetheart neckline with a deep round back, perfect for receptions.', 'sweetheart', 'deep-round', 'cap', 'zip', 'embroidery', '#B87A88', true, 2),
+('Regal Zari High-Neck', 'regal-zari-high-neck', 'A high neckline with rich zari work and elbow sleeves for a stately bridal look.', 'high', 'keyhole', 'elbow', 'button', 'zari', '#8FA88D', true, 3),
+('Boat Neck Minimal', 'boat-neck-minimal', 'A clean boat neck with three-quarter sleeves for a contemporary festive style.', 'boat', 'v', 'three-quarter', 'zip', 'plain', '#2D2D2D', true, 4),
+('Mirror-Work Deep V', 'mirror-work-deep-v', 'A statement V-neck with mirror embellishment and a tie back.', 'v', 'tie', 'sleeveless', 'tie', 'mirror', '#B7C9B5', true, 5),
+('Stone-Studded Square', 'stone-studded-square', 'A square neckline studded with stones, full sleeves for a winter wedding.', 'square', 'round', 'full', 'hook', 'stone', '#D6A6B1', true, 6);
+
+-- MEASUREMENT DEFAULTS
+-- !!! PLACEHOLDER VALUES (inches) — rough pre-fill starting points only.
+-- !!! The boutique should review and tune these in Admin > Measurement Defaults.
+INSERT INTO measurement_defaults (label, age_min, age_max, bust, waist, shoulder_width, blouse_length, sleeve_length, armhole, front_neck_depth, back_neck_depth) VALUES
+('Under 18', 13, 17, 32, 26, 13.5, 13.5, 6, 15, 6, 7),
+('18-25', 18, 25, 34, 28, 14, 14, 6, 15.5, 6.5, 7),
+('26-40', 26, 40, 36, 31, 14.5, 14.5, 6.5, 16.5, 6.5, 7.5),
+('41 and above', 41, 99, 38, 34, 15, 15, 7, 17.5, 6, 7);

@@ -1,0 +1,26 @@
+import { NextRequest, NextResponse } from 'next/server';
+import { createAdminClient } from '@/lib/supabase/admin';
+import { toCamelCase, toSnakeCase } from '@/lib/caseTransform';
+
+// TODO(security): /api/admin/* routes have NO authentication and use the
+// service-role client (bypasses RLS). This route inherits that existing
+// gap — add an admin auth check here when /admin is protected.
+
+export async function PUT(request: NextRequest, { params }: { params: { id: string } }) {
+  const supabase = createAdminClient();
+  if (!supabase) return NextResponse.json({ error: 'Supabase is not configured' }, { status: 503 });
+  const body = await request.json();
+  const snakeBody = toSnakeCase(body) as Record<string, unknown>;
+  delete snakeBody.id;
+  const { data, error } = await supabase.from('blouse_designs').update(snakeBody).eq('id', params.id).select().single();
+  if (error) return NextResponse.json({ error: error.message }, { status: error.code === 'PGRST116' ? 404 : 500 });
+  return NextResponse.json(toCamelCase(data));
+}
+
+export async function DELETE(_request: NextRequest, { params }: { params: { id: string } }) {
+  const supabase = createAdminClient();
+  if (!supabase) return NextResponse.json({ error: 'Supabase is not configured' }, { status: 503 });
+  const { error } = await supabase.from('blouse_designs').delete().eq('id', params.id);
+  if (error) return NextResponse.json({ error: error.message }, { status: 500 });
+  return NextResponse.json({ success: true });
+}

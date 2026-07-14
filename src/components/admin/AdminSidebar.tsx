@@ -11,10 +11,13 @@ const navItems = [
   { label: 'Gallery', href: '/admin/gallery', icon: '\u25A3' },
   { label: 'Blog', href: '/admin/blog', icon: '\u270E' },
   { label: 'Testimonials', href: '/admin/testimonials', icon: '\u201C' },
+  { label: 'Blouse Designs', href: '/admin/blouse-designs', icon: '✂' },
+  { label: 'Measurements', href: '/admin/measurement-defaults', icon: '⇔' },
   { label: 'FAQs', href: '/admin/faqs', icon: '?' },
   { label: 'Pricing', href: '/admin/pricing', icon: '$' },
   { label: 'Media', href: '/admin/media', icon: '\u2191' },
   { label: 'Bookings', href: '/admin/bookings', icon: '\u2611' },
+  { label: 'Custom Requests', href: '/admin/custom-requests', icon: '\u2709' },
 ];
 
 interface AdminSidebarProps {
