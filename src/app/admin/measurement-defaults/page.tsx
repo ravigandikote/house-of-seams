@@ -31,7 +31,7 @@ const defaultForm: DefaultsForm = {
 };
 
 const AdminMeasurementDefaultsPage = () => {
-    const { items: brackets, isLoading, create, update, remove } =
+    const { items: brackets, isLoading, error, create, update, remove } =
         useAdminCrud<MeasurementDefault>('measurement-defaults');
     const [isFormOpen, setIsFormOpen] = useState(false);
     const [editingItem, setEditingItem] = useState<MeasurementDefault | null>(null);
@@ -110,6 +110,13 @@ const AdminMeasurementDefaultsPage = () => {
                 actionLabel="Add Bracket"
                 onAction={openCreate}
             />
+
+            {error && (
+                <div className="bg-red-50 border border-red-200 text-red-700 rounded-lg px-4 py-3 mb-4 text-sm" role="alert">
+                    Couldn&apos;t load brackets: {error}. Check that Supabase credentials are configured and
+                    migration <code>002_blouse_customizer.sql</code> has been applied.
+                </div>
+            )}
 
             <AdminTable
                 columns={columns}

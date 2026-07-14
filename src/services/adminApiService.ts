@@ -2,7 +2,10 @@ const API_BASE = '/api/admin';
 
 export async function fetchItems<T>(resource: string): Promise<T[]> {
   const res = await fetch(`${API_BASE}/${resource}`);
-  if (!res.ok) throw new Error(`Failed to fetch ${resource}`);
+  if (!res.ok) {
+    const body = (await res.json().catch(() => null)) as { error?: string } | null;
+    throw new Error(body?.error || `Failed to fetch ${resource}`);
+  }
   return res.json();
 }
 

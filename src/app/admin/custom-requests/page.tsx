@@ -25,7 +25,7 @@ const STATUS_COLORS: Record<RequestStatus, string> = {
 };
 
 const AdminCustomRequestsPage = () => {
-    const { items: requests, isLoading, update } = useAdminCrud<CustomDesignRequest>('custom-requests');
+    const { items: requests, isLoading, error, update } = useAdminCrud<CustomDesignRequest>('custom-requests');
     const [viewItem, setViewItem] = useState<CustomDesignRequest | null>(null);
     const [status, setStatus] = useState<RequestStatus>('submitted');
     const [previewView, setPreviewView] = useState<'front' | 'back'>('front');
@@ -90,6 +90,13 @@ const AdminCustomRequestsPage = () => {
                 title="Custom Requests"
                 subtitle="Customer blouse customizations awaiting a quote — click Edit to view details and update the status"
             />
+
+            {error && (
+                <div className="bg-red-50 border border-red-200 text-red-700 rounded-lg px-4 py-3 mb-4 text-sm" role="alert">
+                    Couldn&apos;t load requests: {error}. Check that Supabase credentials are configured and
+                    migration <code>002_blouse_customizer.sql</code> has been applied.
+                </div>
+            )}
 
             <AdminTable
                 columns={columns}

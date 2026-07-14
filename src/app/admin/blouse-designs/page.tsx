@@ -78,7 +78,7 @@ const styleSelects = [
 ] as const;
 
 const AdminBlouseDesignsPage = () => {
-    const { items: designs, isLoading, create, update, remove } = useAdminCrud<BlouseDesign>('blouse-designs');
+    const { items: designs, isLoading, error, create, update, remove } = useAdminCrud<BlouseDesign>('blouse-designs');
     const [isFormOpen, setIsFormOpen] = useState(false);
     const [editingItem, setEditingItem] = useState<BlouseDesign | null>(null);
     const [deleteItem, setDeleteItem] = useState<BlouseDesign | null>(null);
@@ -182,6 +182,13 @@ const AdminBlouseDesignsPage = () => {
                 actionLabel="Add Design"
                 onAction={openCreate}
             />
+
+            {error && (
+                <div className="bg-red-50 border border-red-200 text-red-700 rounded-lg px-4 py-3 mb-4 text-sm" role="alert">
+                    Couldn&apos;t load designs: {error}. Check that Supabase credentials are configured and
+                    migration <code>002_blouse_customizer.sql</code> has been applied.
+                </div>
+            )}
 
             <AdminTable
                 columns={columns}
