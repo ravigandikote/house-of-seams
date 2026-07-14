@@ -1,0 +1,36 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="-75 4 450 256" role="img" aria-label="Annotated Front view blouse measurement diagram">
+<defs></defs><g><path d="M 108 50 Q 92.2 58 85.5 80.6 Q 96.4 89.3 110.3 88.4 L 99 83.5 Z" fill="#D6A6B1" stroke="#2D2D2D" stroke-width="1.5" stroke-linejoin="round"></path><path d="M 192 50 Q 207.8 58 214.5 80.6 Q 203.6 89.3 189.7 88.4 L 201 83.5 Z" fill="#D6A6B1" stroke="#2D2D2D" stroke-width="1.5" stroke-linejoin="round"></path><path d="M 108 50 Q 92.2 58 85.5 80.6 Q 96.4 89.3 110.3 88.4 L 99 83.5 Z" fill="#000" opacity="0.08"></path><path d="M 192 50 Q 207.8 58 214.5 80.6 Q 203.6 89.3 189.7 88.4 L 201 83.5 Z" fill="#000" opacity="0.08"></path></g><path d="M 129 42 L 108 50 C 106 65.1 99 73.5 99 83.5 C 99 102.6 108 111.1 108 126 L 192 126 C 192 111.1 201 102.6 201 83.5 C 201 73.5 194 65.1 192 50 L 171 42 C 171 93.9 129 93.9 129 42 Z" fill="#D6A6B1" stroke="#2D2D2D" stroke-width="1.5" stroke-linejoin="round"></path><path d="M 129 54 Q 118.4 93.5 126.9 125" stroke="rgba(0,0,0,0.14)" stroke-width="1" fill="none"></path><path d="M 171 54 Q 181.6 93.5 173.1 125" stroke="rgba(0,0,0,0.14)" stroke-width="1" fill="none"></path><line x1="146" y1="91" x2="154" y2="91" stroke="#2D2D2D" stroke-width="1.2" opacity="0.5"></line><line x1="146" y1="100" x2="154" y2="100" stroke="#2D2D2D" stroke-width="1.2" opacity="0.5"></line><line x1="146" y1="109" x2="154" y2="109" stroke="#2D2D2D" stroke-width="1.2" opacity="0.5"></line><line x1="146" y1="118" x2="154" y2="118" stroke="#2D2D2D" stroke-width="1.2" opacity="0.5"></line>
+<g><line x1="108" y1="24" x2="192" y2="24" stroke="#B87A88" stroke-width="1"/>
+<line x1="108" y1="20" x2="108" y2="28" stroke="#B87A88" stroke-width="1"/>
+<line x1="192" y1="20" x2="192" y2="28" stroke="#B87A88" stroke-width="1"/>
+<line x1="108" y1="28" x2="108" y2="46" stroke="#B87A88" stroke-width="1" stroke-dasharray="3 3"/>
+<line x1="192" y1="28" x2="192" y2="46" stroke="#B87A88" stroke-width="1" stroke-dasharray="3 3"/>
+<text x="150" y="16" font-family="Georgia, serif" font-size="10.5" fill="#2D2D2D" text-anchor="middle">Shoulder Width <tspan font-weight="bold" fill="#B87A88">14&#8243;</tspan></text>
+<line x1="108" y1="138" x2="192" y2="138" stroke="#B87A88" stroke-width="1"/>
+<line x1="108" y1="134" x2="108" y2="142" stroke="#B87A88" stroke-width="1"/>
+<line x1="192" y1="134" x2="192" y2="142" stroke="#B87A88" stroke-width="1"/>
+<line x1="108" y1="128" x2="108" y2="134" stroke="#B87A88" stroke-width="1" stroke-dasharray="3 3"/>
+<line x1="192" y1="128" x2="192" y2="134" stroke="#B87A88" stroke-width="1" stroke-dasharray="3 3"/>
+<text x="150" y="152" font-family="Georgia, serif" font-size="10.5" fill="#2D2D2D" text-anchor="middle">Waist <tspan font-weight="bold" fill="#B87A88">28&#8243;</tspan> <tspan fill="#6B6B6B">(around the hem)</tspan></text>
+<line x1="232" y1="42" x2="232" y2="126" stroke="#B87A88" stroke-width="1"/>
+<line x1="228" y1="42" x2="236" y2="42" stroke="#B87A88" stroke-width="1"/>
+<line x1="228" y1="126" x2="236" y2="126" stroke="#B87A88" stroke-width="1"/>
+<line x1="204" y1="42" x2="228" y2="42" stroke="#B87A88" stroke-width="1" stroke-dasharray="3 3"/>
+<line x1="194" y1="126" x2="228" y2="126" stroke="#B87A88" stroke-width="1" stroke-dasharray="3 3"/>
+<text x="244" y="84" font-family="Georgia, serif" font-size="10.5" fill="#2D2D2D" text-anchor="middle" transform="rotate(-90 244 84)">Blouse Length <tspan font-weight="bold" fill="#B87A88">14&#8243;</tspan></text>
+<line x1="99" y1="83.48" x2="201" y2="83.48" stroke="#B87A88" stroke-width="1" stroke-dasharray="3 3"/>
+<line x1="99" y1="79.48" x2="99" y2="87.48" stroke="#B87A88" stroke-width="1"/>
+<line x1="201" y1="79.48" x2="201" y2="87.48" stroke="#B87A88" stroke-width="1"/>
+<line x1="99" y1="83.48" x2="36" y2="108" stroke="#B87A88" stroke-width="1"/>
+<text x="34" y="112" font-family="Georgia, serif" font-size="10.5" fill="#2D2D2D" text-anchor="end">Bust <tspan font-weight="bold" fill="#B87A88">34&#8243;</tspan></text>
+<line x1="97" y1="85" x2="42" y2="58" stroke="#B87A88" stroke-width="1"/>
+<text x="40" y="56" font-family="Georgia, serif" font-size="10.5" fill="#2D2D2D" text-anchor="end">Sleeve Length <tspan font-weight="bold" fill="#B87A88">6&#8243;</tspan></text>
+<line x1="150" y1="42" x2="150" y2="81" stroke="#B87A88" stroke-width="1"/>
+<line x1="146" y1="42" x2="154" y2="42" stroke="#B87A88" stroke-width="1"/>
+<line x1="146" y1="81" x2="154" y2="81" stroke="#B87A88" stroke-width="1"/>
+<line x1="150" y1="62" x2="62" y2="30" stroke="#B87A88" stroke-width="1"/>
+<text x="60" y="28" font-family="Georgia, serif" font-size="10.5" fill="#2D2D2D" text-anchor="end">Front Neck Depth <tspan font-weight="bold" fill="#B87A88">6.5&#8243;</tspan></text>
+<line x1="201" y1="85.48" x2="212" y2="162" stroke="#B87A88" stroke-width="1"/>
+<text x="215" y="166" font-family="Georgia, serif" font-size="10.5" fill="#2D2D2D" text-anchor="start">Armhole <tspan font-weight="bold" fill="#B87A88">15.5&#8243;</tspan> <tspan fill="#6B6B6B">(around the arm)</tspan></text></g>
+<text x="150" y="252" font-family="Georgia, serif" font-size="10" fill="#6B6B6B" text-anchor="middle" font-style="italic">Front view — example values shown in inches</text>
+</svg>

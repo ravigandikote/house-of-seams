@@ -266,7 +266,10 @@ const CustomizerFlow: React.FC<CustomizerFlowProps> = ({ designs, brackets }) =>
                             />
                             <p className="mt-1 text-xs text-warm-gray">
                                 We pre-fill typical measurements for your age — please adjust every value to your
-                                actual measurements for the best fit.
+                                actual measurements for the best fit.{' '}
+                                <Link href="/measurement-guide" target="_blank" className="text-dusty-rose underline">
+                                    Not sure how to measure?
+                                </Link>
                             </p>
                         </div>
 

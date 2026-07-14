@@ -9,6 +9,7 @@ const FooterLinks = () => {
         { href: '/gallery', label: 'Gallery' },
         { href: '/testimonials', label: 'Testimonials' },
         { href: '/blog', label: 'Blog' },
+        { href: '/measurement-guide', label: 'Measurement Guide' },
         { href: '/contact', label: 'Contact' },
         { href: '/faqs', label: 'FAQs' },
     ];
