@@ -3,9 +3,9 @@ import { createAdminClient } from '@/lib/supabase/admin';
 import { toCamelCase } from '@/lib/caseTransform';
 import { REQUEST_STATUSES, RequestStatus } from '@/types/customDesignRequest';
 
-// TODO(security): /api/admin/* routes have NO authentication and use the
-// service-role client (bypasses RLS). This route inherits that existing
-// gap — add an admin auth check here when /admin is protected.
+// Auth: /api/admin/* is gated by the ADMIN_EMAILS allowlist in
+// src/middleware.ts (401/403 before reaching this handler). This route
+// uses the service-role client, which bypasses RLS.
 
 // Only the status can be updated from the admin panel — the design and
 // measurements are the customer's submission and stay immutable.
