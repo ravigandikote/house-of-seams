@@ -1,58 +1,129 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1100 560" role="img" aria-label="Mind map of the eight blouse measurements"><path d="M 650.0 280.0 C 678.5 280.0 678.5 100 707.0 100" fill="none" stroke="#B87A88" stroke-width="2" opacity="0.55"/>
-<rect x="707.0" y="80.0" width="156" height="40" rx="20" fill="#B87A88" stroke="#B87A88" stroke-width="1.4"/>
-<text x="785.0" y="105" font-family="Georgia, serif" font-size="15" fill="#FFFFFF" font-weight="bold" text-anchor="middle">Around the body</text>
-<path d="M 863.0 100 C 869.0 100 869.0 46.0 875.0 46.0" fill="none" stroke="#B87A88" stroke-width="1.4" opacity="0.55"/>
-<rect x="875.0" y="25.0" width="210" height="42" rx="10" fill="#FDF8F5" stroke="#B87A88" stroke-width="1.4"/>
-<text x="980.0" y="43.0" font-family="Georgia, serif" font-size="13" fill="#2D2D2D" font-weight="bold" text-anchor="middle">Bust</text>
-<text x="980.0" y="59.0" font-family="-apple-system, 'Segoe UI', sans-serif" font-size="10.5" fill="#6B6B6B" font-weight="normal" text-anchor="middle">20–60″ · fullest point</text>
-<path d="M 863.0 100 C 869.0 100 869.0 100.0 875.0 100.0" fill="none" stroke="#B87A88" stroke-width="1.4" opacity="0.55"/>
-<rect x="875.0" y="79.0" width="210" height="42" rx="10" fill="#FDF8F5" stroke="#B87A88" stroke-width="1.4"/>
-<text x="980.0" y="97.0" font-family="Georgia, serif" font-size="13" fill="#2D2D2D" font-weight="bold" text-anchor="middle">Waist</text>
-<text x="980.0" y="113.0" font-family="-apple-system, 'Segoe UI', sans-serif" font-size="10.5" fill="#6B6B6B" font-weight="normal" text-anchor="middle">18–56″ · at the hem</text>
-<path d="M 863.0 100 C 869.0 100 869.0 154.0 875.0 154.0" fill="none" stroke="#B87A88" stroke-width="1.4" opacity="0.55"/>
-<rect x="875.0" y="133.0" width="210" height="42" rx="10" fill="#FDF8F5" stroke="#B87A88" stroke-width="1.4"/>
-<text x="980.0" y="151.0" font-family="Georgia, serif" font-size="13" fill="#2D2D2D" font-weight="bold" text-anchor="middle">Armhole</text>
-<text x="980.0" y="167.0" font-family="-apple-system, 'Segoe UI', sans-serif" font-size="10.5" fill="#6B6B6B" font-weight="normal" text-anchor="middle">10–26″ · around the arm</text>
-<path d="M 650.0 280.0 C 678.5 280.0 678.5 280 707.0 280" fill="none" stroke="#B87A88" stroke-width="2" opacity="0.55"/>
-<rect x="707.0" y="260.0" width="156" height="40" rx="20" fill="#B87A88" stroke="#B87A88" stroke-width="1.4"/>
-<text x="785.0" y="285" font-family="Georgia, serif" font-size="15" fill="#FFFFFF" font-weight="bold" text-anchor="middle">Down the body</text>
-<path d="M 863.0 280 C 869.0 280 869.0 253.0 875.0 253.0" fill="none" stroke="#B87A88" stroke-width="1.4" opacity="0.55"/>
-<rect x="875.0" y="232.0" width="210" height="42" rx="10" fill="#FDF8F5" stroke="#B87A88" stroke-width="1.4"/>
-<text x="980.0" y="250.0" font-family="Georgia, serif" font-size="13" fill="#2D2D2D" font-weight="bold" text-anchor="middle">Blouse Length</text>
-<text x="980.0" y="266.0" font-family="-apple-system, 'Segoe UI', sans-serif" font-size="10.5" fill="#6B6B6B" font-weight="normal" text-anchor="middle">10–24″ · shoulder → hem</text>
-<path d="M 863.0 280 C 869.0 280 869.0 307.0 875.0 307.0" fill="none" stroke="#B87A88" stroke-width="1.4" opacity="0.55"/>
-<rect x="875.0" y="286.0" width="210" height="42" rx="10" fill="#FDF8F5" stroke="#B87A88" stroke-width="1.4"/>
-<text x="980.0" y="304.0" font-family="Georgia, serif" font-size="13" fill="#2D2D2D" font-weight="bold" text-anchor="middle">Sleeve Length</text>
-<text x="980.0" y="320.0" font-family="-apple-system, 'Segoe UI', sans-serif" font-size="10.5" fill="#6B6B6B" font-weight="normal" text-anchor="middle">0–24″ · shoulder → sleeve end</text>
-<path d="M 650.0 280.0 C 678.5 280.0 678.5 452 707.0 452" fill="none" stroke="#B87A88" stroke-width="2" opacity="0.55"/>
-<rect x="707.0" y="432.0" width="156" height="40" rx="20" fill="#B87A88" stroke="#B87A88" stroke-width="1.4"/>
-<text x="785.0" y="457" font-family="Georgia, serif" font-size="15" fill="#FFFFFF" font-weight="bold" text-anchor="middle">Necklines</text>
-<path d="M 863.0 452 C 869.0 452 869.0 425.0 875.0 425.0" fill="none" stroke="#B87A88" stroke-width="1.4" opacity="0.55"/>
-<rect x="875.0" y="404.0" width="210" height="42" rx="10" fill="#FDF8F5" stroke="#B87A88" stroke-width="1.4"/>
-<text x="980.0" y="422.0" font-family="Georgia, serif" font-size="13" fill="#2D2D2D" font-weight="bold" text-anchor="middle">Front Neck Depth</text>
-<text x="980.0" y="438.0" font-family="-apple-system, 'Segoe UI', sans-serif" font-size="10.5" fill="#6B6B6B" font-weight="normal" text-anchor="middle">2–12″ · how low the front cuts</text>
-<path d="M 863.0 452 C 869.0 452 869.0 479.0 875.0 479.0" fill="none" stroke="#B87A88" stroke-width="1.4" opacity="0.55"/>
-<rect x="875.0" y="458.0" width="210" height="42" rx="10" fill="#FDF8F5" stroke="#B87A88" stroke-width="1.4"/>
-<text x="980.0" y="476.0" font-family="Georgia, serif" font-size="13" fill="#2D2D2D" font-weight="bold" text-anchor="middle">Back Neck Depth</text>
-<text x="980.0" y="492.0" font-family="-apple-system, 'Segoe UI', sans-serif" font-size="10.5" fill="#6B6B6B" font-weight="normal" text-anchor="middle">2–14″ · how low the back cuts</text>
-<path d="M 450.0 280.0 C 421.5 280.0 421.5 150 393.0 150" fill="none" stroke="#8FA88D" stroke-width="2" opacity="0.55"/>
-<rect x="237.0" y="130.0" width="156" height="40" rx="20" fill="#8FA88D" stroke="#8FA88D" stroke-width="1.4"/>
-<text x="315.0" y="155" font-family="Georgia, serif" font-size="15" fill="#FFFFFF" font-weight="bold" text-anchor="middle">Across</text>
-<path d="M 237.0 150 C 231.0 150 231.0 150.0 225.0 150.0" fill="none" stroke="#8FA88D" stroke-width="1.4" opacity="0.55"/>
-<rect x="15.0" y="129.0" width="210" height="42" rx="10" fill="#FDF8F5" stroke="#8FA88D" stroke-width="1.4"/>
-<text x="120.0" y="147.0" font-family="Georgia, serif" font-size="13" fill="#2D2D2D" font-weight="bold" text-anchor="middle">Shoulder Width</text>
-<text x="120.0" y="163.0" font-family="-apple-system, 'Segoe UI', sans-serif" font-size="10.5" fill="#6B6B6B" font-weight="normal" text-anchor="middle">10–22″ · bone to bone</text>
-<path d="M 450.0 280.0 C 421.5 280.0 421.5 400 393.0 400" fill="none" stroke="#8FA88D" stroke-width="2" opacity="0.55"/>
-<rect x="237.0" y="380.0" width="156" height="40" rx="20" fill="#8FA88D" stroke="#8FA88D" stroke-width="1.4"/>
-<text x="315.0" y="405" font-family="Georgia, serif" font-size="15" fill="#FFFFFF" font-weight="bold" text-anchor="middle">Smart pre-fill</text>
-<path d="M 237.0 400 C 231.0 400 231.0 373.0 225.0 373.0" fill="none" stroke="#8FA88D" stroke-width="1.4" opacity="0.55"/>
-<rect x="15.0" y="352.0" width="210" height="42" rx="10" fill="#FDF8F5" stroke="#8FA88D" stroke-width="1.4"/>
-<text x="120.0" y="370.0" font-family="Georgia, serif" font-size="13" fill="#2D2D2D" font-weight="bold" text-anchor="middle">Age brackets</text>
-<text x="120.0" y="386.0" font-family="-apple-system, 'Segoe UI', sans-serif" font-size="10.5" fill="#6B6B6B" font-weight="normal" text-anchor="middle">typical starting values</text>
-<path d="M 237.0 400 C 231.0 400 231.0 427.0 225.0 427.0" fill="none" stroke="#8FA88D" stroke-width="1.4" opacity="0.55"/>
-<rect x="15.0" y="406.0" width="210" height="42" rx="10" fill="#FDF8F5" stroke="#8FA88D" stroke-width="1.4"/>
-<text x="120.0" y="424.0" font-family="Georgia, serif" font-size="13" fill="#2D2D2D" font-weight="bold" text-anchor="middle">Everything editable</text>
-<text x="120.0" y="440.0" font-family="-apple-system, 'Segoe UI', sans-serif" font-size="10.5" fill="#6B6B6B" font-weight="normal" text-anchor="middle">the customer fine-tunes</text>
-<rect x="445.0" y="240.0" width="210" height="80" rx="40" fill="#D6A6B1" stroke="#B87A88" stroke-width="2"/>
-<text x="550.0" y="274.0" font-family="Georgia, serif" font-size="21" fill="#FFFFFF" font-weight="bold" text-anchor="middle">Blouse</text>
-<text x="550.0" y="300.0" font-family="Georgia, serif" font-size="21" fill="#FFFFFF" font-weight="bold" text-anchor="middle">Measurements</text></svg>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1100 754" role="img" aria-label="Mind map of the 23 standard blouse measurements and additional details"><path d="M 655.0 377.0 C 684.0 377.0 684.0 246.0 713.0 246.0" fill="none" stroke="#B87A88" stroke-width="2" opacity="0.55"/>
+<rect x="713.0" y="227.0" width="150" height="38" rx="19" fill="#B87A88" stroke="#B87A88" stroke-width="1.4"/>
+<text x="788.0" y="250.5" font-family="Georgia, serif" font-size="13.5" fill="#FFFFFF" font-weight="bold" text-anchor="middle">Upper Body</text>
+<path d="M 863.0 246.0 C 867.5 246.0 867.5 50.0 872.0 50.0" fill="none" stroke="#B87A88" stroke-width="1.3" opacity="0.55"/>
+<rect x="872.0" y="30.0" width="216" height="40" rx="10" fill="#FDF8F5" stroke="#B87A88" stroke-width="1.4"/>
+<text x="980.0" y="47.5" font-family="Georgia, serif" font-size="12" fill="#2D2D2D" font-weight="bold" text-anchor="middle">Shoulder Width</text>
+<text x="980.0" y="62.5" font-family="-apple-system, 'Segoe UI', sans-serif" font-size="9.5" fill="#6B6B6B" font-weight="normal" text-anchor="middle">10–22″ · tip to tip</text>
+<path d="M 863.0 246.0 C 867.5 246.0 867.5 99.0 872.0 99.0" fill="none" stroke="#B87A88" stroke-width="1.3" opacity="0.55"/>
+<rect x="872.0" y="79.0" width="216" height="40" rx="10" fill="#FDF8F5" stroke="#B87A88" stroke-width="1.4"/>
+<text x="980.0" y="96.5" font-family="Georgia, serif" font-size="12" fill="#2D2D2D" font-weight="bold" text-anchor="middle">Across Front</text>
+<text x="980.0" y="111.5" font-family="-apple-system, 'Segoe UI', sans-serif" font-size="9.5" fill="#6B6B6B" font-weight="normal" text-anchor="middle">10–20″ · armhole to armhole</text>
+<path d="M 863.0 246.0 C 867.5 246.0 867.5 148.0 872.0 148.0" fill="none" stroke="#B87A88" stroke-width="1.3" opacity="0.55"/>
+<rect x="872.0" y="128.0" width="216" height="40" rx="10" fill="#FDF8F5" stroke="#B87A88" stroke-width="1.4"/>
+<text x="980.0" y="145.5" font-family="Georgia, serif" font-size="12" fill="#2D2D2D" font-weight="bold" text-anchor="middle">Across Back</text>
+<text x="980.0" y="160.5" font-family="-apple-system, 'Segoe UI', sans-serif" font-size="9.5" fill="#6B6B6B" font-weight="normal" text-anchor="middle">10–20″ · across the back</text>
+<path d="M 863.0 246.0 C 867.5 246.0 867.5 197.0 872.0 197.0" fill="none" stroke="#B87A88" stroke-width="1.3" opacity="0.55"/>
+<rect x="872.0" y="177.0" width="216" height="40" rx="10" fill="#FDF8F5" stroke="#B87A88" stroke-width="1.4"/>
+<text x="980.0" y="194.5" font-family="Georgia, serif" font-size="12" fill="#2D2D2D" font-weight="bold" text-anchor="middle">Bust</text>
+<text x="980.0" y="209.5" font-family="-apple-system, 'Segoe UI', sans-serif" font-size="9.5" fill="#6B6B6B" font-weight="normal" text-anchor="middle">20–60″ · fullest point</text>
+<path d="M 863.0 246.0 C 867.5 246.0 867.5 246.0 872.0 246.0" fill="none" stroke="#B87A88" stroke-width="1.3" opacity="0.55"/>
+<rect x="872.0" y="226.0" width="216" height="40" rx="10" fill="#FDF8F5" stroke="#B87A88" stroke-width="1.4"/>
+<text x="980.0" y="243.5" font-family="Georgia, serif" font-size="12" fill="#2D2D2D" font-weight="bold" text-anchor="middle">Upper Bust</text>
+<text x="980.0" y="258.5" font-family="-apple-system, 'Segoe UI', sans-serif" font-size="9.5" fill="#6B6B6B" font-weight="normal" text-anchor="middle">20–58″ · above the bust</text>
+<path d="M 863.0 246.0 C 867.5 246.0 867.5 295.0 872.0 295.0" fill="none" stroke="#B87A88" stroke-width="1.3" opacity="0.55"/>
+<rect x="872.0" y="275.0" width="216" height="40" rx="10" fill="#FDF8F5" stroke="#B87A88" stroke-width="1.4"/>
+<text x="980.0" y="292.5" font-family="Georgia, serif" font-size="12" fill="#2D2D2D" font-weight="bold" text-anchor="middle">Under Bust</text>
+<text x="980.0" y="307.5" font-family="-apple-system, 'Segoe UI', sans-serif" font-size="9.5" fill="#6B6B6B" font-weight="normal" text-anchor="middle">18–54″ · below the bust</text>
+<path d="M 863.0 246.0 C 867.5 246.0 867.5 344.0 872.0 344.0" fill="none" stroke="#B87A88" stroke-width="1.3" opacity="0.55"/>
+<rect x="872.0" y="324.0" width="216" height="40" rx="10" fill="#FDF8F5" stroke="#B87A88" stroke-width="1.4"/>
+<text x="980.0" y="341.5" font-family="Georgia, serif" font-size="12" fill="#2D2D2D" font-weight="bold" text-anchor="middle">Apex to Apex</text>
+<text x="980.0" y="356.5" font-family="-apple-system, 'Segoe UI', sans-serif" font-size="9.5" fill="#6B6B6B" font-weight="normal" text-anchor="middle">5–14″ · bust point to point</text>
+<path d="M 863.0 246.0 C 867.5 246.0 867.5 393.0 872.0 393.0" fill="none" stroke="#B87A88" stroke-width="1.3" opacity="0.55"/>
+<rect x="872.0" y="373.0" width="216" height="40" rx="10" fill="#FDF8F5" stroke="#B87A88" stroke-width="1.4"/>
+<text x="980.0" y="390.5" font-family="Georgia, serif" font-size="12" fill="#2D2D2D" font-weight="bold" text-anchor="middle">Shoulder to Apex</text>
+<text x="980.0" y="405.5" font-family="-apple-system, 'Segoe UI', sans-serif" font-size="9.5" fill="#6B6B6B" font-weight="normal" text-anchor="middle">7–16″</text>
+<path d="M 863.0 246.0 C 867.5 246.0 867.5 442.0 872.0 442.0" fill="none" stroke="#B87A88" stroke-width="1.3" opacity="0.55"/>
+<rect x="872.0" y="422.0" width="216" height="40" rx="10" fill="#FDF8F5" stroke="#B87A88" stroke-width="1.4"/>
+<text x="980.0" y="439.5" font-family="Georgia, serif" font-size="12" fill="#2D2D2D" font-weight="bold" text-anchor="middle">Shoulder to Under Bust</text>
+<text x="980.0" y="454.5" font-family="-apple-system, 'Segoe UI', sans-serif" font-size="9.5" fill="#6B6B6B" font-weight="normal" text-anchor="middle">10–20″</text>
+<path d="M 655.0 377.0 C 684.0 377.0 684.0 606.0 713.0 606.0" fill="none" stroke="#B87A88" stroke-width="2" opacity="0.55"/>
+<rect x="713.0" y="587.0" width="150" height="38" rx="19" fill="#B87A88" stroke="#B87A88" stroke-width="1.4"/>
+<text x="788.0" y="610.5" font-family="Georgia, serif" font-size="13.5" fill="#FFFFFF" font-weight="bold" text-anchor="middle">Arm &amp; Sleeve</text>
+<path d="M 863.0 606.0 C 867.5 606.0 867.5 508.0 872.0 508.0" fill="none" stroke="#B87A88" stroke-width="1.3" opacity="0.55"/>
+<rect x="872.0" y="488.0" width="216" height="40" rx="10" fill="#FDF8F5" stroke="#B87A88" stroke-width="1.4"/>
+<text x="980.0" y="505.5" font-family="Georgia, serif" font-size="12" fill="#2D2D2D" font-weight="bold" text-anchor="middle">Armhole Round</text>
+<text x="980.0" y="520.5" font-family="-apple-system, 'Segoe UI', sans-serif" font-size="9.5" fill="#6B6B6B" font-weight="normal" text-anchor="middle">10–26″ · around the armhole</text>
+<path d="M 863.0 606.0 C 867.5 606.0 867.5 557.0 872.0 557.0" fill="none" stroke="#B87A88" stroke-width="1.3" opacity="0.55"/>
+<rect x="872.0" y="537.0" width="216" height="40" rx="10" fill="#FDF8F5" stroke="#B87A88" stroke-width="1.4"/>
+<text x="980.0" y="554.5" font-family="Georgia, serif" font-size="12" fill="#2D2D2D" font-weight="bold" text-anchor="middle">Sleeve Round (Bicep)</text>
+<text x="980.0" y="569.5" font-family="-apple-system, 'Segoe UI', sans-serif" font-size="9.5" fill="#6B6B6B" font-weight="normal" text-anchor="middle">7–22″ · fullest upper arm</text>
+<path d="M 863.0 606.0 C 867.5 606.0 867.5 606.0 872.0 606.0" fill="none" stroke="#B87A88" stroke-width="1.3" opacity="0.55"/>
+<rect x="872.0" y="586.0" width="216" height="40" rx="10" fill="#FDF8F5" stroke="#B87A88" stroke-width="1.4"/>
+<text x="980.0" y="603.5" font-family="Georgia, serif" font-size="12" fill="#2D2D2D" font-weight="bold" text-anchor="middle">Elbow Round</text>
+<text x="980.0" y="618.5" font-family="-apple-system, 'Segoe UI', sans-serif" font-size="9.5" fill="#6B6B6B" font-weight="normal" text-anchor="middle">6–18″ · for longer sleeves</text>
+<path d="M 863.0 606.0 C 867.5 606.0 867.5 655.0 872.0 655.0" fill="none" stroke="#B87A88" stroke-width="1.3" opacity="0.55"/>
+<rect x="872.0" y="635.0" width="216" height="40" rx="10" fill="#FDF8F5" stroke="#B87A88" stroke-width="1.4"/>
+<text x="980.0" y="652.5" font-family="Georgia, serif" font-size="12" fill="#2D2D2D" font-weight="bold" text-anchor="middle">Wrist Round</text>
+<text x="980.0" y="667.5" font-family="-apple-system, 'Segoe UI', sans-serif" font-size="9.5" fill="#6B6B6B" font-weight="normal" text-anchor="middle">4–12″ · for full sleeves</text>
+<path d="M 863.0 606.0 C 867.5 606.0 867.5 704.0 872.0 704.0" fill="none" stroke="#B87A88" stroke-width="1.3" opacity="0.55"/>
+<rect x="872.0" y="684.0" width="216" height="40" rx="10" fill="#FDF8F5" stroke="#B87A88" stroke-width="1.4"/>
+<text x="980.0" y="701.5" font-family="Georgia, serif" font-size="12" fill="#2D2D2D" font-weight="bold" text-anchor="middle">Sleeve Length</text>
+<text x="980.0" y="716.5" font-family="-apple-system, 'Segoe UI', sans-serif" font-size="9.5" fill="#6B6B6B" font-weight="normal" text-anchor="middle">0–24″ · shoulder → sleeve end</text>
+<path d="M 445.0 377.0 C 416.0 377.0 416.0 106.5 387.0 106.5" fill="none" stroke="#B87A88" stroke-width="2" opacity="0.55"/>
+<rect x="237.0" y="87.5" width="150" height="38" rx="19" fill="#B87A88" stroke="#B87A88" stroke-width="1.4"/>
+<text x="312.0" y="111.0" font-family="Georgia, serif" font-size="13.5" fill="#FFFFFF" font-weight="bold" text-anchor="middle">Neck</text>
+<path d="M 237.0 106.5 C 232.5 106.5 232.5 57.5 228.0 57.5" fill="none" stroke="#B87A88" stroke-width="1.3" opacity="0.55"/>
+<rect x="12.0" y="37.5" width="216" height="40" rx="10" fill="#FDF8F5" stroke="#B87A88" stroke-width="1.4"/>
+<text x="120.0" y="55.0" font-family="Georgia, serif" font-size="12" fill="#2D2D2D" font-weight="bold" text-anchor="middle">Front Neck Depth</text>
+<text x="120.0" y="70.0" font-family="-apple-system, 'Segoe UI', sans-serif" font-size="9.5" fill="#6B6B6B" font-weight="normal" text-anchor="middle">2–12″ · how low the front cuts</text>
+<path d="M 237.0 106.5 C 232.5 106.5 232.5 106.5 228.0 106.5" fill="none" stroke="#B87A88" stroke-width="1.3" opacity="0.55"/>
+<rect x="12.0" y="86.5" width="216" height="40" rx="10" fill="#FDF8F5" stroke="#B87A88" stroke-width="1.4"/>
+<text x="120.0" y="104.0" font-family="Georgia, serif" font-size="12" fill="#2D2D2D" font-weight="bold" text-anchor="middle">Back Neck Depth</text>
+<text x="120.0" y="119.0" font-family="-apple-system, 'Segoe UI', sans-serif" font-size="9.5" fill="#6B6B6B" font-weight="normal" text-anchor="middle">2–14″ · nape → back depth</text>
+<path d="M 237.0 106.5 C 232.5 106.5 232.5 155.5 228.0 155.5" fill="none" stroke="#B87A88" stroke-width="1.3" opacity="0.55"/>
+<rect x="12.0" y="135.5" width="216" height="40" rx="10" fill="#FDF8F5" stroke="#B87A88" stroke-width="1.4"/>
+<text x="120.0" y="153.0" font-family="Georgia, serif" font-size="12" fill="#2D2D2D" font-weight="bold" text-anchor="middle">Neck Width</text>
+<text x="120.0" y="168.0" font-family="-apple-system, 'Segoe UI', sans-serif" font-size="9.5" fill="#6B6B6B" font-weight="normal" text-anchor="middle">10–20″ · around the neck base</text>
+<path d="M 445.0 377.0 C 416.0 377.0 416.0 295.0 387.0 295.0" fill="none" stroke="#B87A88" stroke-width="2" opacity="0.55"/>
+<rect x="237.0" y="276.0" width="150" height="38" rx="19" fill="#B87A88" stroke="#B87A88" stroke-width="1.4"/>
+<text x="312.0" y="299.5" font-family="Georgia, serif" font-size="13.5" fill="#FFFFFF" font-weight="bold" text-anchor="middle">Lengths</text>
+<path d="M 237.0 295.0 C 232.5 295.0 232.5 221.5 228.0 221.5" fill="none" stroke="#B87A88" stroke-width="1.3" opacity="0.55"/>
+<rect x="12.0" y="201.5" width="216" height="40" rx="10" fill="#FDF8F5" stroke="#B87A88" stroke-width="1.4"/>
+<text x="120.0" y="219.0" font-family="Georgia, serif" font-size="12" fill="#2D2D2D" font-weight="bold" text-anchor="middle">Blouse Length</text>
+<text x="120.0" y="234.0" font-family="-apple-system, 'Segoe UI', sans-serif" font-size="9.5" fill="#6B6B6B" font-weight="normal" text-anchor="middle">10–24″ · shoulder → hem</text>
+<path d="M 237.0 295.0 C 232.5 295.0 232.5 270.5 228.0 270.5" fill="none" stroke="#B87A88" stroke-width="1.3" opacity="0.55"/>
+<rect x="12.0" y="250.5" width="216" height="40" rx="10" fill="#FDF8F5" stroke="#B87A88" stroke-width="1.4"/>
+<text x="120.0" y="268.0" font-family="Georgia, serif" font-size="12" fill="#2D2D2D" font-weight="bold" text-anchor="middle">Front Length</text>
+<text x="120.0" y="283.0" font-family="-apple-system, 'Segoe UI', sans-serif" font-size="9.5" fill="#6B6B6B" font-weight="normal" text-anchor="middle">10–22″ · shoulder → waist</text>
+<path d="M 237.0 295.0 C 232.5 295.0 232.5 319.5 228.0 319.5" fill="none" stroke="#B87A88" stroke-width="1.3" opacity="0.55"/>
+<rect x="12.0" y="299.5" width="216" height="40" rx="10" fill="#FDF8F5" stroke="#B87A88" stroke-width="1.4"/>
+<text x="120.0" y="317.0" font-family="Georgia, serif" font-size="12" fill="#2D2D2D" font-weight="bold" text-anchor="middle">Back Length</text>
+<text x="120.0" y="332.0" font-family="-apple-system, 'Segoe UI', sans-serif" font-size="9.5" fill="#6B6B6B" font-weight="normal" text-anchor="middle">10–22″ · nape → waist</text>
+<path d="M 237.0 295.0 C 232.5 295.0 232.5 368.5 228.0 368.5" fill="none" stroke="#B87A88" stroke-width="1.3" opacity="0.55"/>
+<rect x="12.0" y="348.5" width="216" height="40" rx="10" fill="#FDF8F5" stroke="#B87A88" stroke-width="1.4"/>
+<text x="120.0" y="366.0" font-family="Georgia, serif" font-size="12" fill="#2D2D2D" font-weight="bold" text-anchor="middle">Side Seam Length</text>
+<text x="120.0" y="381.0" font-family="-apple-system, 'Segoe UI', sans-serif" font-size="9.5" fill="#6B6B6B" font-weight="normal" text-anchor="middle">4–14″ · underarm → waist</text>
+<path d="M 445.0 377.0 C 416.0 377.0 416.0 459.0 387.0 459.0" fill="none" stroke="#B87A88" stroke-width="2" opacity="0.55"/>
+<rect x="237.0" y="440.0" width="150" height="38" rx="19" fill="#B87A88" stroke="#B87A88" stroke-width="1.4"/>
+<text x="312.0" y="463.5" font-family="Georgia, serif" font-size="13.5" fill="#FFFFFF" font-weight="bold" text-anchor="middle">Waist &amp; Hips</text>
+<path d="M 237.0 459.0 C 232.5 459.0 232.5 434.5 228.0 434.5" fill="none" stroke="#B87A88" stroke-width="1.3" opacity="0.55"/>
+<rect x="12.0" y="414.5" width="216" height="40" rx="10" fill="#FDF8F5" stroke="#B87A88" stroke-width="1.4"/>
+<text x="120.0" y="432.0" font-family="Georgia, serif" font-size="12" fill="#2D2D2D" font-weight="bold" text-anchor="middle">Waist</text>
+<text x="120.0" y="447.0" font-family="-apple-system, 'Segoe UI', sans-serif" font-size="9.5" fill="#6B6B6B" font-weight="normal" text-anchor="middle">18–56″ · natural waistline</text>
+<path d="M 237.0 459.0 C 232.5 459.0 232.5 483.5 228.0 483.5" fill="none" stroke="#B87A88" stroke-width="1.3" opacity="0.55"/>
+<rect x="12.0" y="463.5" width="216" height="40" rx="10" fill="#FDF8F5" stroke="#B87A88" stroke-width="1.4"/>
+<text x="120.0" y="481.0" font-family="Georgia, serif" font-size="12" fill="#2D2D2D" font-weight="bold" text-anchor="middle">Hip</text>
+<text x="120.0" y="496.0" font-family="-apple-system, 'Segoe UI', sans-serif" font-size="9.5" fill="#6B6B6B" font-weight="normal" text-anchor="middle">24–62″ · optional</text>
+<path d="M 445.0 377.0 C 416.0 377.0 416.0 623.0 387.0 623.0" fill="none" stroke="#8FA88D" stroke-width="2" opacity="0.55"/>
+<rect x="237.0" y="604.0" width="150" height="38" rx="19" fill="#8FA88D" stroke="#8FA88D" stroke-width="1.4"/>
+<text x="312.0" y="627.5" font-family="Georgia, serif" font-size="13.5" fill="#FFFFFF" font-weight="bold" text-anchor="middle">Additional Details</text>
+<path d="M 237.0 623.0 C 232.5 623.0 232.5 549.5 228.0 549.5" fill="none" stroke="#8FA88D" stroke-width="1.3" opacity="0.55"/>
+<rect x="12.0" y="529.5" width="216" height="40" rx="10" fill="#FDF8F5" stroke="#8FA88D" stroke-width="1.4"/>
+<text x="120.0" y="547.0" font-family="Georgia, serif" font-size="12" fill="#2D2D2D" font-weight="bold" text-anchor="middle">Blouse Opening</text>
+<text x="120.0" y="562.0" font-family="-apple-system, 'Segoe UI', sans-serif" font-size="9.5" fill="#6B6B6B" font-weight="normal" text-anchor="middle">front / back / side zip</text>
+<path d="M 237.0 623.0 C 232.5 623.0 232.5 598.5 228.0 598.5" fill="none" stroke="#8FA88D" stroke-width="1.3" opacity="0.55"/>
+<rect x="12.0" y="578.5" width="216" height="40" rx="10" fill="#FDF8F5" stroke="#8FA88D" stroke-width="1.4"/>
+<text x="120.0" y="596.0" font-family="Georgia, serif" font-size="12" fill="#2D2D2D" font-weight="bold" text-anchor="middle">Cup Padding</text>
+<text x="120.0" y="611.0" font-family="-apple-system, 'Segoe UI', sans-serif" font-size="9.5" fill="#6B6B6B" font-weight="normal" text-anchor="middle">yes / no</text>
+<path d="M 237.0 623.0 C 232.5 623.0 232.5 647.5 228.0 647.5" fill="none" stroke="#8FA88D" stroke-width="1.3" opacity="0.55"/>
+<rect x="12.0" y="627.5" width="216" height="40" rx="10" fill="#FDF8F5" stroke="#8FA88D" stroke-width="1.4"/>
+<text x="120.0" y="645.0" font-family="Georgia, serif" font-size="12" fill="#2D2D2D" font-weight="bold" text-anchor="middle">Fit Preference</text>
+<text x="120.0" y="660.0" font-family="-apple-system, 'Segoe UI', sans-serif" font-size="9.5" fill="#6B6B6B" font-weight="normal" text-anchor="middle">tight / regular / comfortable</text>
+<path d="M 237.0 623.0 C 232.5 623.0 232.5 696.5 228.0 696.5" fill="none" stroke="#8FA88D" stroke-width="1.3" opacity="0.55"/>
+<rect x="12.0" y="676.5" width="216" height="40" rx="10" fill="#FDF8F5" stroke="#8FA88D" stroke-width="1.4"/>
+<text x="120.0" y="694.0" font-family="Georgia, serif" font-size="12" fill="#2D2D2D" font-weight="bold" text-anchor="middle">Seam Allowance</text>
+<text x="120.0" y="709.0" font-family="-apple-system, 'Segoe UI', sans-serif" font-size="9.5" fill="#6B6B6B" font-weight="normal" text-anchor="middle">standard / extra</text>
+<rect x="445.0" y="337.0" width="210" height="80" rx="40" fill="#D6A6B1" stroke="#B87A88" stroke-width="2"/>
+<text x="550.0" y="371.0" font-family="Georgia, serif" font-size="21" fill="#FFFFFF" font-weight="bold" text-anchor="middle">Blouse</text>
+<text x="550.0" y="397.0" font-family="Georgia, serif" font-size="21" fill="#FFFFFF" font-weight="bold" text-anchor="middle">Measurements</text></svg>

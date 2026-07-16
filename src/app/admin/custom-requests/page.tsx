@@ -8,7 +8,7 @@ import {
     RequestStatus,
     REQUEST_STATUSES,
 } from '@/types/customDesignRequest';
-import { MEASUREMENT_FIELDS, MEASUREMENT_LABELS } from '@/types/measurements';
+import { MEASUREMENT_GROUPS, MEASUREMENT_LABELS } from '@/types/measurements';
 import AdminPageHeader from '@/components/admin/AdminPageHeader';
 import AdminTable from '@/components/admin/AdminTable';
 import AdminFormModal from '@/components/admin/AdminFormModal';
@@ -167,12 +167,46 @@ const AdminCustomRequestsPage = () => {
                                         {previewDesign.baseColor}
                                     </dd>
                                 </div>
-                                {MEASUREMENT_FIELDS.map((field) => (
-                                    <div key={field} className="flex justify-between border-b border-gray-100 py-1">
-                                        <dt className="text-gray-500">{MEASUREMENT_LABELS[field]}</dt>
-                                        <dd className="text-charcoal">{viewItem.measurements[field]}&Prime;</dd>
-                                    </div>
-                                ))}
+                                {viewItem.preferences && (
+                                    <>
+                                        <div className="flex justify-between border-b border-gray-100 py-1">
+                                            <dt className="text-gray-500">Opening / Fit / Seams</dt>
+                                            <dd className="text-charcoal text-right capitalize">
+                                                {viewItem.preferences.blouseOpening} · {viewItem.preferences.fitPreference} ·{' '}
+                                                {viewItem.preferences.seamAllowance}
+                                            </dd>
+                                        </div>
+                                        <div className="flex justify-between border-b border-gray-100 py-1">
+                                            <dt className="text-gray-500">Cup Padding / Inner-wear</dt>
+                                            <dd className="text-charcoal text-right">
+                                                {viewItem.preferences.cupPadding ? 'Yes' : 'No'}
+                                                {viewItem.preferences.braSize ? ` · ${viewItem.preferences.braSize}` : ''}
+                                            </dd>
+                                        </div>
+                                    </>
+                                )}
+                                {MEASUREMENT_GROUPS.map((group) => {
+                                    // Older requests may predate some fields — show only what was submitted.
+                                    const present = group.fields.filter(
+                                        (f) => typeof viewItem.measurements[f] === 'number'
+                                    );
+                                    if (present.length === 0) return null;
+                                    return (
+                                        <React.Fragment key={group.id}>
+                                            <div className="pt-1">
+                                                <dt className="font-heading text-xs font-bold text-charcoal uppercase tracking-wide">
+                                                    {group.label}
+                                                </dt>
+                                            </div>
+                                            {present.map((field) => (
+                                                <div key={field} className="flex justify-between border-b border-gray-100 py-1">
+                                                    <dt className="text-gray-500">{MEASUREMENT_LABELS[field]}</dt>
+                                                    <dd className="text-charcoal">{viewItem.measurements[field]}&Prime;</dd>
+                                                </div>
+                                            ))}
+                                        </React.Fragment>
+                                    );
+                                })}
                                 {viewItem.notes && (
                                     <div className="py-1">
                                         <dt className="text-gray-500 mb-1">Notes</dt>

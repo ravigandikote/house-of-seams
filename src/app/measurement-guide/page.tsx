@@ -2,7 +2,8 @@ import React from 'react';
 import Link from 'next/link';
 import {
     MeasurementField,
-    MEASUREMENT_FIELDS,
+    MEASUREMENT_DESCRIPTIONS,
+    MEASUREMENT_GROUPS,
     MEASUREMENT_LABELS,
     MEASUREMENT_RANGES,
 } from '@/types/measurements';
@@ -10,57 +11,42 @@ import {
 export const metadata = {
     title: 'Blouse Measurement Guide | House of Seams',
     description:
-        'How to take the eight blouse measurements used by our Design Your Blouse customizer — with a mind map and tailor-annotated diagrams.',
+        'How to take the 23 standard blouse measurements used by our Design Your Blouse customizer — with a mind map and tailor-annotated diagrams.',
 };
 
-// How to take each measurement, and what it shapes in the blouse.
-const GUIDE: Record<MeasurementField, { how: string; drives: string }> = {
-    bust: {
-        how: 'Around the fullest part of the bust, tape level across the back — snug, never tight.',
-        drives: 'Shapes the blouse width at the chest',
-    },
-    waist: {
-        how: 'A blouse ends above the natural waist — measure around the body exactly where the hem will sit.',
-        drives: 'Shapes the hem and the taper',
-    },
-    shoulderWidth: {
-        how: 'Across the back, from the edge of one shoulder bone to the other.',
-        drives: 'Sets the shoulder line',
-    },
-    blouseLength: {
-        how: 'From the highest point of the shoulder (beside the neck) straight down to the desired hem.',
-        drives: 'Sets the overall length',
-    },
-    sleeveLength: {
-        how: 'From the shoulder tip down the arm to where the sleeve should end — works together with the sleeve style (cap, short, elbow, three-quarter, full).',
-        drives: 'Sets where the sleeve ends',
-    },
-    armhole: {
-        how: 'Around the top of the arm at the shoulder joint, where the sleeve joins the body.',
-        drives: 'Sets the depth of the sleeve opening',
-    },
-    frontNeckDepth: {
-        how: 'From the shoulder line beside the neck, straight down the front to the lowest point of the neckline.',
-        drives: 'How low the front neckline cuts',
-    },
-    backNeckDepth: {
-        how: 'The same, down the back — deeper for deep-round, keyhole, or tie-back designs.',
-        drives: 'How low the back cuts',
-    },
+// What the core measurements shape in the live preview drawing.
+const DRIVES: Partial<Record<MeasurementField, string>> = {
+    bust: 'Shapes the blouse width at the chest',
+    waist: 'Shapes the hem and the taper',
+    shoulderWidth: 'Sets the shoulder line',
+    blouseLength: 'Sets the overall length',
+    sleeveLength: 'Sets where the sleeve ends',
+    armhole: 'Sets the depth of the sleeve opening',
+    frontNeckDepth: 'How low the front neckline cuts',
+    backNeckDepth: 'How low the back cuts',
 };
+
+const ADDITIONAL_DETAILS = [
+    { label: 'Blouse Opening', text: 'Front, back, or side zip — where the blouse fastens.' },
+    { label: 'Cup Padding', text: 'Whether light padding is stitched in.' },
+    { label: 'Fit Preference', text: 'Tight, regular, or comfortable.' },
+    { label: 'Seam Allowance', text: 'Standard, or extra room left in the seams for future alterations.' },
+    { label: 'Bra / Inner-wear Size', text: 'So the blouse is cut for what will be worn under it.' },
+    { label: 'Design & Style Notes', text: 'Anything specific — fabric, lining, occasion, deadline.' },
+];
 
 const TIPS = [
     {
-        title: 'Measure over the right layer',
-        text: 'Take measurements over the inner-wear that will be worn with the blouse.',
+        title: 'Use a soft measuring tape',
+        text: 'Measure over the inner-wear that will be worn with the blouse, tape parallel to the floor.',
     },
     {
         title: 'Keep one finger of ease',
-        text: 'The tape should sit flat with room for one finger underneath.',
+        text: 'The tape should sit flat with room for one finger underneath — never pulled tight.',
     },
     {
-        title: 'When in doubt, round up',
-        text: 'Fabric can always be taken in at the fitting — letting out is harder.',
+        title: 'Recheck, and round up',
+        text: 'Take each measurement twice. Fabric can be taken in at the fitting — letting out is harder.',
     },
 ];
 
@@ -71,8 +57,8 @@ const MeasurementGuidePage = () => {
                 Blouse Measurement Guide
             </h1>
             <p className="text-center text-warm-gray mb-10 max-w-2xl mx-auto">
-                Eight numbers turn a design into a blouse that fits. Here is what each one is, how to take
-                it, and what it shapes — the same eight our customizer asks for and draws live.
+                Twenty-three numbers turn a design into a blouse that fits perfectly. Here is what each one
+                is, how to take it, and what it shapes — the same set our customizer asks for.
             </p>
 
             {/* Mind map */}
@@ -81,7 +67,7 @@ const MeasurementGuidePage = () => {
                     {/* eslint-disable-next-line @next/next/no-img-element */}
                     <img
                         src="/images/guide/mindmap.svg"
-                        alt="Mind map of the eight blouse measurements, grouped into four families: around the body, across, down the body, and necklines"
+                        alt="Mind map of the 23 standard blouse measurements grouped into upper body, neck, arm and sleeve, lengths, and waist and hips — plus the additional details we capture"
                         className="w-full h-auto"
                     />
                 </div>
@@ -93,10 +79,11 @@ const MeasurementGuidePage = () => {
             {/* Annotated diagrams */}
             <section className="mb-14">
                 <h2 className="font-heading text-2xl font-bold text-charcoal mb-2">
-                    Where each number lives
+                    The core measurements, illustrated
                 </h2>
                 <p className="text-warm-gray mb-6">
-                    The same drawing you see in the customizer, annotated the way a tailor would.
+                    The same drawing you see in the customizer, annotated the way a tailor would. These core
+                    values drive the live preview; the full list below refines the final fit.
                 </p>
                 <div className="grid grid-cols-1 md:grid-cols-5 gap-6 items-start">
                     <div className="bg-cream rounded-lg p-4 md:col-span-3">
@@ -118,7 +105,7 @@ const MeasurementGuidePage = () => {
                 </div>
             </section>
 
-            {/* How to measure */}
+            {/* How to measure, by group */}
             <section className="mb-14">
                 <h2 className="font-heading text-2xl font-bold text-charcoal mb-2">
                     How each one is measured
@@ -126,26 +113,51 @@ const MeasurementGuidePage = () => {
                 <p className="text-warm-gray mb-6">
                     The customizer accepts the ranges shown and will let you know if a value looks off.
                 </p>
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                    {MEASUREMENT_FIELDS.map((field) => {
-                        const { min, max } = MEASUREMENT_RANGES[field];
-                        return (
-                            <div key={field} className="bg-white border border-gray-200 rounded-lg p-5 shadow-sm">
-                                <div className="flex items-baseline justify-between mb-1">
-                                    <h3 className="font-heading text-lg font-bold text-charcoal">
-                                        {MEASUREMENT_LABELS[field]}
-                                    </h3>
-                                    <span className="text-xs font-semibold text-dusty-rose-dark whitespace-nowrap">
-                                        {min}&ndash;{max}&Prime;
-                                    </span>
-                                </div>
-                                <p className="text-sm text-warm-gray">{GUIDE[field].how}</p>
-                                <p className="text-xs font-semibold text-sage-green-dark mt-3">
-                                    ◆ {GUIDE[field].drives}
-                                </p>
-                            </div>
-                        );
-                    })}
+                {MEASUREMENT_GROUPS.map((group) => (
+                    <div key={group.id} className="mb-8">
+                        <h3 className="font-heading text-lg font-bold text-charcoal border-b-2 border-dusty-rose inline-block pb-1 mb-4">
+                            {group.label}
+                        </h3>
+                        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+                            {group.fields.map((field) => {
+                                const { min, max } = MEASUREMENT_RANGES[field];
+                                return (
+                                    <div key={field} className="bg-white border border-gray-200 rounded-lg p-4 shadow-sm">
+                                        <div className="flex items-baseline justify-between mb-1">
+                                            <h4 className="font-heading text-base font-bold text-charcoal">
+                                                {MEASUREMENT_LABELS[field]}
+                                            </h4>
+                                            <span className="text-xs font-semibold text-dusty-rose-dark whitespace-nowrap ml-2">
+                                                {min}&ndash;{max}&Prime;
+                                            </span>
+                                        </div>
+                                        <p className="text-sm text-warm-gray">{MEASUREMENT_DESCRIPTIONS[field]}</p>
+                                        {DRIVES[field] && (
+                                            <p className="text-xs font-semibold text-sage-green-dark mt-2">
+                                                ◆ {DRIVES[field]}
+                                            </p>
+                                        )}
+                                    </div>
+                                );
+                            })}
+                        </div>
+                    </div>
+                ))}
+            </section>
+
+            {/* Additional details */}
+            <section className="mb-14">
+                <h2 className="font-heading text-2xl font-bold text-charcoal mb-2">Additional details</h2>
+                <p className="text-warm-gray mb-6">
+                    Beyond the tape measure — a few choices that complete the order.
+                </p>
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+                    {ADDITIONAL_DETAILS.map((d) => (
+                        <div key={d.label} className="bg-white border border-gray-200 rounded-lg p-4 shadow-sm">
+                            <h4 className="font-heading text-base font-bold text-charcoal mb-1">{d.label}</h4>
+                            <p className="text-sm text-warm-gray">{d.text}</p>
+                        </div>
+                    ))}
                 </div>
             </section>
 

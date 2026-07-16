@@ -108,11 +108,19 @@ INSERT INTO blouse_designs (name, slug, description, neck_style, back_style, sle
 ('Mirror-Work Deep V', 'mirror-work-deep-v', 'A statement V-neck with mirror embellishment and a tie back.', 'v', 'tie', 'sleeveless', 'tie', 'mirror', '#B7C9B5', true, 5),
 ('Stone-Studded Square', 'stone-studded-square', 'A square neckline studded with stones, full sleeves for a winter wedding.', 'square', 'round', 'full', 'hook', 'stone', '#D6A6B1', true, 6);
 
--- MEASUREMENT DEFAULTS
+-- MEASUREMENT DEFAULTS (full 23-field set; requires migrations/003)
 -- !!! PLACEHOLDER VALUES (inches) — rough pre-fill starting points only.
 -- !!! The boutique should review and tune these in Admin > Measurement Defaults.
-INSERT INTO measurement_defaults (label, age_min, age_max, bust, waist, shoulder_width, blouse_length, sleeve_length, armhole, front_neck_depth, back_neck_depth) VALUES
-('Under 18', 13, 17, 32, 26, 13.5, 13.5, 6, 15, 6, 7),
-('18-25', 18, 25, 34, 28, 14, 14, 6, 15.5, 6.5, 7),
-('26-40', 26, 40, 36, 31, 14.5, 14.5, 6.5, 16.5, 6.5, 7.5),
-('41 and above', 41, 99, 38, 34, 15, 15, 7, 17.5, 6, 7);
+INSERT INTO measurement_defaults (
+  label, age_min, age_max,
+  shoulder_width, across_front, across_back, bust, upper_bust, under_bust,
+  apex_to_apex, shoulder_to_apex, shoulder_to_under_bust,
+  front_neck_depth, back_neck_depth, neck_width,
+  armhole, sleeve_round, elbow_round, wrist_round, sleeve_length,
+  blouse_length, front_length, back_length, side_seam_length,
+  waist, hip
+) VALUES
+('Under 18', 13, 17,  13.5, 12.5, 13, 32, 31, 27,  6.5, 9, 14,  6, 7, 13.5,  15, 10, 9, 6, 6,  13.5, 14, 14.5, 7.5,  26, 34),
+('18-25', 18, 25,     14, 13, 13.5, 34, 33, 29,    7, 9.5, 15,  6.5, 7, 14,  15.5, 11, 9.5, 6.5, 6,  14, 14.5, 15, 8,  28, 36),
+('26-40', 26, 40,     14.5, 13.5, 14, 36, 35, 31,  7.5, 10, 15.5,  6.5, 7.5, 14.5,  16.5, 12, 10, 7, 6.5,  14.5, 15, 15.5, 8.5,  31, 39),
+('41 and above', 41, 99,  15, 14, 14.5, 38, 37, 33,  8, 10.5, 16,  6, 7, 15,  17.5, 13, 10.5, 7.5, 7,  15, 15.5, 16, 9,  34, 42);

@@ -5,15 +5,29 @@ import Link from 'next/link';
 import { useForm } from 'react-hook-form';
 import BlousePreview from './BlousePreview';
 import Button from '../ui/Button';
+import SelectField from '../ui/SelectField';
 import TextArea from '../ui/TextArea';
+import ToggleSwitch from '../ui/ToggleSwitch';
 import { submitCustomDesignRequest } from '../../services/customizerService';
 import { BlouseDesign } from '../../types/blouseDesign';
 import {
+    BlousePreferences,
+    BLOUSE_OPENINGS,
+    DEFAULT_PREFERENCES,
+    FIT_PREFERENCES,
+    SEAM_ALLOWANCES,
+} from '../../types/customDesignRequest';
+import { CUSTOMIZER_CATEGORIES } from '../../types/customizerCategories';
+import {
     Measurements,
     MeasurementDefault,
+    MEASUREMENT_DESCRIPTIONS,
     MEASUREMENT_FIELDS,
+    MEASUREMENT_GROUPS,
     MEASUREMENT_LABELS,
     MEASUREMENT_RANGES,
+    TYPICAL_MEASUREMENTS,
+    bracketValue,
     findBracketForAge,
 } from '../../types/measurements';
 
@@ -33,18 +47,17 @@ interface CustomizerFormValues extends Measurements {
 const STEPS = ['Design', 'Measurements', 'Preview'] as const;
 
 // Used when no age bracket matches (or none are configured).
-const BASE_MEASUREMENTS: Measurements = {
-    bust: 34,
-    waist: 28,
-    shoulderWidth: 14,
-    blouseLength: 14,
-    sleeveLength: 6,
-    armhole: 15.5,
-    frontNeckDepth: 6.5,
-    backNeckDepth: 7,
-};
+const BASE_MEASUREMENTS: Measurements = TYPICAL_MEASUREMENTS;
 
 const DEFAULT_AGE = 25;
+
+// "three-quarter" / "side-zip" -> "Three Quarter" / "Side Zip"
+function labelize(value: string): string {
+    return value
+        .split('-')
+        .map((w) => w.charAt(0).toUpperCase() + w.slice(1))
+        .join(' ');
+}
 
 function toMeasurements(values: CustomizerFormValues): Measurements {
     const result = {} as Measurements;
@@ -62,6 +75,7 @@ const CustomizerFlow: React.FC<CustomizerFlowProps> = ({ designs, brackets }) =>
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [submitError, setSubmitError] = useState<string | null>(null);
     const [submitted, setSubmitted] = useState(false);
+    const [preferences, setPreferences] = useState<BlousePreferences>(DEFAULT_PREFERENCES);
 
     const initialBracket = findBracketForAge(brackets, DEFAULT_AGE);
     const {
@@ -80,7 +94,7 @@ const CustomizerFlow: React.FC<CustomizerFlowProps> = ({ designs, brackets }) =>
             customerPhone: '',
             ...BASE_MEASUREMENTS,
             ...(initialBracket
-                ? Object.fromEntries(MEASUREMENT_FIELDS.map((f) => [f, initialBracket[f]]))
+                ? Object.fromEntries(MEASUREMENT_FIELDS.map((f) => [f, bracketValue(initialBracket, f)]))
                 : {}),
         },
     });
@@ -98,7 +112,9 @@ const CustomizerFlow: React.FC<CustomizerFlowProps> = ({ designs, brackets }) =>
         if (bracket && bracket.id !== lastBracketId.current) {
             lastBracketId.current = bracket.id;
             for (const field of MEASUREMENT_FIELDS) {
-                setValue(field, bracket[field], { shouldValidate: true });
+                // bracketValue falls back to typical values when a bracket
+                // predates a newly added measurement column.
+                setValue(field, bracketValue(bracket, field), { shouldValidate: true });
             }
         }
     }, [age, brackets, setValue]);
@@ -150,6 +166,7 @@ const CustomizerFlow: React.FC<CustomizerFlowProps> = ({ designs, brackets }) =>
                 customerEmail: values.customerEmail || null,
                 customerPhone: values.customerPhone || null,
                 notes: values.notes || null,
+                preferences: { ...preferences, braSize: preferences.braSize?.trim() || null },
             });
             setSubmitted(true);
         } catch (err) {
@@ -195,6 +212,30 @@ const CustomizerFlow: React.FC<CustomizerFlowProps> = ({ designs, brackets }) =>
 
     return (
         <div>
+            {/* Category selector — blouse is live; other garments are on the way */}
+            <div className="flex justify-center gap-3 mb-10 flex-wrap">
+                {CUSTOMIZER_CATEGORIES.map((category) => (
+                    <button
+                        key={category.id}
+                        type="button"
+                        disabled={!category.available}
+                        title={category.description}
+                        className={`relative px-5 py-2.5 rounded-full text-sm font-medium border transition-colors ${
+                            category.available
+                                ? 'bg-dusty-rose border-dusty-rose text-white'
+                                : 'bg-white border-gray-200 text-gray-400 cursor-not-allowed'
+                        }`}
+                    >
+                        {category.label}
+                        {!category.available && (
+                            <span className="ml-2 text-[10px] uppercase tracking-wide bg-gray-100 text-gray-500 rounded-full px-2 py-0.5">
+                                Coming soon
+                            </span>
+                        )}
+                    </button>
+                ))}
+            </div>
+
             {/* Stepper */}
             <ol className="flex items-center justify-center gap-2 sm:gap-6 mb-10">
                 {STEPS.map((label, i) => (
@@ -273,31 +314,91 @@ const CustomizerFlow: React.FC<CustomizerFlowProps> = ({ designs, brackets }) =>
                             </p>
                         </div>
 
-                        <div className="grid grid-cols-2 gap-x-4">
-                            {MEASUREMENT_FIELDS.map((field) => {
-                                const { min, max } = MEASUREMENT_RANGES[field];
-                                return (
-                                    <div key={field} className="mb-4">
-                                        <label className="block text-sm font-medium text-gray-700">
-                                            {MEASUREMENT_LABELS[field]} (inches)
-                                        </label>
-                                        <input
-                                            type="number"
-                                            step={0.25}
-                                            {...register(field, { valueAsNumber: true, required: true, min, max })}
-                                            className={`mt-1 block w-full border rounded-md shadow-sm px-3 py-2 ${
-                                                errors[field] ? 'border-red-500' : 'border-gray-300'
-                                            }`}
-                                        />
-                                        {errors[field] && (
-                                            <p className="mt-1 text-xs text-red-500">
-                                                Enter a value between {min} and {max} inches
-                                            </p>
-                                        )}
-                                    </div>
-                                );
-                            })}
+                        {MEASUREMENT_GROUPS.map((group) => (
+                            <div key={group.id} className="mb-2">
+                                <h3 className="font-heading text-base font-bold text-charcoal border-b border-dusty-rose/40 pb-1 mb-3">
+                                    {group.label}
+                                </h3>
+                                <div className="grid grid-cols-2 gap-x-4">
+                                    {group.fields.map((field) => {
+                                        const { min, max } = MEASUREMENT_RANGES[field];
+                                        return (
+                                            <div key={field} className="mb-4">
+                                                <label
+                                                    className="block text-sm font-medium text-gray-700"
+                                                    title={MEASUREMENT_DESCRIPTIONS[field]}
+                                                >
+                                                    {MEASUREMENT_LABELS[field]} (in)
+                                                </label>
+                                                <input
+                                                    type="number"
+                                                    step={0.25}
+                                                    {...register(field, { valueAsNumber: true, required: true, min, max })}
+                                                    className={`mt-1 block w-full border rounded-md shadow-sm px-3 py-2 ${
+                                                        errors[field] ? 'border-red-500' : 'border-gray-300'
+                                                    }`}
+                                                />
+                                                {errors[field] && (
+                                                    <p className="mt-1 text-xs text-red-500">
+                                                        Enter a value between {min} and {max} inches
+                                                    </p>
+                                                )}
+                                            </div>
+                                        );
+                                    })}
+                                </div>
+                            </div>
+                        ))}
+
+                        <h3 className="font-heading text-base font-bold text-charcoal border-b border-dusty-rose/40 pb-1 mb-3">
+                            Additional Details
+                        </h3>
+                        <SelectField
+                            label="Blouse Opening"
+                            value={preferences.blouseOpening}
+                            onChange={(e) =>
+                                setPreferences({ ...preferences, blouseOpening: e.target.value as BlousePreferences['blouseOpening'] })
+                            }
+                            options={BLOUSE_OPENINGS.map((o) => ({ value: o, label: labelize(o) }))}
+                        />
+                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-4">
+                            <SelectField
+                                label="Fit Preference"
+                                value={preferences.fitPreference}
+                                onChange={(e) =>
+                                    setPreferences({ ...preferences, fitPreference: e.target.value as BlousePreferences['fitPreference'] })
+                                }
+                                options={FIT_PREFERENCES.map((f) => ({ value: f, label: labelize(f) }))}
+                            />
+                            <SelectField
+                                label="Seam Allowance"
+                                value={preferences.seamAllowance}
+                                onChange={(e) =>
+                                    setPreferences({ ...preferences, seamAllowance: e.target.value as BlousePreferences['seamAllowance'] })
+                                }
+                                options={SEAM_ALLOWANCES.map((s) => ({
+                                    value: s,
+                                    label: s === 'extra' ? 'Extra (room for future alterations)' : 'Standard',
+                                }))}
+                            />
                         </div>
+                        <div className="mb-4">
+                            <label className="block text-sm font-medium text-gray-700">
+                                Bra / Inner-wear Size (optional)
+                            </label>
+                            <input
+                                type="text"
+                                value={preferences.braSize ?? ''}
+                                onChange={(e) => setPreferences({ ...preferences, braSize: e.target.value })}
+                                placeholder="e.g. 34B"
+                                className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm px-3 py-2"
+                            />
+                        </div>
+                        <ToggleSwitch
+                            label="Cup padding"
+                            checked={preferences.cupPadding}
+                            onChange={(checked) => setPreferences({ ...preferences, cupPadding: checked })}
+                        />
 
                         <div className="mb-4">
                             <label className="block text-sm font-medium text-gray-700">Blouse Color</label>
@@ -379,11 +480,32 @@ const CustomizerFlow: React.FC<CustomizerFlowProps> = ({ designs, brackets }) =>
                                     {color}
                                 </dd>
                             </div>
-                            {MEASUREMENT_FIELDS.map((field) => (
-                                <div key={field} className="flex justify-between border-b border-gray-100 pb-2">
-                                    <dt className="text-warm-gray">{MEASUREMENT_LABELS[field]}</dt>
-                                    <dd className="text-charcoal">{measurements[field]}&Prime;</dd>
-                                </div>
+                            <div className="flex justify-between border-b border-gray-100 pb-2">
+                                <dt className="text-warm-gray">Opening / Fit / Seams</dt>
+                                <dd className="text-charcoal text-right">
+                                    {labelize(preferences.blouseOpening)} · {labelize(preferences.fitPreference)} ·{' '}
+                                    {labelize(preferences.seamAllowance)}
+                                </dd>
+                            </div>
+                            <div className="flex justify-between border-b border-gray-100 pb-2">
+                                <dt className="text-warm-gray">Cup Padding / Inner-wear</dt>
+                                <dd className="text-charcoal text-right">
+                                    {preferences.cupPadding ? 'Yes' : 'No'}
+                                    {preferences.braSize?.trim() ? ` · ${preferences.braSize.trim()}` : ''}
+                                </dd>
+                            </div>
+                            {MEASUREMENT_GROUPS.map((group) => (
+                                <React.Fragment key={group.id}>
+                                    <div className="pt-2">
+                                        <dt className="font-heading text-sm font-bold text-charcoal">{group.label}</dt>
+                                    </div>
+                                    {group.fields.map((field) => (
+                                        <div key={field} className="flex justify-between border-b border-gray-100 pb-2">
+                                            <dt className="text-warm-gray">{MEASUREMENT_LABELS[field]}</dt>
+                                            <dd className="text-charcoal">{measurements[field]}&Prime;</dd>
+                                        </div>
+                                    ))}
+                                </React.Fragment>
                             ))}
                             {values.notes && (
                                 <div className="pt-2">

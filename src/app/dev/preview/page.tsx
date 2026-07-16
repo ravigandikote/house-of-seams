@@ -18,6 +18,7 @@ import {
     MEASUREMENT_FIELDS,
     MEASUREMENT_LABELS,
     MEASUREMENT_RANGES,
+    TYPICAL_MEASUREMENTS,
 } from '../../../types/measurements';
 
 const initialDesign: BlouseDesignAttributes = {
@@ -29,16 +30,7 @@ const initialDesign: BlouseDesignAttributes = {
     baseColor: '#D6A6B1',
 };
 
-const initialMeasurements: Measurements = {
-    bust: 34,
-    waist: 28,
-    shoulderWidth: 14,
-    blouseLength: 14,
-    sleeveLength: 6,
-    armhole: 15.5,
-    frontNeckDepth: 6.5,
-    backNeckDepth: 7,
-};
+const initialMeasurements: Measurements = TYPICAL_MEASUREMENTS;
 
 const styleSelects = [
     { key: 'neckStyle', label: 'Neck Style', options: NECK_STYLES },

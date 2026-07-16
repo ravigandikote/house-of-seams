@@ -20,7 +20,7 @@ import TextArea from '@/components/ui/TextArea';
 import SelectField from '@/components/ui/SelectField';
 import ToggleSwitch from '@/components/ui/ToggleSwitch';
 import BlousePreview from '@/components/customizer/BlousePreview';
-import { Measurements } from '@/types/measurements';
+import { TYPICAL_MEASUREMENTS } from '@/types/measurements';
 
 function generateSlug(title: string): string {
     return title
@@ -58,16 +58,7 @@ const defaultForm: DesignForm = {
 };
 
 // Representative measurements for the in-form preview only.
-const previewMeasurements: Measurements = {
-    bust: 34,
-    waist: 28,
-    shoulderWidth: 14,
-    blouseLength: 14,
-    sleeveLength: 6,
-    armhole: 15.5,
-    frontNeckDepth: 6.5,
-    backNeckDepth: 7,
-};
+const previewMeasurements = TYPICAL_MEASUREMENTS;
 
 const styleSelects = [
     { key: 'neckStyle', label: 'Neck Style', options: NECK_STYLES },

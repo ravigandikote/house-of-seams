@@ -1,5 +1,5 @@
 import { BlouseDesign } from '../../types/blouseDesign';
-import { MeasurementDefault } from '../../types/measurements';
+import { MeasurementDefault, Measurements, TYPICAL_MEASUREMENTS } from '../../types/measurements';
 
 // Fallback data mirroring supabase/seed.sql, used only when Supabase is
 // not configured (same convention as the products page JSON fallback).
@@ -91,25 +91,38 @@ export const FALLBACK_DESIGNS: BlouseDesign[] = [
     },
 ];
 
+function bracket(
+    id: string,
+    label: string,
+    ageMin: number,
+    ageMax: number,
+    overrides: Partial<Measurements>
+): MeasurementDefault {
+    return { id, label, ageMin, ageMax, ...TYPICAL_MEASUREMENTS, ...overrides };
+}
+
 export const FALLBACK_BRACKETS: MeasurementDefault[] = [
-    {
-        id: 'fallback-b1', label: 'Under 18', ageMin: 13, ageMax: 17,
-        bust: 32, waist: 26, shoulderWidth: 13.5, blouseLength: 13.5,
-        sleeveLength: 6, armhole: 15, frontNeckDepth: 6, backNeckDepth: 7,
-    },
-    {
-        id: 'fallback-b2', label: '18-25', ageMin: 18, ageMax: 25,
-        bust: 34, waist: 28, shoulderWidth: 14, blouseLength: 14,
-        sleeveLength: 6, armhole: 15.5, frontNeckDepth: 6.5, backNeckDepth: 7,
-    },
-    {
-        id: 'fallback-b3', label: '26-40', ageMin: 26, ageMax: 40,
-        bust: 36, waist: 31, shoulderWidth: 14.5, blouseLength: 14.5,
-        sleeveLength: 6.5, armhole: 16.5, frontNeckDepth: 6.5, backNeckDepth: 7.5,
-    },
-    {
-        id: 'fallback-b4', label: '41 and above', ageMin: 41, ageMax: 99,
-        bust: 38, waist: 34, shoulderWidth: 15, blouseLength: 15,
-        sleeveLength: 7, armhole: 17.5, frontNeckDepth: 6, backNeckDepth: 7,
-    },
+    bracket('fallback-b1', 'Under 18', 13, 17, {
+        shoulderWidth: 13.5, acrossFront: 12.5, acrossBack: 13, bust: 32, upperBust: 31,
+        underBust: 27, apexToApex: 6.5, shoulderToApex: 9, shoulderToUnderBust: 14,
+        frontNeckDepth: 6, backNeckDepth: 7, neckWidth: 13.5, armhole: 15, sleeveRound: 10,
+        elbowRound: 9, wristRound: 6, sleeveLength: 6, blouseLength: 13.5, frontLength: 14,
+        backLength: 14.5, sideSeamLength: 7.5, waist: 26, hip: 34,
+    }),
+    // 18-25 is exactly the typical set
+    bracket('fallback-b2', '18-25', 18, 25, {}),
+    bracket('fallback-b3', '26-40', 26, 40, {
+        shoulderWidth: 14.5, acrossFront: 13.5, acrossBack: 14, bust: 36, upperBust: 35,
+        underBust: 31, apexToApex: 7.5, shoulderToApex: 10, shoulderToUnderBust: 15.5,
+        frontNeckDepth: 6.5, backNeckDepth: 7.5, neckWidth: 14.5, armhole: 16.5, sleeveRound: 12,
+        elbowRound: 10, wristRound: 7, sleeveLength: 6.5, blouseLength: 14.5, frontLength: 15,
+        backLength: 15.5, sideSeamLength: 8.5, waist: 31, hip: 39,
+    }),
+    bracket('fallback-b4', '41 and above', 41, 99, {
+        shoulderWidth: 15, acrossFront: 14, acrossBack: 14.5, bust: 38, upperBust: 37,
+        underBust: 33, apexToApex: 8, shoulderToApex: 10.5, shoulderToUnderBust: 16,
+        frontNeckDepth: 6, backNeckDepth: 7, neckWidth: 15, armhole: 17.5, sleeveRound: 13,
+        elbowRound: 10.5, wristRound: 7.5, sleeveLength: 7, blouseLength: 15, frontLength: 15.5,
+        backLength: 16, sideSeamLength: 9, waist: 34, hip: 42,
+    }),
 ];

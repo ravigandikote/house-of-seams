@@ -5,7 +5,10 @@ import { useAdminCrud } from '@/hooks/useAdminCrud';
 import {
     MeasurementDefault,
     MEASUREMENT_FIELDS,
+    MEASUREMENT_GROUPS,
     MEASUREMENT_LABELS,
+    TYPICAL_MEASUREMENTS,
+    bracketValue,
 } from '@/types/measurements';
 import AdminPageHeader from '@/components/admin/AdminPageHeader';
 import AdminTable from '@/components/admin/AdminTable';
@@ -20,14 +23,7 @@ const defaultForm: DefaultsForm = {
     label: '',
     ageMin: 18,
     ageMax: 25,
-    bust: 34,
-    waist: 28,
-    shoulderWidth: 14,
-    blouseLength: 14,
-    sleeveLength: 6,
-    armhole: 15.5,
-    frontNeckDepth: 6.5,
-    backNeckDepth: 7,
+    ...TYPICAL_MEASUREMENTS,
 };
 
 const AdminMeasurementDefaultsPage = () => {
@@ -48,8 +44,15 @@ const AdminMeasurementDefaultsPage = () => {
 
     const openEdit = (bracket: MeasurementDefault) => {
         setEditingItem(bracket);
-        const { id: _id, createdAt: _c, updatedAt: _u, ...rest } = bracket;
-        setForm(rest);
+        // bracketValue fills any fields the row predates (migration 003)
+        setForm({
+            label: bracket.label,
+            ageMin: bracket.ageMin,
+            ageMax: bracket.ageMax,
+            ...(Object.fromEntries(
+                MEASUREMENT_FIELDS.map((f) => [f, bracketValue(bracket, f)])
+            ) as Record<(typeof MEASUREMENT_FIELDS)[number], number>),
+        });
         setIsFormOpen(true);
     };
 
@@ -163,20 +166,27 @@ const AdminMeasurementDefaultsPage = () => {
                 <p className="text-sm text-gray-500 mb-3">
                     Default measurements in inches — rough starting points only; customers can edit every value.
                 </p>
-                <div className="grid grid-cols-2 gap-x-4">
-                    {MEASUREMENT_FIELDS.map((field) => (
-                        <Input
-                            key={field}
-                            label={`${MEASUREMENT_LABELS[field]} (in)`}
-                            type="number"
-                            step={0.5}
-                            min={0}
-                            value={form[field]}
-                            onChange={(e) => setForm({ ...form, [field]: Number(e.target.value) })}
-                            required
-                        />
-                    ))}
-                </div>
+                {MEASUREMENT_GROUPS.map((group) => (
+                    <div key={group.id} className="mb-2">
+                        <h3 className="font-heading text-sm font-bold text-charcoal border-b border-gray-200 pb-1 mb-3">
+                            {group.label}
+                        </h3>
+                        <div className="grid grid-cols-2 sm:grid-cols-3 gap-x-4">
+                            {group.fields.map((field) => (
+                                <Input
+                                    key={field}
+                                    label={`${MEASUREMENT_LABELS[field]} (in)`}
+                                    type="number"
+                                    step={0.5}
+                                    min={0}
+                                    value={form[field]}
+                                    onChange={(e) => setForm({ ...form, [field]: Number(e.target.value) })}
+                                    required
+                                />
+                            ))}
+                        </div>
+                    </div>
+                ))}
             </AdminFormModal>
 
             <DeleteConfirmDialog
