@@ -19,6 +19,12 @@ export const CUSTOMIZER_CATEGORIES: readonly CustomizerCategory[] = [
         description: 'Custom-fitted saree blouses',
     },
     {
+        id: 'lehenga',
+        label: 'Lehenga',
+        available: true,
+        description: 'Custom lehenga skirts — design and measurements, ordering coming soon',
+    },
+    {
         id: 'shirt',
         label: 'Shirts',
         available: false,

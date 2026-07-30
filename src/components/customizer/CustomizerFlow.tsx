@@ -4,11 +4,14 @@ import React, { useEffect, useRef, useState } from 'react';
 import Link from 'next/link';
 import { useForm } from 'react-hook-form';
 import BlousePreview from './BlousePreview';
+import LehengaFlow from './LehengaFlow';
+import MeasurementSliderGroup from './MeasurementSliderGroup';
 import Button from '../ui/Button';
 import SelectField from '../ui/SelectField';
 import TextArea from '../ui/TextArea';
 import ToggleSwitch from '../ui/ToggleSwitch';
 import { submitCustomDesignRequest } from '../../services/customizerService';
+import { downloadBlouseDesignPdf } from '../../lib/blouseDesignPdf';
 import { BlouseDesign } from '../../types/blouseDesign';
 import {
     BlousePreferences,
@@ -21,11 +24,11 @@ import { CUSTOMIZER_CATEGORIES } from '../../types/customizerCategories';
 import {
     Measurements,
     MeasurementDefault,
-    MEASUREMENT_DESCRIPTIONS,
+    MeasurementField,
+    BLOUSE_MEASUREMENT_SPEC,
     MEASUREMENT_FIELDS,
     MEASUREMENT_GROUPS,
     MEASUREMENT_LABELS,
-    MEASUREMENT_RANGES,
     TYPICAL_MEASUREMENTS,
     bracketValue,
     findBracketForAge,
@@ -68,14 +71,18 @@ function toMeasurements(values: CustomizerFormValues): Measurements {
 }
 
 const CustomizerFlow: React.FC<CustomizerFlowProps> = ({ designs, brackets }) => {
+    const [category, setCategory] = useState('blouse');
     const [step, setStep] = useState(0);
     const [selected, setSelected] = useState<BlouseDesign | null>(null);
     const [color, setColor] = useState('#D6A6B1');
-    const [view, setView] = useState<'front' | 'back'>('front');
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [submitError, setSubmitError] = useState<string | null>(null);
     const [submitted, setSubmitted] = useState(false);
     const [preferences, setPreferences] = useState<BlousePreferences>(DEFAULT_PREFERENCES);
+    const [isGeneratingPdf, setIsGeneratingPdf] = useState(false);
+    const [pdfError, setPdfError] = useState<string | null>(null);
+    // Hidden front+back renders used as the PDF's image sources.
+    const pdfRenderRef = useRef<HTMLDivElement>(null);
 
     const initialBracket = findBracketForAge(brackets, DEFAULT_AGE);
     const {
@@ -126,13 +133,42 @@ const CustomizerFlow: React.FC<CustomizerFlowProps> = ({ designs, brackets }) =>
 
     const goNext = async () => {
         if (step === 1) {
-            const valid = await trigger([...MEASUREMENT_FIELDS, 'age']);
+            // Measurement values are slider-clamped and can't be invalid;
+            // only the free-typed age needs checking.
+            const valid = await trigger('age');
             if (!valid) return;
         }
         setStep((s) => Math.min(s + 1, STEPS.length - 1));
     };
 
     const previewDesign = selected ? { ...selected, baseColor: color } : null;
+
+    const handleGeneratePdf = async () => {
+        if (!selected) return;
+        const svgs = pdfRenderRef.current?.querySelectorAll('svg');
+        if (!svgs || svgs.length < 2) return;
+        setPdfError(null);
+        setIsGeneratingPdf(true);
+        try {
+            await downloadBlouseDesignPdf(
+                {
+                    designName: selected.name,
+                    design: { ...selected, baseColor: color },
+                    color,
+                    measurements,
+                    preferences: { ...preferences, braSize: preferences.braSize?.trim() || null },
+                    customerAge: Number(values.age) || null,
+                    notes: values.notes || null,
+                },
+                svgs[0],
+                svgs[1]
+            );
+        } catch (err) {
+            setPdfError(err instanceof Error ? err.message : 'Could not generate the PDF. Please try again.');
+        } finally {
+            setIsGeneratingPdf(false);
+        }
+    };
 
     const handleSubmit = async () => {
         if (!selected) return;
@@ -201,40 +237,58 @@ const CustomizerFlow: React.FC<CustomizerFlowProps> = ({ designs, brackets }) =>
         );
     }
 
-    if (designs.length === 0) {
+    const categoryPills = (
+        <div className="flex justify-center gap-3 mb-10 flex-wrap">
+            {CUSTOMIZER_CATEGORIES.map((c) => (
+                <button
+                    key={c.id}
+                    type="button"
+                    disabled={!c.available}
+                    title={c.description}
+                    onClick={() => c.available && setCategory(c.id)}
+                    className={`relative px-5 py-2.5 rounded-full text-sm font-medium border transition-colors ${
+                        c.id === category
+                            ? 'bg-dusty-rose border-dusty-rose text-white'
+                            : c.available
+                                ? 'bg-white border-gray-300 text-gray-700 hover:border-dusty-rose'
+                                : 'bg-white border-gray-200 text-gray-400 cursor-not-allowed'
+                    }`}
+                >
+                    {c.label}
+                    {!c.available && (
+                        <span className="ml-2 text-[10px] uppercase tracking-wide bg-gray-100 text-gray-500 rounded-full px-2 py-0.5">
+                            Coming soon
+                        </span>
+                    )}
+                </button>
+            ))}
+        </div>
+    );
+
+    if (category === 'blouse' && designs.length === 0) {
         return (
-            <p className="text-center text-warm-gray py-16">
-                The blouse customizer is being set up — please check back soon, or{' '}
-                <a href="/booking" className="text-dusty-rose underline">book a consultation</a>.
-            </p>
+            <div>
+                {categoryPills}
+                <p className="text-center text-warm-gray py-16">
+                    The blouse customizer is being set up — please check back soon, or{' '}
+                    <a href="/booking" className="text-dusty-rose underline">book a consultation</a>.
+                </p>
+            </div>
+        );
+    }
+
+    if (category === 'lehenga') {
+        return (
+            <div>
+                {categoryPills}
+                <LehengaFlow />
+            </div>
         );
     }
 
     return (
         <div>
-            {/* Category selector — blouse is live; other garments are on the way */}
-            <div className="flex justify-center gap-3 mb-10 flex-wrap">
-                {CUSTOMIZER_CATEGORIES.map((category) => (
-                    <button
-                        key={category.id}
-                        type="button"
-                        disabled={!category.available}
-                        title={category.description}
-                        className={`relative px-5 py-2.5 rounded-full text-sm font-medium border transition-colors ${
-                            category.available
-                                ? 'bg-dusty-rose border-dusty-rose text-white'
-                                : 'bg-white border-gray-200 text-gray-400 cursor-not-allowed'
-                        }`}
-                    >
-                        {category.label}
-                        {!category.available && (
-                            <span className="ml-2 text-[10px] uppercase tracking-wide bg-gray-100 text-gray-500 rounded-full px-2 py-0.5">
-                                Coming soon
-                            </span>
-                        )}
-                    </button>
-                ))}
-            </div>
+            {categoryPills}
 
             {/* Stepper */}
             <ol className="flex items-center justify-center gap-2 sm:gap-6 mb-10">
@@ -314,40 +368,20 @@ const CustomizerFlow: React.FC<CustomizerFlowProps> = ({ designs, brackets }) =>
                             </p>
                         </div>
 
-                        {MEASUREMENT_GROUPS.map((group) => (
-                            <div key={group.id} className="mb-2">
-                                <h3 className="font-heading text-base font-bold text-charcoal border-b border-dusty-rose/40 pb-1 mb-3">
-                                    {group.label}
-                                </h3>
-                                <div className="grid grid-cols-2 gap-x-4">
-                                    {group.fields.map((field) => {
-                                        const { min, max } = MEASUREMENT_RANGES[field];
-                                        return (
-                                            <div key={field} className="mb-4">
-                                                <label
-                                                    className="block text-sm font-medium text-gray-700"
-                                                    title={MEASUREMENT_DESCRIPTIONS[field]}
-                                                >
-                                                    {MEASUREMENT_LABELS[field]} (in)
-                                                </label>
-                                                <input
-                                                    type="number"
-                                                    step={0.25}
-                                                    {...register(field, { valueAsNumber: true, required: true, min, max })}
-                                                    className={`mt-1 block w-full border rounded-md shadow-sm px-3 py-2 ${
-                                                        errors[field] ? 'border-red-500' : 'border-gray-300'
-                                                    }`}
-                                                />
-                                                {errors[field] && (
-                                                    <p className="mt-1 text-xs text-red-500">
-                                                        Enter a value between {min} and {max} inches
-                                                    </p>
-                                                )}
-                                            </div>
-                                        );
-                                    })}
-                                </div>
-                            </div>
+                        {/* Slider editor: every measurement is a slider paired with
+                            an exact numeric input; values are always in-range so no
+                            per-field validation errors are possible here. */}
+                        {BLOUSE_MEASUREMENT_SPEC.groups.map((group) => (
+                            <MeasurementSliderGroup
+                                key={group.key}
+                                spec={BLOUSE_MEASUREMENT_SPEC}
+                                group={group}
+                                values={measurements}
+                                styleAttrs={{}}
+                                onChange={(key, v) =>
+                                    setValue(key as MeasurementField, v, { shouldValidate: false })
+                                }
+                            />
                         ))}
 
                         <h3 className="font-heading text-base font-bold text-charcoal border-b border-dusty-rose/40 pb-1 mb-3">
@@ -421,13 +455,25 @@ const CustomizerFlow: React.FC<CustomizerFlowProps> = ({ designs, brackets }) =>
 
                     <div>
                         <p className="text-sm font-medium text-gray-700 mb-2 text-center">Live preview</p>
-                        <div className="bg-cream rounded-lg p-6 md:sticky md:top-24">
-                            <BlousePreview
-                                design={previewDesign}
-                                measurements={measurements}
-                                view="front"
-                                className="max-w-xs mx-auto"
-                            />
+                        <div className="md:sticky md:top-20">
+                            <div className="flex flex-col gap-4">
+                                {(['front', 'back'] as const).map((v) => (
+                                    <div key={v} className="bg-cream rounded-lg p-4 w-full max-w-[360px] mx-auto">
+                                        <BlousePreview
+                                            design={previewDesign}
+                                            measurements={measurements}
+                                            view={v}
+                                            showCaption={false}
+                                        />
+                                        <p className="text-center text-sm text-warm-gray mt-1">
+                                            {v === 'front' ? 'Front' : 'Back'}
+                                        </p>
+                                    </div>
+                                ))}
+                            </div>
+                            <p className="text-xs text-warm-gray italic text-center mt-2">
+                                Illustrative preview — not to scale
+                            </p>
                         </div>
                     </div>
                 </div>
@@ -437,30 +483,41 @@ const CustomizerFlow: React.FC<CustomizerFlowProps> = ({ designs, brackets }) =>
             {step === 2 && previewDesign && selected && (
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-8 animate-fade-in">
                     <div>
-                        <div className="flex items-center justify-center gap-2 mb-4">
+                        {/* Both views shown together; this container is also the
+                            PDF's image source (front svg first, back svg second). */}
+                        <div ref={pdfRenderRef} className="flex flex-col gap-4">
                             {(['front', 'back'] as const).map((v) => (
-                                <button
-                                    key={v}
-                                    type="button"
-                                    onClick={() => setView(v)}
-                                    className={`px-4 py-1.5 rounded-full text-sm font-medium transition-colors ${
-                                        view === v
-                                            ? 'bg-dusty-rose text-white'
-                                            : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
-                                    }`}
-                                >
-                                    {v === 'front' ? 'Front' : 'Back'}
-                                </button>
+                                <div key={v} className="bg-cream rounded-lg p-5 w-full max-w-md mx-auto">
+                                    <BlousePreview
+                                        design={previewDesign}
+                                        measurements={measurements}
+                                        view={v}
+                                        showCaption={false}
+                                    />
+                                    <p className="text-center text-sm text-warm-gray mt-1">
+                                        {v === 'front' ? 'Front' : 'Back'}
+                                    </p>
+                                </div>
                             ))}
                         </div>
-                        <div className="bg-cream rounded-lg p-6">
-                            <BlousePreview
-                                design={previewDesign}
-                                measurements={measurements}
-                                view={view}
-                                className="max-w-sm mx-auto"
-                            />
-                        </div>
+                        <p className="text-xs text-warm-gray italic text-center mt-2">
+                            Illustrative preview — not to scale
+                        </p>
+
+                        <Button
+                            variant="outline"
+                            onClick={handleGeneratePdf}
+                            disabled={isGeneratingPdf}
+                            className="w-full mt-4"
+                        >
+                            {isGeneratingPdf ? 'Preparing PDF…' : 'Generate PDF'}
+                        </Button>
+                        <p className="text-xs text-warm-gray text-center mt-2">
+                            Downloads a design sheet with both views, all measurements, and your choices.
+                        </p>
+                        {pdfError && (
+                            <p className="text-sm text-red-500 text-center mt-2" role="alert">{pdfError}</p>
+                        )}
                     </div>
 
                     <div>

@@ -20,6 +20,8 @@ export interface BlousePreviewProps {
     measurements: Measurements;
     view: 'front' | 'back';
     className?: string;
+    /** Hide the built-in caption when views are shown side by side. */
+    showCaption?: boolean;
 }
 
 // 6 SVG units per inch on a fixed canvas, so measurement changes are
@@ -100,7 +102,7 @@ function necklineSegment(shape: NeckShape, halfW: number, depth: number): string
     }
 }
 
-const BlousePreview: React.FC<BlousePreviewProps> = ({ design, measurements, view, className }) => {
+const BlousePreview: React.FC<BlousePreviewProps> = ({ design, measurements, view, className, showCaption = true }) => {
     // Unique pattern ids so multiple previews can coexist on one page.
     const uid = useId().replace(/[:]/g, '');
     const patternId = `blouse-pat-${uid}`;
@@ -315,9 +317,11 @@ const BlousePreview: React.FC<BlousePreviewProps> = ({ design, measurements, vie
                     </g>
                 )}
             </svg>
-            <figcaption className="text-xs text-warm-gray italic text-center mt-2">
-                Illustrative preview — not to scale
-            </figcaption>
+            {showCaption && (
+                <figcaption className="text-xs text-warm-gray italic text-center mt-2">
+                    Illustrative preview — not to scale
+                </figcaption>
+            )}
         </figure>
     );
 };
