@@ -17,6 +17,7 @@ const navItems = [
   { label: 'Pricing', href: '/admin/pricing', icon: '$' },
   { label: 'Media', href: '/admin/media', icon: '\u2191' },
   { label: 'Bookings', href: '/admin/bookings', icon: '\u2611' },
+  { label: 'Customers', href: '/admin/customers', icon: '\u2661' },
   { label: 'Custom Requests', href: '/admin/custom-requests', icon: '\u2709' },
 ];
 

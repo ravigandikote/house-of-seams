@@ -1,5 +1,6 @@
 import React from 'react';
 import { Metadata } from 'next';
+import Link from 'next/link';
 import { notFound } from 'next/navigation';
 import BlousePreview from '@/components/customizer/BlousePreview';
 import ShareBar from '@/components/atelier/ShareBar';
@@ -179,6 +180,23 @@ const AtelierPage = async ({ params }: { params: { token: string } }) => {
                 <p className="label-caps text-champagne-gold-dark text-center mb-2">The Journey</p>
                 <h2 className="font-heading text-display text-ink text-center mb-8">Chapter by chapter</h2>
                 <StoryTimeline events={events} currentStatus={request.status} />
+            </section>
+
+            {/* ——— Consultation bridge ——— */}
+            <section className="text-center mb-14">
+                <div className="relative bg-blush/50 border border-champagne-gold/30 rounded-sm p-7 max-w-lg mx-auto">
+                    <CornerFlourish position="tl" />
+                    <CornerFlourish position="br" />
+                    <p className="font-accent italic text-lede text-charcoal mb-4">
+                        Prefer to finish your design together?
+                    </p>
+                    <Link
+                        href={`/booking?ref=${request.id.slice(0, 8).toUpperCase()}`}
+                        className="label-caps inline-block bg-deep-rose text-white hover:bg-deep-rose-dark transition-colors duration-300 rounded-sm px-7 py-3"
+                    >
+                        Book a private consultation with Kavya
+                    </Link>
+                </div>
             </section>
 
             {/* ——— Share ——— */}

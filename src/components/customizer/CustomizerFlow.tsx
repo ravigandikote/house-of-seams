@@ -285,9 +285,18 @@ const CustomizerFlow: React.FC<CustomizerFlowProps> = ({ designs, brackets }) =>
                     ))}
                 </div>
                 <GoldDivider className="mb-8" />
+                {/* Customizer bridge: consultations carry the design reference */}
+                <p className="font-accent italic text-lede text-warm-gray mb-4 max-w-md mx-auto">
+                    Prefer to finish your design together?
+                </p>
+                <Link
+                    href={reference ? `/booking?ref=${reference}` : '/booking'}
+                    className="link-gold text-body inline-block mb-8"
+                >
+                    Book a private consultation with Kavya →
+                </Link>
                 <div className="flex gap-6 justify-center">
                     <Link href="/products" className="link-gold text-body-sm">Browse Products</Link>
-                    <Link href="/booking" className="link-gold text-body-sm">Book a Consultation</Link>
                 </div>
             </div>
         );

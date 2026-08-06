@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@/lib/supabase/server';
 import { createAdminClient } from '@/lib/supabase/admin';
 import { toCamelCase, toSnakeCase } from '@/lib/caseTransform';
+import { upsertCustomer } from '@/lib/customers';
 import {
     BLOUSE_OPENINGS,
     BlousePreferences,
@@ -80,6 +81,15 @@ export async function POST(request: NextRequest) {
     .select()
     .single();
   if (error) return NextResponse.json({ error: error.message }, { status: 500 });
+
+  // Register the customer in the boutique's customer database (best-effort).
+  await upsertCustomer(admin, {
+    name: body.customerName,
+    email: body.customerEmail,
+    phone: body.customerPhone,
+    source: 'custom-design',
+    userId,
+  });
 
   // Opening chapter of the request's Design Story timeline (see
   // 005_design_story.sql — events are app-inserted, not triggered).
