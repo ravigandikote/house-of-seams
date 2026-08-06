@@ -169,7 +169,9 @@ const CustomizerFlow: React.FC<CustomizerFlowProps> = ({ designs, brackets }) =>
 
     const handleGeneratePdf = async () => {
         if (!selected) return;
-        const svgs = pdfRenderRef.current?.querySelectorAll('svg');
+        // Only the sketch SVGs — the card corner flourishes are SVGs too,
+        // so a bare 'svg' selector would rasterise ornaments instead.
+        const svgs = pdfRenderRef.current?.querySelectorAll<SVGSVGElement>('[data-pdf-sketch] svg');
         if (!svgs || svgs.length < 2) return;
         setPdfError(null);
         setIsGeneratingPdf(true);
@@ -674,12 +676,14 @@ const CustomizerFlow: React.FC<CustomizerFlowProps> = ({ designs, brackets }) =>
                                 >
                                     <CornerFlourish position="tl" />
                                     <CornerFlourish position="br" />
-                                    <BlousePreview
-                                        design={previewDesign}
-                                        measurements={measurements}
-                                        view={v}
-                                        showCaption={false}
-                                    />
+                                    <div data-pdf-sketch>
+                                        <BlousePreview
+                                            design={previewDesign}
+                                            measurements={measurements}
+                                            view={v}
+                                            showCaption={false}
+                                        />
+                                    </div>
                                     <p className="font-accent italic text-body-sm text-warm-gray text-center mt-1">
                                         {v === 'front' ? 'Front' : 'Back'}
                                     </p>

@@ -13,6 +13,7 @@ import {
 } from '@/types/customDesignRequest';
 import SketchAnnotator from '@/components/admin/SketchAnnotator';
 import { MEASUREMENT_GROUPS, MEASUREMENT_LABELS } from '@/types/measurements';
+import { LEHENGA_MEASUREMENT_SPEC } from '@/types/lehengaMeasurements';
 import AdminPageHeader from '@/components/admin/AdminPageHeader';
 import AdminTable from '@/components/admin/AdminTable';
 import AdminFormModal from '@/components/admin/AdminFormModal';
@@ -109,6 +110,12 @@ const AdminCustomRequestsPage = () => {
                 item.customerEmail || item.customerPhone || '—'
         },
         {
+            key: 'category', label: 'Category', render: (v: unknown) => {
+                const c = String(v || 'blouse');
+                return c.charAt(0).toUpperCase() + c.slice(1);
+            }
+        },
+        {
             key: 'designSnapshot', label: 'Design', render: (v: unknown) =>
                 (v as CustomDesignRequest['designSnapshot'])?.name ?? '—'
         },
@@ -133,6 +140,8 @@ const AdminCustomRequestsPage = () => {
     const previewDesign = viewItem
         ? { ...viewItem.designSnapshot, baseColor: viewItem.selectedColor || viewItem.designSnapshot.baseColor }
         : null;
+    const viewCategory = viewItem?.category ?? 'blouse';
+    const isLehengaItem = viewCategory === 'lehenga';
 
     return (
         <div>
@@ -170,27 +179,30 @@ const AdminCustomRequestsPage = () => {
                                 <span className="block text-sm font-medium text-gray-700">
                                     {viewItem.designSnapshot.name}
                                 </span>
-                                <div className="flex gap-1">
-                                    {(['front', 'back'] as const).map((v) => (
-                                        <button
-                                            key={v}
-                                            type="button"
-                                            onClick={() => setPreviewView(v)}
-                                            className={`px-3 py-1 rounded-full text-xs font-medium transition-colors ${previewView === v
-                                                ? 'bg-dusty-rose text-white'
-                                                : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
-                                                }`}
-                                        >
-                                            {v === 'front' ? 'Front' : 'Back'}
-                                        </button>
-                                    ))}
-                                </div>
+                                {!isLehengaItem && (
+                                    <div className="flex gap-1">
+                                        {(['front', 'back'] as const).map((v) => (
+                                            <button
+                                                key={v}
+                                                type="button"
+                                                onClick={() => setPreviewView(v)}
+                                                className={`px-3 py-1 rounded-full text-xs font-medium transition-colors ${previewView === v
+                                                    ? 'bg-dusty-rose text-white'
+                                                    : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+                                                    }`}
+                                            >
+                                                {v === 'front' ? 'Front' : 'Back'}
+                                            </button>
+                                        ))}
+                                    </div>
+                                )}
                             </div>
                             <div className="bg-cream rounded-lg p-4">
                                 <SketchAnnotator
+                                    category={viewCategory}
                                     design={previewDesign}
                                     measurements={viewItem.measurements}
-                                    view={previewView}
+                                    view={isLehengaItem ? 'front' : previewView}
                                     annotations={annotations}
                                     onChange={setAnnotations}
                                 />
@@ -261,28 +273,40 @@ const AdminCustomRequestsPage = () => {
                                         </div>
                                     </>
                                 )}
-                                {MEASUREMENT_GROUPS.map((group) => {
-                                    // Older requests may predate some fields — show only what was submitted.
-                                    const present = group.fields.filter(
-                                        (f) => typeof viewItem.measurements[f] === 'number'
-                                    );
-                                    if (present.length === 0) return null;
-                                    return (
-                                        <React.Fragment key={group.id}>
-                                            <div className="pt-1">
-                                                <dt className="font-heading text-xs font-bold text-charcoal uppercase tracking-wide">
-                                                    {group.label}
-                                                </dt>
-                                            </div>
-                                            {present.map((field) => (
-                                                <div key={field} className="flex justify-between border-b border-gray-100 py-1">
-                                                    <dt className="text-gray-500">{MEASUREMENT_LABELS[field]}</dt>
-                                                    <dd className="text-charcoal">{viewItem.measurements[field]}&Prime;</dd>
-                                                </div>
-                                            ))}
-                                        </React.Fragment>
-                                    );
-                                })}
+                                {isLehengaItem
+                                    ? LEHENGA_MEASUREMENT_SPEC.fields
+                                          .filter((f) => typeof (viewItem.measurements as Record<string, number>)[f.key] === 'number')
+                                          .map((f) => (
+                                              <div key={f.key} className="flex justify-between border-b border-gray-100 py-1">
+                                                  <dt className="text-gray-500">{f.label}</dt>
+                                                  <dd className="text-charcoal">
+                                                      {(viewItem.measurements as Record<string, number>)[f.key]}
+                                                      {f.unit === 'in' ? '″' : ''}
+                                                  </dd>
+                                              </div>
+                                          ))
+                                    : MEASUREMENT_GROUPS.map((group) => {
+                                          // Older requests may predate some fields — show only what was submitted.
+                                          const present = group.fields.filter(
+                                              (f) => typeof viewItem.measurements[f] === 'number'
+                                          );
+                                          if (present.length === 0) return null;
+                                          return (
+                                              <React.Fragment key={group.id}>
+                                                  <div className="pt-1">
+                                                      <dt className="font-heading text-xs font-bold text-charcoal uppercase tracking-wide">
+                                                          {group.label}
+                                                      </dt>
+                                                  </div>
+                                                  {present.map((field) => (
+                                                      <div key={field} className="flex justify-between border-b border-gray-100 py-1">
+                                                          <dt className="text-gray-500">{MEASUREMENT_LABELS[field]}</dt>
+                                                          <dd className="text-charcoal">{viewItem.measurements[field]}&Prime;</dd>
+                                                      </div>
+                                                  ))}
+                                              </React.Fragment>
+                                          );
+                                      })}
                                 {viewItem.notes && (
                                     <div className="py-1">
                                         <dt className="text-gray-500 mb-1">Notes</dt>

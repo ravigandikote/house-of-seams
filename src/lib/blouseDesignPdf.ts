@@ -233,7 +233,13 @@ export async function svgElementToPngDataUrl(svg: SVGSVGElement, scale = 3): Pro
     if (!markup.includes('xmlns=')) {
         markup = markup.replace('<svg ', '<svg xmlns="http://www.w3.org/2000/svg" ');
     }
-    markup = markup.replace('<svg ', `<svg width="${vw}" height="${vh}" `);
+    // Force explicit raster dimensions WITHOUT duplicating attributes — a
+    // second width/height on the root tag is invalid XML and the image
+    // silently fails to load ("Could not rasterise the preview").
+    markup = markup
+        .replace(/<svg([^>]*?)\swidth="[^"]*"/, '<svg$1')
+        .replace(/<svg([^>]*?)\sheight="[^"]*"/, '<svg$1')
+        .replace('<svg ', `<svg width="${vw}" height="${vh}" `);
 
     const blob = new Blob([markup], { type: 'image/svg+xml;charset=utf-8' });
     const url = URL.createObjectURL(blob);

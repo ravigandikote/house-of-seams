@@ -2,9 +2,11 @@
 
 import React, { useRef, useState } from 'react';
 import BlousePreview from '@/components/customizer/BlousePreview';
+import LehengaPreview from '@/components/customizer/LehengaPreview';
 import { BlouseDesignAttributes } from '@/types/blouseDesign';
+import { LehengaDesignAttributes } from '@/types/lehengaDesign';
 import { Measurements } from '@/types/measurements';
-import { SketchAnnotation, SketchView } from '@/types/customDesignRequest';
+import { RequestCategory, SketchAnnotation, SketchView } from '@/types/customDesignRequest';
 
 // "Design With Kavya" admin editor: numbered gold pins dropped directly on
 // the client's submitted sketch. Pure overlay — an absolutely-positioned
@@ -14,8 +16,9 @@ import { SketchAnnotation, SketchView } from '@/types/customDesignRequest';
 // exactly the same spots at any size.
 
 interface SketchAnnotatorProps {
-    design: BlouseDesignAttributes;
-    measurements: Measurements;
+    category?: RequestCategory;
+    design: BlouseDesignAttributes | LehengaDesignAttributes;
+    measurements: Measurements | Record<string, number>;
     view: SketchView;
     annotations: SketchAnnotation[];
     onChange: (annotations: SketchAnnotation[]) => void;
@@ -26,6 +29,7 @@ const clampPct = (n: number) => Math.min(97, Math.max(3, n));
 const newId = () => `pin-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`;
 
 const SketchAnnotator: React.FC<SketchAnnotatorProps> = ({
+    category = 'blouse',
     design,
     measurements,
     view,
@@ -125,7 +129,19 @@ const SketchAnnotator: React.FC<SketchAnnotatorProps> = ({
                 onPointerLeave={() => setDraggingId(null)}
                 className={`relative select-none ${annotateMode ? 'cursor-crosshair' : ''}`}
             >
-                <BlousePreview design={design} measurements={measurements} view={view} showCaption={false} />
+                {category === 'lehenga' ? (
+                    <LehengaPreview
+                        styleAttributes={design as LehengaDesignAttributes}
+                        measurements={measurements as Record<string, number>}
+                    />
+                ) : (
+                    <BlousePreview
+                        design={design as BlouseDesignAttributes}
+                        measurements={measurements as Measurements}
+                        view={view}
+                        showCaption={false}
+                    />
+                )}
                 {/* Pin overlay — absolute layer, renderer untouched */}
                 {visible.map((a) => (
                     <button

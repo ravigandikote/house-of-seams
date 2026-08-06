@@ -8,6 +8,9 @@ import StoryTimeline from '@/components/atelier/StoryTimeline';
 import { CornerFlourish, GoldDivider } from '@/components/ui/decor';
 import { getDesignStoryByToken } from '@/lib/designStory';
 import { MEASUREMENT_LABELS, MeasurementField } from '@/types/measurements';
+import { LEHENGA_MEASUREMENT_SPEC } from '@/types/lehengaMeasurements';
+import { BlouseDesignAttributes } from '@/types/blouseDesign';
+import { LehengaDesignAttributes } from '@/types/lehengaDesign';
 
 // The Design Story portal — a private, shareable design journal for one
 // custom request. The unguessable token in the URL is the only auth
@@ -24,7 +27,7 @@ export const metadata: Metadata = {
 };
 
 // Spec-sheet highlights — the numbers a client recognises at a glance.
-const KEY_FIELDS: readonly MeasurementField[] = [
+const BLOUSE_KEY_FIELDS: readonly MeasurementField[] = [
     'bust',
     'waist',
     'shoulderWidth',
@@ -32,10 +35,17 @@ const KEY_FIELDS: readonly MeasurementField[] = [
     'sleeveLength',
     'armhole',
 ];
+const LEHENGA_KEY_FIELDS = [
+    'waistRound',
+    'hipRound',
+    'lehengaLength',
+    'flareGhera',
+    'kaliCount',
+] as const;
 
 function labelize(value: string): string {
     return value
-        .split('-')
+        .split(/[-_]/)
         .map((w) => w.charAt(0).toUpperCase() + w.slice(1))
         .join(' ');
 }
@@ -59,13 +69,27 @@ const AtelierPage = async ({ params }: { params: { token: string } }) => {
 
     const { request, events, museImageUrls } = result.story;
     const firstName = request.customerName.trim().split(/\s+/)[0];
+    const category = request.category ?? 'blouse';
+    const isLehenga = category === 'lehenga';
     const design = {
         ...request.designSnapshot,
         baseColor: request.selectedColor || request.designSnapshot.baseColor,
     };
-    const keyMeasurements = KEY_FIELDS.filter(
-        (f) => typeof request.measurements[f] === 'number'
-    );
+    const rawMeasurements = request.measurements as Record<string, number>;
+    // Key numbers, labelled from the right category's single source.
+    const keyMeasurements: { label: string; value: number; inches: boolean }[] = isLehenga
+        ? LEHENGA_KEY_FIELDS.flatMap((key) => {
+              const spec = LEHENGA_MEASUREMENT_SPEC.fields.find((f) => f.key === key);
+              const value = rawMeasurements[key];
+              return spec && typeof value === 'number'
+                  ? [{ label: spec.label, value, inches: spec.unit === 'in' }]
+                  : [];
+          })
+        : BLOUSE_KEY_FIELDS.filter((f) => typeof rawMeasurements[f] === 'number').map((f) => ({
+              label: MEASUREMENT_LABELS[f],
+              value: rawMeasurements[f],
+              inches: true,
+          }));
 
     return (
         <div className="max-w-3xl mx-auto px-4 py-12 sm:py-16">
@@ -124,6 +148,7 @@ const AtelierPage = async ({ params }: { params: { token: string } }) => {
             <section className="mb-12">
                 <p className="label-caps text-champagne-gold-dark text-center mb-4">The Sketch</p>
                 <AnnotatedSketch
+                    category={category}
                     design={design}
                     measurements={request.measurements}
                     annotations={request.annotations ?? []}
@@ -137,13 +162,25 @@ const AtelierPage = async ({ params }: { params: { token: string } }) => {
                     <p className="label-caps text-champagne-gold-dark mb-1.5">The Design Sheet</p>
                     <h2 className="font-heading text-headline text-ink mb-5">{request.designSnapshot.name}</h2>
                     <dl className="space-y-2 text-body-sm">
-                        <div className="flex justify-between border-b border-champagne-gold/15 pb-2">
-                            <dt className="text-warm-gray">Neckline / Back / Sleeves</dt>
-                            <dd className="text-charcoal text-right">
-                                {labelize(design.neckStyle)} · {labelize(design.backStyle)} ·{' '}
-                                {labelize(design.sleeveStyle)}
-                            </dd>
-                        </div>
+                        {isLehenga ? (
+                            <div className="flex justify-between border-b border-champagne-gold/15 pb-2">
+                                <dt className="text-warm-gray">Silhouette / Closure / Finish</dt>
+                                <dd className="text-charcoal text-right">
+                                    {labelize((design as LehengaDesignAttributes).silhouette)} ·{' '}
+                                    {labelize((design as LehengaDesignAttributes).closure)} ·{' '}
+                                    {labelize((design as LehengaDesignAttributes).embellishment)}
+                                </dd>
+                            </div>
+                        ) : (
+                            <div className="flex justify-between border-b border-champagne-gold/15 pb-2">
+                                <dt className="text-warm-gray">Neckline / Back / Sleeves</dt>
+                                <dd className="text-charcoal text-right">
+                                    {labelize((design as BlouseDesignAttributes).neckStyle)} ·{' '}
+                                    {labelize((design as BlouseDesignAttributes).backStyle)} ·{' '}
+                                    {labelize((design as BlouseDesignAttributes).sleeveStyle)}
+                                </dd>
+                            </div>
+                        )}
                         <div className="flex justify-between border-b border-champagne-gold/15 pb-2">
                             <dt className="text-warm-gray">Colour</dt>
                             <dd className="flex items-center gap-2">
@@ -166,12 +203,13 @@ const AtelierPage = async ({ params }: { params: { token: string } }) => {
                         )}
                     </dl>
                     {keyMeasurements.length > 0 && (
-                        <div className="grid grid-cols-3 sm:grid-cols-6 gap-4 mt-6 text-center">
+                        <div className={`grid grid-cols-3 gap-4 mt-6 text-center ${isLehenga ? 'sm:grid-cols-5' : 'sm:grid-cols-6'}`}>
                             {keyMeasurements.map((field) => (
-                                <div key={field}>
-                                    <p className="label-caps text-[9px] text-warm-gray">{MEASUREMENT_LABELS[field]}</p>
+                                <div key={field.label}>
+                                    <p className="label-caps text-[9px] text-warm-gray">{field.label}</p>
                                     <p className="text-body text-ink tabular-nums mt-0.5">
-                                        {request.measurements[field]}&Prime;
+                                        {field.value}
+                                        {field.inches ? '″' : ''}
                                     </p>
                                 </div>
                             ))}

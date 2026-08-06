@@ -2,28 +2,41 @@
 
 import React, { useRef, useState } from 'react';
 import BlousePreview from '@/components/customizer/BlousePreview';
+import LehengaPreview from '@/components/customizer/LehengaPreview';
 import { CornerFlourish } from '@/components/ui/decor';
 import { BlouseDesignAttributes } from '@/types/blouseDesign';
+import { LehengaDesignAttributes } from '@/types/lehengaDesign';
 import { Measurements } from '@/types/measurements';
-import { SketchAnnotation } from '@/types/customDesignRequest';
+import { RequestCategory, SketchAnnotation } from '@/types/customDesignRequest';
 
 // The atelier page's sketch section. When Kavya has annotated the design,
 // her numbered gold pins appear on the sketch and her notes below —
 // tapping a pin highlights its note and vice-versa. Pure overlay over the
-// BlousePreview container; renderer internals untouched. Pins are 28px —
+// preview container; renderer internals untouched. Pins are 28px —
 // comfortably above the 24px minimum touch target.
+//
+// Category-aware: blouses show front + back sheets; lehengas have a
+// single view, so one centered sheet (all pins live on 'front').
 
 interface AnnotatedSketchProps {
-    design: BlouseDesignAttributes;
-    measurements: Measurements;
+    category?: RequestCategory;
+    design: BlouseDesignAttributes | LehengaDesignAttributes;
+    measurements: Measurements | Record<string, number>;
     annotations: SketchAnnotation[];
 }
 
-const AnnotatedSketch: React.FC<AnnotatedSketchProps> = ({ design, measurements, annotations }) => {
+const AnnotatedSketch: React.FC<AnnotatedSketchProps> = ({
+    category = 'blouse',
+    design,
+    measurements,
+    annotations,
+}) => {
     const [activeId, setActiveId] = useState<string | null>(null);
     const noteRefs = useRef<Record<string, HTMLLIElement | null>>({});
     const sketchRef = useRef<HTMLDivElement>(null);
 
+    const isLehenga = category === 'lehenga';
+    const views = isLehenga ? (['front'] as const) : (['front', 'back'] as const);
     const numbered = annotations.map((a, i) => ({ ...a, number: i + 1 }));
 
     const focusNote = (id: string) => {
@@ -38,8 +51,13 @@ const AnnotatedSketch: React.FC<AnnotatedSketchProps> = ({ design, measurements,
 
     return (
         <div>
-            <div ref={sketchRef} className="grid grid-cols-1 sm:grid-cols-2 gap-5 max-w-xl mx-auto">
-                {(['front', 'back'] as const).map((view) => (
+            <div
+                ref={sketchRef}
+                className={`grid grid-cols-1 gap-5 mx-auto ${
+                    isLehenga ? 'max-w-sm' : 'sm:grid-cols-2 max-w-xl'
+                }`}
+            >
+                {views.map((view) => (
                     <div
                         key={view}
                         className="relative paper-card border border-champagne-gold/40 rounded-sm p-5"
@@ -47,12 +65,19 @@ const AnnotatedSketch: React.FC<AnnotatedSketchProps> = ({ design, measurements,
                         <CornerFlourish position="tl" />
                         <CornerFlourish position="br" />
                         <div className="relative">
-                            <BlousePreview
-                                design={design}
-                                measurements={measurements}
-                                view={view}
-                                showCaption={false}
-                            />
+                            {isLehenga ? (
+                                <LehengaPreview
+                                    styleAttributes={design as LehengaDesignAttributes}
+                                    measurements={measurements as Record<string, number>}
+                                />
+                            ) : (
+                                <BlousePreview
+                                    design={design as BlouseDesignAttributes}
+                                    measurements={measurements as Measurements}
+                                    view={view}
+                                    showCaption={false}
+                                />
+                            )}
                             {numbered
                                 .filter((a) => a.view === view)
                                 .map((a) => (
@@ -72,9 +97,11 @@ const AnnotatedSketch: React.FC<AnnotatedSketchProps> = ({ design, measurements,
                                     </button>
                                 ))}
                         </div>
-                        <p className="font-accent italic text-body-sm text-warm-gray text-center mt-1">
-                            {view === 'front' ? 'Front' : 'Back'}
-                        </p>
+                        {!isLehenga && (
+                            <p className="font-accent italic text-body-sm text-warm-gray text-center mt-1">
+                                {view === 'front' ? 'Front' : 'Back'}
+                            </p>
+                        )}
                     </div>
                 ))}
             </div>
@@ -114,9 +141,11 @@ const AnnotatedSketch: React.FC<AnnotatedSketchProps> = ({ design, measurements,
                                         <span className="font-accent italic text-body text-charcoal block">
                                             {a.note}
                                         </span>
-                                        <span className="label-caps text-[9px] text-warm-gray block mt-1.5">
-                                            On the {a.view} view
-                                        </span>
+                                        {!isLehenga && (
+                                            <span className="label-caps text-[9px] text-warm-gray block mt-1.5">
+                                                On the {a.view} view
+                                            </span>
+                                        )}
                                     </span>
                                 </button>
                             </li>

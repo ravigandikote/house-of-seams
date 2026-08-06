@@ -9,49 +9,86 @@ import {
     CustomDesignRequestInput,
     DEFAULT_PREFERENCES,
     FIT_PREFERENCES,
+    LehengaDesignSnapshot,
+    RequestCategory,
     SEAM_ALLOWANCES,
 } from '@/types/customDesignRequest';
 import { MEASUREMENT_FIELDS, MEASUREMENT_LABELS, MEASUREMENT_RANGES } from '@/types/measurements';
+import { LEHENGA_CLOSURES, LEHENGA_EMBELLISHMENTS, LEHENGA_SILHOUETTES } from '@/types/lehengaDesign';
+import { LEHENGA_MEASUREMENT_SPEC } from '@/types/lehengaMeasurements';
 
 // Public endpoint: guests can submit a custom design request (same
-// public-insert policy as bookings). Writes use the service-role client;
-// the logged-in user (if any) is attached server-side from the session —
-// the client-sent userId is never trusted.
+// public-insert policy as bookings). Category-aware: blouse requests are
+// validated against the 23-field standard chart + preferences; lehenga
+// requests against LEHENGA_MEASUREMENT_SPEC (honouring visibleWhen — a
+// straight lehenga is never asked for a knee round). Writes use the
+// service-role client; the logged-in user (if any) is attached
+// server-side — the client-sent userId is never trusted.
 
 function validationError(message: string) {
   return NextResponse.json({ error: message }, { status: 400 });
 }
 
 export async function POST(request: NextRequest) {
-  const body = (await request.json()) as CustomDesignRequestInput;
+  const body = (await request.json()) as CustomDesignRequestInput & { category?: RequestCategory };
+  const category: RequestCategory = body.category === 'lehenga' ? 'lehenga' : 'blouse';
 
-  // --- Server-side validation ---
+  // --- Shared validation ---
   if (!body.customerName?.trim()) return validationError('Name is required');
   if (!body.customerEmail?.trim() && !body.customerPhone?.trim()) {
     return validationError('An email or phone number is required so we can reach you');
   }
   if (!body.designSnapshot?.name) return validationError('No design selected');
-  for (const field of MEASUREMENT_FIELDS) {
-    const value = body.measurements?.[field];
-    const { min, max } = MEASUREMENT_RANGES[field];
-    if (typeof value !== 'number' || !Number.isFinite(value) || value < min || value > max) {
-      return validationError(`${MEASUREMENT_LABELS[field]} must be between ${min} and ${max} inches`);
+
+  // --- Category validation: measurements + preferences ---
+  let measurements: Record<string, number>;
+  let preferences: BlousePreferences | null = null;
+
+  if (category === 'blouse') {
+    for (const field of MEASUREMENT_FIELDS) {
+      const value = body.measurements?.[field];
+      const { min, max } = MEASUREMENT_RANGES[field];
+      if (typeof value !== 'number' || !Number.isFinite(value) || value < min || value > max) {
+        return validationError(`${MEASUREMENT_LABELS[field]} must be between ${min} and ${max} inches`);
+      }
+    }
+    measurements = body.measurements;
+
+    // Additional details: normalise and validate against the allowed values.
+    const raw = body.preferences ?? DEFAULT_PREFERENCES;
+    if (!BLOUSE_OPENINGS.includes(raw.blouseOpening)) return validationError('Invalid blouse opening');
+    if (!FIT_PREFERENCES.includes(raw.fitPreference)) return validationError('Invalid fit preference');
+    if (!SEAM_ALLOWANCES.includes(raw.seamAllowance)) return validationError('Invalid seam allowance');
+    if (raw.braSize && raw.braSize.length > 20) return validationError('Inner-wear size is too long');
+    preferences = {
+      braSize: raw.braSize?.trim() || null,
+      blouseOpening: raw.blouseOpening,
+      cupPadding: !!raw.cupPadding,
+      fitPreference: raw.fitPreference,
+      seamAllowance: raw.seamAllowance,
+    };
+  } else {
+    const snapshot = body.designSnapshot as LehengaDesignSnapshot;
+    if (!LEHENGA_SILHOUETTES.includes(snapshot.silhouette)) return validationError('Invalid silhouette');
+    if (!LEHENGA_CLOSURES.includes(snapshot.closure)) return validationError('Invalid closure');
+    if (!LEHENGA_EMBELLISHMENTS.includes(snapshot.embellishment)) return validationError('Invalid embellishment');
+
+    // Only fields visible for this silhouette are required/stored.
+    const styleAttrs = { silhouette: snapshot.silhouette };
+    measurements = {};
+    const raw = (body.measurements ?? {}) as Record<string, unknown>;
+    for (const field of LEHENGA_MEASUREMENT_SPEC.fields) {
+      if (field.visibleWhen && !field.visibleWhen(styleAttrs)) continue;
+      const value = raw[field.key];
+      if (value == null && field.optional) continue;
+      if (typeof value !== 'number' || !Number.isFinite(value) || value < field.min || value > field.max) {
+        return validationError(
+          `${field.label} must be between ${field.min} and ${field.max}${field.unit === 'in' ? ' inches' : ''}`
+        );
+      }
+      measurements[field.key] = value;
     }
   }
-
-  // Additional details: normalise and validate against the allowed values.
-  const raw = body.preferences ?? DEFAULT_PREFERENCES;
-  if (!BLOUSE_OPENINGS.includes(raw.blouseOpening)) return validationError('Invalid blouse opening');
-  if (!FIT_PREFERENCES.includes(raw.fitPreference)) return validationError('Invalid fit preference');
-  if (!SEAM_ALLOWANCES.includes(raw.seamAllowance)) return validationError('Invalid seam allowance');
-  if (raw.braSize && raw.braSize.length > 20) return validationError('Inner-wear size is too long');
-  const preferences: BlousePreferences = {
-    braSize: raw.braSize?.trim() || null,
-    blouseOpening: raw.blouseOpening,
-    cupPadding: !!raw.cupPadding,
-    fitPreference: raw.fitPreference,
-    seamAllowance: raw.seamAllowance,
-  };
 
   const admin = createAdminClient();
   if (!admin) return NextResponse.json({ error: 'Supabase is not configured' }, { status: 503 });
@@ -62,9 +99,10 @@ export async function POST(request: NextRequest) {
 
   const requestRow = toSnakeCase({
     userId,
+    category,
     designId: body.designId ?? null,
     designSnapshot: body.designSnapshot,
-    measurements: body.measurements,
+    measurements,
     selectedColor: body.selectedColor ?? null,
     customerAge: body.customerAge ?? null,
     customerName: body.customerName.trim(),
@@ -100,18 +138,36 @@ export async function POST(request: NextRequest) {
 
   // Best-effort companion booking so the request is immediately visible in
   // the existing admin Bookings view. A failure here must not fail the
-  // request itself.
-  // Keep the booking note scannable: key facts only — the full 23
-  // measurements + preferences live on the request in Admin > Custom Requests.
-  const CORE_FIELDS = ['bust', 'waist', 'shoulderWidth', 'blouseLength', 'sleeveLength'] as const;
-  const summary =
-    `Custom blouse request: ${body.designSnapshot.name} — ` +
-    `${body.designSnapshot.neckStyle} neck, ${body.designSnapshot.sleeveStyle} sleeves, ` +
-    `${body.designSnapshot.embellishment}, color ${body.selectedColor ?? body.designSnapshot.baseColor}, ` +
-    `${preferences.blouseOpening} opening, ${preferences.fitPreference} fit. ` +
-    CORE_FIELDS.map((f) => `${MEASUREMENT_LABELS[f]} ${body.measurements[f]}"`).join(', ') +
-    (body.notes?.trim() ? `. Notes: ${body.notes.trim()}` : '') +
-    '. Full measurements in Admin > Custom Requests.';
+  // request itself. Keep the note scannable: key facts only — the full
+  // measurement set lives on the request in Admin > Custom Requests.
+  let summary: string;
+  let service: string;
+  if (category === 'blouse') {
+    const snapshot = body.designSnapshot as CustomDesignRequestInput['designSnapshot'] & {
+      neckStyle: string; sleeveStyle: string; embellishment: string; baseColor: string;
+    };
+    const CORE_FIELDS = ['bust', 'waist', 'shoulderWidth', 'blouseLength', 'sleeveLength'] as const;
+    service = 'Custom Blouse Design';
+    summary =
+      `Custom blouse request: ${snapshot.name} — ` +
+      `${snapshot.neckStyle} neck, ${snapshot.sleeveStyle} sleeves, ` +
+      `${snapshot.embellishment}, color ${body.selectedColor ?? snapshot.baseColor}, ` +
+      `${preferences!.blouseOpening} opening, ${preferences!.fitPreference} fit. ` +
+      CORE_FIELDS.map((f) => `${MEASUREMENT_LABELS[f]} ${measurements[f]}"`).join(', ') +
+      (body.notes?.trim() ? `. Notes: ${body.notes.trim()}` : '') +
+      '. Full measurements in Admin > Custom Requests.';
+  } else {
+    const snapshot = body.designSnapshot as LehengaDesignSnapshot;
+    service = 'Custom Lehenga Design';
+    summary =
+      `Custom lehenga request: ${snapshot.name} — ` +
+      `${snapshot.silhouette.replace(/_/g, ' ')} silhouette, ${snapshot.embellishment}, ` +
+      `color ${body.selectedColor ?? snapshot.baseColor}. ` +
+      `Waist ${measurements.waistRound}", hip ${measurements.hipRound}", ` +
+      `length ${measurements.lehengaLength}", ghera ${measurements.flareGhera}"` +
+      (body.notes?.trim() ? `. Notes: ${body.notes.trim()}` : '') +
+      '. Full measurements in Admin > Custom Requests.';
+  }
 
   let linkedBookingId: string | null = null;
   const { data: booking, error: bookingError } = await admin
@@ -120,7 +176,7 @@ export async function POST(request: NextRequest) {
       customer_name: body.customerName.trim(),
       email: body.customerEmail?.trim() || null,
       phone: body.customerPhone?.trim() || null,
-      service: 'Custom Blouse Design',
+      service,
       notes: summary,
       status: 'pending',
       user_id: userId,

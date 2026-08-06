@@ -1,5 +1,12 @@
 import { BlouseDesignAttributes } from './blouseDesign';
+import { LehengaDesignAttributes } from './lehengaDesign';
 import { Measurements } from './measurements';
+
+// Matches the CHECK constraint on custom_design_requests.category exactly
+// (008_request_category.sql). shirt/trousers are reserved for the
+// coming-soon categories.
+export const REQUEST_CATEGORIES = ['blouse', 'lehenga', 'shirt', 'trousers'] as const;
+export type RequestCategory = (typeof REQUEST_CATEGORIES)[number];
 
 // Matches the CHECK constraint on custom_design_requests.status exactly
 // (extended in 005_design_story.sql). Order = the canonical journey;
@@ -106,11 +113,27 @@ export interface DesignSnapshot extends BlouseDesignAttributes {
     slug: string;
 }
 
+export interface LehengaDesignSnapshot extends LehengaDesignAttributes {
+    name: string;
+    slug: string;
+}
+
+export type AnyDesignSnapshot = DesignSnapshot | LehengaDesignSnapshot;
+
+// Narrow a snapshot by shape (category is the authority where available).
+export function isLehengaSnapshot(s: AnyDesignSnapshot): s is LehengaDesignSnapshot {
+    return 'silhouette' in s;
+}
+
 export interface CustomDesignRequest {
     id: string;
     userId?: string | null;
     designId?: string | null;
-    designSnapshot: DesignSnapshot;
+    // Legacy rows (pre-008) have no category — treat missing as 'blouse'.
+    category?: RequestCategory;
+    designSnapshot: AnyDesignSnapshot;
+    // Blouse rows carry the full 23-field Measurements; lehenga rows carry
+    // the LEHENGA_MEASUREMENT_SPEC keys — cast at category boundaries.
     measurements: Measurements;
     selectedColor?: string | null;
     customerAge?: number | null;
