@@ -1,5 +1,6 @@
 import React from 'react';
 import { createClient } from '@/lib/supabase/server';
+import { GoldDivider } from '@/components/ui/decor';
 import { toCamelCase } from '@/lib/caseTransform';
 import CustomizerFlow from '../../components/customizer/CustomizerFlow';
 import { FALLBACK_DESIGNS, FALLBACK_BRACKETS } from '../../components/customizer/fallbackData';
@@ -26,12 +27,10 @@ const CustomizePage = async () => {
 
     return (
         <div className="max-w-5xl mx-auto px-4 py-12">
-            <h1 className="font-heading text-4xl font-bold text-center mb-2 text-charcoal">
-                Design Your Blouse
-            </h1>
-            <p className="text-center text-warm-gray mb-10">
-                Pick a design, adjust your measurements, and preview your custom blouse
-            </p>
+            <p className="label-caps text-champagne-gold-dark text-center mb-3">The Atelier</p>
+            <h1 className="font-heading text-display-lg text-center mb-3 text-ink">Design Your Blouse</h1>
+            <p className="font-accent italic text-lede text-center text-warm-gray mb-5 max-w-xl mx-auto">Pick a design, adjust your measurements, and preview your custom blouse</p>
+            <GoldDivider className="mb-10" />
             <CustomizerFlow designs={designs} brackets={brackets} />
         </div>
     );

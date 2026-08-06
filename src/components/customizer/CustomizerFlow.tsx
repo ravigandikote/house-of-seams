@@ -3,10 +3,15 @@
 import React, { useEffect, useRef, useState } from 'react';
 import Link from 'next/link';
 import { useForm } from 'react-hook-form';
+import AtelierStepper from './AtelierStepper';
 import BlousePreview from './BlousePreview';
 import LehengaFlow from './LehengaFlow';
+import LehengaPreview from './LehengaPreview';
+import { SAMPLE_LEHENGA_DESIGNS } from './lehengaSamples';
 import MeasurementSliderGroup from './MeasurementSliderGroup';
 import Button from '../ui/Button';
+import { CornerFlourish, GoldDivider } from '../ui/decor';
+import { LEHENGA_MEASUREMENT_SPEC } from '../../types/lehengaMeasurements';
 import SelectField from '../ui/SelectField';
 import TextArea from '../ui/TextArea';
 import ToggleSwitch from '../ui/ToggleSwitch';
@@ -47,7 +52,15 @@ interface CustomizerFormValues extends Measurements {
     customerPhone: string;
 }
 
-const STEPS = ['Design', 'Measurements', 'Preview'] as const;
+const STEPS = ['Choose Design', 'Measurements', 'Preview & Submit'] as const;
+
+// Poetic one-liners revealed on category-card hover.
+const CATEGORY_POETRY: Record<string, string> = {
+    blouse: 'Tailored to the last quarter-inch — your blouse, your story.',
+    lehenga: 'Twirl-worthy gheras, stitched to your silhouette.',
+    shirt: 'Joining the atelier soon.',
+    trousers: 'Joining the atelier soon.',
+};
 
 // Used when no age bracket matches (or none are configured).
 const BASE_MEASUREMENTS: Measurements = TYPICAL_MEASUREMENTS;
@@ -78,6 +91,8 @@ const CustomizerFlow: React.FC<CustomizerFlowProps> = ({ designs, brackets }) =>
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [submitError, setSubmitError] = useState<string | null>(null);
     const [submitted, setSubmitted] = useState(false);
+    // Short human-friendly reference from the created request (display only).
+    const [reference, setReference] = useState<string | null>(null);
     const [preferences, setPreferences] = useState<BlousePreferences>(DEFAULT_PREFERENCES);
     const [isGeneratingPdf, setIsGeneratingPdf] = useState(false);
     const [pdfError, setPdfError] = useState<string | null>(null);
@@ -203,6 +218,8 @@ const CustomizerFlow: React.FC<CustomizerFlowProps> = ({ designs, brackets }) =>
                 customerPhone: values.customerPhone || null,
                 notes: values.notes || null,
                 preferences: { ...preferences, braSize: preferences.braSize?.trim() || null },
+            }).then((created) => {
+                setReference(created.id ? created.id.slice(0, 8).toUpperCase() : null);
             });
             setSubmitted(true);
         } catch (err) {
@@ -212,31 +229,52 @@ const CustomizerFlow: React.FC<CustomizerFlowProps> = ({ designs, brackets }) =>
         }
     };
 
-    // Confirmation screen (mirrors checkout/success styling)
+    // Celebratory, refined confirmation
     if (submitted && previewDesign) {
+        const nextSteps = [
+            { title: 'We review', text: 'Our designer studies your sketch and measurements.' },
+            { title: 'We reach out', text: 'You receive a personal quote and fabric suggestions.' },
+            { title: 'We create', text: 'Your blouse is cut, stitched, and fitted to you.' },
+        ];
         return (
-            <div className="max-w-lg mx-auto text-center py-8 animate-fade-in">
-                <div className="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-6">
-                    <svg xmlns="http://www.w3.org/2000/svg" className="h-8 w-8 text-green-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-                    </svg>
-                </div>
-                <h2 className="font-heading text-3xl font-bold text-charcoal mb-2">Request Received!</h2>
-                <p className="text-warm-gray mb-6">
-                    Thank you, {values.customerName.trim()}. The boutique will review your design and get back
-                    to you with a quote and next steps.
+            <div className="max-w-2xl mx-auto text-center py-8 animate-fade-in">
+                <GoldDivider className="mb-8" />
+                <p className="label-caps text-champagne-gold-dark mb-3">Request received</p>
+                <h2 className="font-heading text-display-lg text-ink mb-3">
+                    Beautifully done, {values.customerName.trim().split(' ')[0]}.
+                </h2>
+                <p className="font-accent italic text-lede text-warm-gray mb-2 max-w-md mx-auto">
+                    Your design has been handed to the atelier.
                 </p>
-                <div className="bg-cream rounded-lg p-6 mb-6">
-                    <BlousePreview design={previewDesign} measurements={measurements} view="front" className="max-w-[220px] mx-auto" />
+                {reference && (
+                    <p className="text-body-sm text-warm-gray mb-6">
+                        Reference <span className="font-medium text-ink tracking-widest">{reference}</span>
+                    </p>
+                )}
+                <div className="relative paper-card border border-champagne-gold/40 rounded-sm p-8 mb-10 max-w-xs mx-auto">
+                    <CornerFlourish position="tl" />
+                    <CornerFlourish position="br" />
+                    <BlousePreview design={previewDesign} measurements={measurements} view="front" showCaption={false} />
                 </div>
-                <div className="flex gap-3 justify-center">
-                    <Link href="/products" className="text-dusty-rose hover:underline font-medium">Browse Products</Link>
-                    <Link href="/booking" className="text-dusty-rose hover:underline font-medium">Book a Consultation</Link>
+                <div className="grid grid-cols-1 sm:grid-cols-3 gap-6 mb-10 text-left sm:text-center">
+                    {nextSteps.map((s, i) => (
+                        <div key={s.title}>
+                            <p className="font-heading text-headline text-champagne-gold-dark mb-1">{i + 1}</p>
+                            <p className="font-heading text-body text-ink">{s.title}</p>
+                            <p className="text-body-sm text-warm-gray mt-1">{s.text}</p>
+                        </div>
+                    ))}
+                </div>
+                <GoldDivider className="mb-8" />
+                <div className="flex gap-6 justify-center">
+                    <Link href="/products" className="link-gold text-body-sm">Browse Products</Link>
+                    <Link href="/booking" className="link-gold text-body-sm">Book a Consultation</Link>
                 </div>
             </div>
         );
     }
 
+    // Compact pill switcher, used once the customer is inside a journey.
     const categoryPills = (
         <div className="flex justify-center gap-3 mb-10 flex-wrap">
             {CUSTOMIZER_CATEGORIES.map((c) => (
@@ -246,17 +284,17 @@ const CustomizerFlow: React.FC<CustomizerFlowProps> = ({ designs, brackets }) =>
                     disabled={!c.available}
                     title={c.description}
                     onClick={() => c.available && setCategory(c.id)}
-                    className={`relative px-5 py-2.5 rounded-full text-sm font-medium border transition-colors ${
+                    className={`label-caps relative px-5 py-2.5 rounded-full border transition-colors duration-300 ${
                         c.id === category
-                            ? 'bg-dusty-rose border-dusty-rose text-white'
+                            ? 'bg-deep-rose border-deep-rose text-white'
                             : c.available
-                                ? 'bg-white border-gray-300 text-gray-700 hover:border-dusty-rose'
-                                : 'bg-white border-gray-200 text-gray-400 cursor-not-allowed'
+                                ? 'bg-ivory border-champagne-gold/40 text-charcoal hover:border-deep-rose hover:text-deep-rose'
+                                : 'bg-ivory border-champagne-gold/20 text-warm-gray/60 cursor-not-allowed'
                     }`}
                 >
                     {c.label}
                     {!c.available && (
-                        <span className="ml-2 text-[10px] uppercase tracking-wide bg-gray-100 text-gray-500 rounded-full px-2 py-0.5">
+                        <span className="ml-2 text-[9px] tracking-[0.14em] bg-blush text-warm-gray rounded-full px-2 py-0.5">
                             Coming soon
                         </span>
                     )}
@@ -265,13 +303,86 @@ const CustomizerFlow: React.FC<CustomizerFlowProps> = ({ designs, brackets }) =>
         </div>
     );
 
+    // Editorial category cards — the opening moment of the journey.
+    const sketchDesign = designs[0] ?? {
+        neckStyle: 'sweetheart' as const,
+        backStyle: 'deep-round' as const,
+        sleeveStyle: 'cap' as const,
+        closure: 'zip' as const,
+        embellishment: 'embroidery' as const,
+        baseColor: '#B87A88',
+    };
+    const categoryCards = (
+        <div className="mb-14">
+            <p className="label-caps text-champagne-gold-dark text-center mb-3">Begin with</p>
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
+                {CUSTOMIZER_CATEGORIES.map((c) => {
+                    const isCurrent = c.id === category;
+                    return (
+                        <button
+                            key={c.id}
+                            type="button"
+                            disabled={!c.available}
+                            onClick={() => c.available && setCategory(c.id)}
+                            className={`group relative text-left rounded-sm border transition-all duration-300 overflow-hidden ${
+                                isCurrent
+                                    ? 'border-champagne-gold shadow-lift'
+                                    : c.available
+                                        ? 'border-champagne-gold/30 shadow-soft hover:shadow-lift hover:-translate-y-1'
+                                        : 'border-champagne-gold/15 opacity-60 cursor-not-allowed'
+                            }`}
+                        >
+                            <div className="relative paper-card p-5 h-44 flex items-center justify-center">
+                                <CornerFlourish position="tl" />
+                                {c.id === 'blouse' && (
+                                    <BlousePreview
+                                        design={sketchDesign}
+                                        measurements={BASE_MEASUREMENTS}
+                                        view="front"
+                                        showCaption={false}
+                                        className="max-w-[130px]"
+                                    />
+                                )}
+                                {c.id === 'lehenga' && (
+                                    <LehengaPreview
+                                        styleAttributes={SAMPLE_LEHENGA_DESIGNS[0]}
+                                        measurements={LEHENGA_MEASUREMENT_SPEC.typicalDefaults}
+                                        className="max-w-[110px]"
+                                    />
+                                )}
+                                {!c.available && (
+                                    <span className="font-accent italic text-lede text-warm-gray/70">
+                                        {c.label}
+                                    </span>
+                                )}
+                            </div>
+                            <div className="bg-white px-5 py-4 border-t border-champagne-gold/25">
+                                <span className="font-heading text-title text-ink flex items-center justify-between">
+                                    {c.label}
+                                    {!c.available && (
+                                        <span className="label-caps text-[9px] text-warm-gray/70">Coming soon</span>
+                                    )}
+                                </span>
+                                <span className="font-accent italic text-body-sm text-warm-gray block mt-1 sm:opacity-0 sm:group-hover:opacity-100 transition-opacity duration-500">
+                                    {CATEGORY_POETRY[c.id]}
+                                </span>
+                            </div>
+                        </button>
+                    );
+                })}
+            </div>
+        </div>
+    );
+
+    const showEditorialCategories = step === 0;
+
     if (category === 'blouse' && designs.length === 0) {
         return (
             <div>
-                {categoryPills}
+                {categoryCards}
                 <p className="text-center text-warm-gray py-16">
                     The blouse customizer is being set up — please check back soon, or{' '}
-                    <a href="/booking" className="text-dusty-rose underline">book a consultation</a>.
+                    <a href="/booking" className="link-gold">book a consultation</a>.
                 </p>
             </div>
         );
@@ -288,30 +399,9 @@ const CustomizerFlow: React.FC<CustomizerFlowProps> = ({ designs, brackets }) =>
 
     return (
         <div>
-            {categoryPills}
+            {showEditorialCategories ? categoryCards : categoryPills}
 
-            {/* Stepper */}
-            <ol className="flex items-center justify-center gap-2 sm:gap-6 mb-10">
-                {STEPS.map((label, i) => (
-                    <li key={label} className="flex items-center gap-2 sm:gap-3">
-                        <span
-                            className={`flex items-center justify-center w-8 h-8 rounded-full text-sm font-medium transition-colors ${
-                                i < step
-                                    ? 'bg-sage-green text-white'
-                                    : i === step
-                                        ? 'bg-dusty-rose text-white'
-                                        : 'bg-gray-200 text-gray-500'
-                            }`}
-                        >
-                            {i < step ? '✓' : i + 1}
-                        </span>
-                        <span className={`text-sm font-medium ${i === step ? 'text-charcoal' : 'text-warm-gray'}`}>
-                            {label}
-                        </span>
-                        {i < STEPS.length - 1 && <span className="w-6 sm:w-12 h-px bg-gray-300" />}
-                    </li>
-                ))}
-            </ol>
+            <AtelierStepper steps={STEPS} current={step} />
 
             {/* Step 1: pick a design */}
             {step === 0 && (
@@ -324,22 +414,39 @@ const CustomizerFlow: React.FC<CustomizerFlowProps> = ({ designs, brackets }) =>
                                     key={design.id}
                                     type="button"
                                     onClick={() => selectDesign(design)}
-                                    className={`text-left bg-white rounded-lg shadow-sm border transition-all duration-200 overflow-hidden hover:shadow-md ${
-                                        isSelected ? 'border-dusty-rose ring-2 ring-dusty-rose' : 'border-gray-200'
+                                    className={`text-left bg-white rounded-sm overflow-hidden transition-all duration-300 border ${
+                                        isSelected
+                                            ? 'border-champagne-gold ring-1 ring-champagne-gold shadow-lift scale-[1.015]'
+                                            : 'border-champagne-gold/25 shadow-soft hover:shadow-lift hover:-translate-y-1'
                                     }`}
                                 >
-                                    <div className="bg-cream p-4">
+                                    <div className="relative paper-card p-4">
+                                        <CornerFlourish position="tl" />
+                                        {isSelected && <CornerFlourish position="br" />}
                                         <BlousePreview
                                             design={design}
                                             measurements={BASE_MEASUREMENTS}
                                             view="front"
+                                            showCaption={false}
                                         />
                                     </div>
-                                    <div className="p-4">
-                                        <h3 className="font-heading text-lg font-bold text-charcoal">{design.name}</h3>
+                                    <div className="p-5 border-t border-champagne-gold/25">
+                                        <h3 className="font-heading text-title text-ink">{design.name}</h3>
                                         {design.description && (
-                                            <p className="text-sm text-warm-gray mt-1">{design.description}</p>
+                                            <p className="font-accent italic text-body-sm text-warm-gray mt-1.5">
+                                                {design.description}
+                                            </p>
                                         )}
+                                        <div className="flex flex-wrap gap-1.5 mt-3">
+                                            {[design.neckStyle, design.sleeveStyle, design.embellishment].map((attr) => (
+                                                <span
+                                                    key={attr}
+                                                    className="label-caps text-[9px] text-champagne-gold-dark bg-ivory border border-champagne-gold/30 rounded-full px-2.5 py-1"
+                                                >
+                                                    {labelize(attr)}
+                                                </span>
+                                            ))}
+                                        </div>
                                     </div>
                                 </button>
                             );
@@ -352,17 +459,17 @@ const CustomizerFlow: React.FC<CustomizerFlowProps> = ({ designs, brackets }) =>
             {step === 1 && previewDesign && (
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-8 animate-fade-in">
                     <div>
-                        <div className="mb-6">
-                            <label className="block text-sm font-medium text-gray-700">Your Age</label>
+                        <div className="mb-8 bg-blush/60 border border-champagne-gold/25 rounded-sm p-4">
+                            <label className="label-caps block text-warm-gray">Your Age</label>
                             <input
                                 type="number"
                                 {...register('age', { valueAsNumber: true, min: 1, max: 120 })}
-                                className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm px-3 py-2"
+                                className="mt-1.5 block w-full rounded-sm px-3 py-2.5"
                             />
-                            <p className="mt-1 text-xs text-warm-gray">
+                            <p className="mt-2 text-body-sm text-warm-gray">
                                 We pre-fill typical measurements for your age — please adjust every value to your
                                 actual measurements for the best fit.{' '}
-                                <Link href="/measurement-guide" target="_blank" className="text-dusty-rose underline">
+                                <Link href="/measurement-guide" target="_blank" className="link-gold">
                                     Not sure how to measure?
                                 </Link>
                             </p>
@@ -384,9 +491,9 @@ const CustomizerFlow: React.FC<CustomizerFlowProps> = ({ designs, brackets }) =>
                             />
                         ))}
 
-                        <h3 className="font-heading text-base font-bold text-charcoal border-b border-dusty-rose/40 pb-1 mb-3">
-                            Additional Details
-                        </h3>
+                        <div className="border-b border-champagne-gold/40 pb-2 mb-4">
+                            <span className="label-caps text-champagne-gold-dark">Additional Details</span>
+                        </div>
                         <SelectField
                             label="Blouse Opening"
                             value={preferences.blouseOpening}
@@ -417,7 +524,7 @@ const CustomizerFlow: React.FC<CustomizerFlowProps> = ({ designs, brackets }) =>
                             />
                         </div>
                         <div className="mb-4">
-                            <label className="block text-sm font-medium text-gray-700">
+                            <label className="label-caps block text-warm-gray">
                                 Bra / Inner-wear Size (optional)
                             </label>
                             <input
@@ -425,7 +532,7 @@ const CustomizerFlow: React.FC<CustomizerFlowProps> = ({ designs, brackets }) =>
                                 value={preferences.braSize ?? ''}
                                 onChange={(e) => setPreferences({ ...preferences, braSize: e.target.value })}
                                 placeholder="e.g. 34B"
-                                className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm px-3 py-2"
+                                className="mt-1.5 block w-full rounded-sm px-3 py-2.5"
                             />
                         </div>
                         <ToggleSwitch
@@ -435,12 +542,12 @@ const CustomizerFlow: React.FC<CustomizerFlowProps> = ({ designs, brackets }) =>
                         />
 
                         <div className="mb-4">
-                            <label className="block text-sm font-medium text-gray-700">Blouse Color</label>
+                            <label className="label-caps block text-warm-gray">Blouse Color</label>
                             <input
                                 type="color"
                                 value={color}
                                 onChange={(e) => setColor(e.target.value)}
-                                className="mt-1 block w-full h-10 border border-gray-300 rounded-md"
+                                className="mt-1.5 block w-full h-11 rounded-sm !p-1"
                             />
                         </div>
 
@@ -454,24 +561,43 @@ const CustomizerFlow: React.FC<CustomizerFlowProps> = ({ designs, brackets }) =>
                     </div>
 
                     <div>
-                        <p className="text-sm font-medium text-gray-700 mb-2 text-center">Live preview</p>
                         <div className="md:sticky md:top-20">
-                            <div className="flex flex-col gap-4">
+                            <p className="label-caps text-champagne-gold-dark text-center mb-3">The Sketchbook</p>
+                            <div className="flex flex-col gap-5">
                                 {(['front', 'back'] as const).map((v) => (
-                                    <div key={v} className="bg-cream rounded-lg p-4 w-full max-w-[360px] mx-auto">
+                                    <div
+                                        key={v}
+                                        className="relative paper-card border border-champagne-gold/40 rounded-sm p-5 w-full max-w-[360px] mx-auto transition-shadow duration-500"
+                                    >
+                                        <CornerFlourish position="tl" />
+                                        <CornerFlourish position="br" />
                                         <BlousePreview
                                             design={previewDesign}
                                             measurements={measurements}
                                             view={v}
                                             showCaption={false}
                                         />
-                                        <p className="text-center text-sm text-warm-gray mt-1">
+                                        <p className="font-accent italic text-body-sm text-warm-gray text-center mt-1">
                                             {v === 'front' ? 'Front' : 'Back'}
                                         </p>
                                     </div>
                                 ))}
                             </div>
-                            <p className="text-xs text-warm-gray italic text-center mt-2">
+                            {/* Key numbers, annotated like a designer's spec sheet */}
+                            <div className="flex justify-center gap-5 mt-4 flex-wrap">
+                                {([
+                                    ['Bust', measurements.bust],
+                                    ['Waist', measurements.waist],
+                                    ['Length', measurements.blouseLength],
+                                    ['Sleeve', measurements.sleeveLength],
+                                ] as const).map(([label, num]) => (
+                                    <div key={label} className="text-center">
+                                        <p className="label-caps text-[9px] text-warm-gray">{label}</p>
+                                        <p className="text-body text-ink tabular-nums">{num}&Prime;</p>
+                                    </div>
+                                ))}
+                            </div>
+                            <p className="font-accent italic text-body-sm text-warm-gray text-center mt-3">
                                 Illustrative preview — not to scale
                             </p>
                         </div>
@@ -485,49 +611,58 @@ const CustomizerFlow: React.FC<CustomizerFlowProps> = ({ designs, brackets }) =>
                     <div>
                         {/* Both views shown together; this container is also the
                             PDF's image source (front svg first, back svg second). */}
-                        <div ref={pdfRenderRef} className="flex flex-col gap-4">
+                        <div ref={pdfRenderRef} className="flex flex-col gap-5">
                             {(['front', 'back'] as const).map((v) => (
-                                <div key={v} className="bg-cream rounded-lg p-5 w-full max-w-md mx-auto">
+                                <div
+                                    key={v}
+                                    className="relative paper-card border border-champagne-gold/40 rounded-sm p-6 w-full max-w-md mx-auto"
+                                >
+                                    <CornerFlourish position="tl" />
+                                    <CornerFlourish position="br" />
                                     <BlousePreview
                                         design={previewDesign}
                                         measurements={measurements}
                                         view={v}
                                         showCaption={false}
                                     />
-                                    <p className="text-center text-sm text-warm-gray mt-1">
+                                    <p className="font-accent italic text-body-sm text-warm-gray text-center mt-1">
                                         {v === 'front' ? 'Front' : 'Back'}
                                     </p>
                                 </div>
                             ))}
                         </div>
-                        <p className="text-xs text-warm-gray italic text-center mt-2">
+                        <p className="font-accent italic text-body-sm text-warm-gray text-center mt-3">
                             Illustrative preview — not to scale
                         </p>
 
                         <Button
-                            variant="outline"
+                            variant="secondary"
                             onClick={handleGeneratePdf}
                             disabled={isGeneratingPdf}
-                            className="w-full mt-4"
+                            className="w-full mt-5"
                         >
-                            {isGeneratingPdf ? 'Preparing PDF…' : 'Generate PDF'}
+                            {isGeneratingPdf ? 'Preparing PDF…' : 'Download Design Sheet (PDF)'}
                         </Button>
-                        <p className="text-xs text-warm-gray text-center mt-2">
-                            Downloads a design sheet with both views, all measurements, and your choices.
+                        <p className="text-caption text-warm-gray text-center mt-2">
+                            Both views, all measurements, and your choices — ready to share.
                         </p>
                         {pdfError && (
-                            <p className="text-sm text-red-500 text-center mt-2" role="alert">{pdfError}</p>
+                            <p className="text-body-sm text-red-500 text-center mt-2" role="alert">{pdfError}</p>
                         )}
                     </div>
 
                     <div>
-                        <h3 className="font-heading text-xl font-bold text-charcoal mb-4">Your Custom Blouse</h3>
-                        <dl className="space-y-2 text-sm">
-                            <div className="flex justify-between border-b border-gray-100 pb-2">
+                        <p className="label-caps text-champagne-gold-dark mb-1.5">The Design Sheet</p>
+                        <h3 className="font-heading text-headline text-ink mb-1">{selected.name}</h3>
+                        <p className="font-accent italic text-body text-warm-gray mb-5">
+                            Every number below was set by your hand.
+                        </p>
+                        <dl className="space-y-2 text-body-sm">
+                            <div className="flex justify-between border-b border-champagne-gold/15 pb-2">
                                 <dt className="text-warm-gray">Design</dt>
                                 <dd className="text-charcoal font-medium">{selected.name}</dd>
                             </div>
-                            <div className="flex justify-between border-b border-gray-100 pb-2">
+                            <div className="flex justify-between border-b border-champagne-gold/15 pb-2">
                                 <dt className="text-warm-gray">Color</dt>
                                 <dd className="flex items-center gap-2">
                                     <span
@@ -537,14 +672,14 @@ const CustomizerFlow: React.FC<CustomizerFlowProps> = ({ designs, brackets }) =>
                                     {color}
                                 </dd>
                             </div>
-                            <div className="flex justify-between border-b border-gray-100 pb-2">
+                            <div className="flex justify-between border-b border-champagne-gold/15 pb-2">
                                 <dt className="text-warm-gray">Opening / Fit / Seams</dt>
                                 <dd className="text-charcoal text-right">
                                     {labelize(preferences.blouseOpening)} · {labelize(preferences.fitPreference)} ·{' '}
                                     {labelize(preferences.seamAllowance)}
                                 </dd>
                             </div>
-                            <div className="flex justify-between border-b border-gray-100 pb-2">
+                            <div className="flex justify-between border-b border-champagne-gold/15 pb-2">
                                 <dt className="text-warm-gray">Cup Padding / Inner-wear</dt>
                                 <dd className="text-charcoal text-right">
                                     {preferences.cupPadding ? 'Yes' : 'No'}
@@ -553,13 +688,13 @@ const CustomizerFlow: React.FC<CustomizerFlowProps> = ({ designs, brackets }) =>
                             </div>
                             {MEASUREMENT_GROUPS.map((group) => (
                                 <React.Fragment key={group.id}>
-                                    <div className="pt-2">
-                                        <dt className="font-heading text-sm font-bold text-charcoal">{group.label}</dt>
+                                    <div className="pt-3">
+                                        <dt className="label-caps text-champagne-gold-dark">{group.label}</dt>
                                     </div>
                                     {group.fields.map((field) => (
-                                        <div key={field} className="flex justify-between border-b border-gray-100 pb-2">
+                                        <div key={field} className="flex justify-between border-b border-champagne-gold/15 pb-2">
                                             <dt className="text-warm-gray">{MEASUREMENT_LABELS[field]}</dt>
-                                            <dd className="text-charcoal">{measurements[field]}&Prime;</dd>
+                                            <dd className="text-ink tabular-nums">{measurements[field]}&Prime;</dd>
                                         </div>
                                     ))}
                                 </React.Fragment>
@@ -572,64 +707,66 @@ const CustomizerFlow: React.FC<CustomizerFlowProps> = ({ designs, brackets }) =>
                             )}
                         </dl>
 
-                        <div className="mt-6 bg-sage-green-light/40 border border-sage-green rounded-lg p-4 text-sm text-charcoal">
+                        <div className="mt-6 bg-blush/60 border border-champagne-gold/25 rounded-sm p-4 text-body-sm text-charcoal">
                             Custom blouses are individually quoted. Submit your design and the boutique will get
                             back to you with a price and next steps — no account needed.
                         </div>
 
-                        {/* Contact fields use raw inputs: the shared ui/Input is not
-                            forwardRef-compatible, so react-hook-form's register ref
-                            would be silently dropped (same approach as step 2). */}
-                        <div className="mt-6">
+                        {/* Signature block. Contact fields use raw inputs: the shared
+                            ui/Input is not forwardRef-compatible, so react-hook-form's
+                            register ref would be silently dropped. */}
+                        <div className="mt-6 border border-champagne-gold/40 rounded-sm p-5 relative">
+                            <CornerFlourish position="tr" />
+                            <p className="font-accent italic text-lede text-ink mb-4">Signed for the atelier by…</p>
                             <div className="mb-4">
-                                <label className="block text-sm font-medium text-gray-700">Your Name</label>
+                                <label className="label-caps block text-warm-gray">Your Name</label>
                                 <input
                                     type="text"
                                     {...register('customerName', { required: true })}
-                                    className={`mt-1 block w-full border rounded-md shadow-sm px-3 py-2 ${errors.customerName ? 'border-red-500' : 'border-gray-300'}`}
+                                    className={`mt-1.5 block w-full rounded-sm px-3 py-2.5 ${errors.customerName ? '!border-red-400' : ''}`}
                                 />
                                 {errors.customerName && (
-                                    <p className="mt-1 text-xs text-red-500">Please enter your name</p>
+                                    <p className="mt-1 text-caption text-red-500">Please enter your name</p>
                                 )}
                             </div>
                             <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-4">
                                 <div className="mb-4">
-                                    <label className="block text-sm font-medium text-gray-700">Email</label>
+                                    <label className="label-caps block text-warm-gray">Email</label>
                                     <input
                                         type="email"
                                         {...register('customerEmail', {
                                             pattern: /^[^\s@]+@[^\s@]+\.[^\s@]+$/,
                                         })}
-                                        className={`mt-1 block w-full border rounded-md shadow-sm px-3 py-2 ${errors.customerEmail ? 'border-red-500' : 'border-gray-300'}`}
+                                        className={`mt-1.5 block w-full rounded-sm px-3 py-2.5 ${errors.customerEmail ? '!border-red-400' : ''}`}
                                     />
                                     {errors.customerEmail && (
-                                        <p className="mt-1 text-xs text-red-500">Please enter a valid email</p>
+                                        <p className="mt-1 text-caption text-red-500">Please enter a valid email</p>
                                     )}
                                 </div>
                                 <div className="mb-4">
-                                    <label className="block text-sm font-medium text-gray-700">Phone</label>
+                                    <label className="label-caps block text-warm-gray">Phone</label>
                                     <input
                                         type="tel"
                                         {...register('customerPhone', {
                                             pattern: /^[0-9+\-() ]{7,15}$/,
                                         })}
-                                        className={`mt-1 block w-full border rounded-md shadow-sm px-3 py-2 ${errors.customerPhone ? 'border-red-500' : 'border-gray-300'}`}
+                                        className={`mt-1.5 block w-full rounded-sm px-3 py-2.5 ${errors.customerPhone ? '!border-red-400' : ''}`}
                                     />
                                     {errors.customerPhone && (
-                                        <p className="mt-1 text-xs text-red-500">Please enter a valid phone number</p>
+                                        <p className="mt-1 text-caption text-red-500">Please enter a valid phone number</p>
                                     )}
                                 </div>
                             </div>
-                            <p className="text-xs text-warm-gray -mt-2 mb-3">
+                            <p className="text-caption text-warm-gray -mt-2 mb-4">
                                 Provide an email or a phone number so the boutique can reach you.
                             </p>
 
                             {submitError && (
-                                <p className="text-sm text-red-500 mb-3" role="alert">{submitError}</p>
+                                <p className="text-body-sm text-red-500 mb-3" role="alert">{submitError}</p>
                             )}
 
                             <Button className="w-full" onClick={handleSubmit} disabled={isSubmitting}>
-                                {isSubmitting ? 'Submitting…' : 'Submit Request'}
+                                {isSubmitting ? 'Sending to the atelier…' : 'Request My Design'}
                             </Button>
                         </div>
                     </div>

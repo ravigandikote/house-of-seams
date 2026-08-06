@@ -16,11 +16,11 @@ const FooterLinks = () => {
 
     return (
         <div>
-            <h4 className="text-lg font-heading font-semibold mb-4">Quick Links</h4>
-            <ul className="list-none space-y-2">
+            <h4 className="label-caps text-champagne-gold-light mb-5">Quick Links</h4>
+            <ul className="list-none space-y-2.5">
                 {links.map((link) => (
                     <li key={link.href}>
-                        <Link href={link.href} className="text-gray-300 hover:text-dusty-rose transition-colors duration-200">
+                        <Link href={link.href} className="text-cream/70 text-body-sm hover:text-champagne-gold-light transition-colors duration-300">
                             {link.label}
                         </Link>
                     </li>

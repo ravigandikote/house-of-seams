@@ -30,17 +30,144 @@ button {
     cursor: pointer;
 }
 
+/* Refined form defaults: hairline borders on ivory, rose focus */
 input,
-textarea {
-    border: 1px solid #ccc;
+textarea,
+select {
+    border: 1px solid #E4D8D0;
     border-radius: 4px;
     padding: 0.5rem;
+    background-color: #FBF6EF;
+    transition: border-color 0.2s ease, box-shadow 0.2s ease;
 }
 
 input:focus,
-textarea:focus {
-    border-color: #D6A6B1;
+textarea:focus,
+select:focus {
+    border-color: #A4586A;
     outline: none;
+    box-shadow: 0 0 0 3px rgba(164, 88, 106, 0.12);
+}
+
+/* Keyboard focus is always visible, in champagne gold */
+:focus-visible {
+    outline: 2px solid #C6A15B;
+    outline-offset: 2px;
+}
+
+/* ------------------------------------------------------------------ */
+/* Couture utilities                                                   */
+/* ------------------------------------------------------------------ */
+
+/* Small-caps editorial label */
+.label-caps {
+    text-transform: uppercase;
+    letter-spacing: 0.16em;
+    font-size: 0.6875rem;
+    font-weight: 600;
+}
+
+/* Faint fabric-grain dot texture (ornament, sits behind content) */
+.texture-dots {
+    background-image: radial-gradient(rgba(33, 29, 30, 0.055) 1px, transparent 1px);
+    background-size: 14px 14px;
+}
+
+/* Sketchbook paper: ivory with a whisper of grid, like pattern paper */
+.paper-card {
+    background-color: #FBF6EF;
+    background-image:
+        linear-gradient(rgba(198, 161, 91, 0.06) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(198, 161, 91, 0.06) 1px, transparent 1px);
+    background-size: 22px 22px;
+}
+
+/* Card hover lift */
+.card-lift {
+    transition: transform 0.35s ease, box-shadow 0.35s ease;
+}
+
+.card-lift:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 18px 44px -20px rgba(33, 29, 30, 0.3);
+}
+
+/* Gold-underlined tertiary link */
+.link-gold {
+    color: #2D2D2D;
+    border-bottom: 1px solid #C6A15B;
+    padding-bottom: 0.1em;
+    transition: color 0.2s ease, border-color 0.2s ease;
+}
+
+.link-gold:hover {
+    color: #A4586A;
+    border-color: #A4586A;
+}
+
+/* ------------------------------------------------------------------ */
+/* Couture range slider (visual only; behavior lives in the component) */
+/* ------------------------------------------------------------------ */
+
+input[type='range'].range-couture {
+    -webkit-appearance: none;
+    appearance: none;
+    height: 4px;
+    border: none;
+    border-radius: 999px;
+    padding: 0;
+    /* Track fill gradient is set inline by MeasurementSlider based on value */
+    background-color: #F0E4DC;
+    box-shadow: none;
+}
+
+input[type='range'].range-couture::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    appearance: none;
+    width: 18px;
+    height: 18px;
+    border-radius: 50%;
+    background: #FBF6EF;
+    border: 2px solid #A4586A;
+    box-shadow: 0 1px 4px rgba(33, 29, 30, 0.25);
+    transition: transform 0.15s ease, border-color 0.15s ease;
+    cursor: grab;
+}
+
+input[type='range'].range-couture::-webkit-slider-thumb:hover {
+    transform: scale(1.12);
+    border-color: #8E4757;
+}
+
+input[type='range'].range-couture::-moz-range-thumb {
+    width: 16px;
+    height: 16px;
+    border-radius: 50%;
+    background: #FBF6EF;
+    border: 2px solid #A4586A;
+    box-shadow: 0 1px 4px rgba(33, 29, 30, 0.25);
+    cursor: grab;
+}
+
+input[type='range'].range-couture:focus-visible {
+    outline: 2px solid #C6A15B;
+    outline-offset: 4px;
+}
+
+/* ------------------------------------------------------------------ */
+/* Reveal-on-scroll (classes added by the Reveal component; JS-off      */
+/* users never receive the hiding class, so content stays reachable)    */
+/* ------------------------------------------------------------------ */
+
+.reveal-pending {
+    opacity: 0;
+    transform: translateY(18px);
+}
+
+.reveal-shown {
+    opacity: 1;
+    transform: translateY(0);
+    transition: opacity 0.7s ease, transform 0.7s ease;
 }
 
 /* Animation delay utilities */
@@ -70,4 +197,24 @@ textarea:focus {
 
 .animation-delay-700 {
     animation-delay: 700ms;
+}
+
+/* Respect reduced motion everywhere */
+@media (prefers-reduced-motion: reduce) {
+    html {
+        scroll-behavior: auto;
+    }
+
+    *,
+    *::before,
+    *::after {
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.01ms !important;
+    }
+
+    .reveal-pending {
+        opacity: 1;
+        transform: none;
+    }
 }

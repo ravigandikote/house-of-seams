@@ -1,4 +1,5 @@
 import React from 'react';
+import { SectionHeader } from '../ui/decor';
 
 const InstagramFeed = () => {
     const posts = [
@@ -15,8 +16,7 @@ const InstagramFeed = () => {
     return (
         <section className="py-16 bg-white">
             <div className="max-w-5xl mx-auto px-4">
-                <h2 className="font-heading text-3xl font-bold text-center text-charcoal mb-2">Follow Us on Instagram</h2>
-                <p className="text-center text-warm-gray mb-10">@houseofseams</p>
+                <SectionHeader kicker="From the Studio" title="Follow Along" subline="@houseofseams — daily craft, drape, and detail" className="mb-12" />
                 <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3">
                     {posts.map((post) => (
                         <div key={post.id} className="group relative overflow-hidden rounded-lg aspect-square">

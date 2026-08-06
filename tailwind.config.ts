@@ -18,10 +18,42 @@ module.exports = {
         'cream': '#FDF8F5',
         'charcoal': '#2D2D2D',
         'warm-gray': '#6B6B6B',
+        // Couture extensions — richer rose for CTAs, metallic accent for
+        // ornament (never body text), background tints, editorial near-black.
+        'deep-rose': {
+          DEFAULT: '#A4586A',
+          dark: '#8E4757',
+        },
+        'champagne-gold': {
+          light: '#E7D3AC',
+          DEFAULT: '#C6A15B',
+          dark: '#8F6D2A',
+        },
+        'ivory': '#FBF6EF',
+        'blush': '#F7E8EA',
+        'ink': '#211D1E',
       },
       fontFamily: {
         heading: ['var(--font-heading)', 'Georgia', 'serif'],
+        accent: ['var(--font-accent)', 'Georgia', 'serif'],
         body: ['var(--font-body)', 'system-ui', 'sans-serif'],
+      },
+      // Editorial type scale — use these tokens, not ad-hoc text-2xl.
+      fontSize: {
+        'display-xl': ['clamp(2.75rem, 6.5vw, 4.75rem)', { lineHeight: '1.04', letterSpacing: '-0.015em' }],
+        'display-lg': ['clamp(2.25rem, 5vw, 3.5rem)', { lineHeight: '1.08', letterSpacing: '-0.01em' }],
+        'display': ['clamp(1.85rem, 4vw, 2.75rem)', { lineHeight: '1.12' }],
+        'headline': ['clamp(1.4rem, 2.6vw, 1.9rem)', { lineHeight: '1.2' }],
+        'title': ['1.25rem', { lineHeight: '1.35' }],
+        'lede': ['1.125rem', { lineHeight: '1.55' }],
+        'body': ['1rem', { lineHeight: '1.6' }],
+        'body-sm': ['0.875rem', { lineHeight: '1.55' }],
+        'caption': ['0.75rem', { lineHeight: '1.4', letterSpacing: '0.02em' }],
+        'kicker': ['0.6875rem', { lineHeight: '1.2', letterSpacing: '0.18em' }],
+      },
+      boxShadow: {
+        'soft': '0 10px 30px -18px rgba(33, 29, 30, 0.25)',
+        'lift': '0 18px 44px -20px rgba(33, 29, 30, 0.3)',
       },
       keyframes: {
         'fade-in-up': {

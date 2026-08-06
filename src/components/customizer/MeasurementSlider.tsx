@@ -29,23 +29,28 @@ const MeasurementSlider: React.FC<MeasurementSliderProps> = ({ field, value, onC
     };
 
     const unitSuffix = field.unit === 'in' ? '″' : '';
+    // Dusty-rose → deep-rose gradient fill up to the current value.
+    const pct = ((value - field.min) / (field.max - field.min)) * 100;
+    const trackStyle: React.CSSProperties = {
+        background: `linear-gradient(to right, #D6A6B1 0%, #A4586A ${pct}%, #F0E4DC ${pct}%)`,
+    };
 
     return (
-        <div className="mb-3">
+        <div className="mb-4">
             <div className="flex items-baseline justify-between gap-2">
                 <label
                     htmlFor={`slider-${field.key}`}
-                    className="text-sm font-medium text-gray-700 cursor-help"
+                    className="text-body-sm font-medium text-charcoal cursor-help"
                     title={field.description}
                 >
                     {field.label}
                     {field.optional && <span className="text-warm-gray font-normal"> (optional)</span>}
                 </label>
-                <span className="text-xs text-warm-gray tabular-nums whitespace-nowrap">
+                <span className="text-caption text-warm-gray tabular-nums whitespace-nowrap">
                     {field.min}–{field.max}{unitSuffix}
                 </span>
             </div>
-            <div className="flex items-center gap-3 mt-1">
+            <div className="flex items-center gap-3 mt-1.5">
                 <input
                     id={`slider-${field.key}`}
                     type="range"
@@ -56,7 +61,8 @@ const MeasurementSlider: React.FC<MeasurementSliderProps> = ({ field, value, onC
                     aria-label={`${field.label}${field.unit === 'in' ? ' in inches' : ''}`}
                     aria-valuetext={`${value}${unitSuffix}`}
                     onChange={(e) => onChange(clampToSpec(field, Number(e.target.value)))}
-                    className="flex-1 accent-dusty-rose cursor-pointer"
+                    className="range-couture flex-1 cursor-pointer"
+                    style={trackStyle}
                 />
                 <div className="flex items-center gap-1 shrink-0">
                     <input
@@ -75,9 +81,9 @@ const MeasurementSlider: React.FC<MeasurementSliderProps> = ({ field, value, onC
                                 commitText();
                             }
                         }}
-                        className="w-20 border border-gray-300 rounded-md px-2 py-1 text-sm text-right tabular-nums"
+                        className="w-20 !bg-white rounded-sm px-2 py-1 text-body-sm text-right tabular-nums"
                     />
-                    <span className="text-sm text-warm-gray w-3">{unitSuffix}</span>
+                    <span className="text-body-sm text-champagne-gold-dark w-3">{unitSuffix}</span>
                 </div>
             </div>
         </div>

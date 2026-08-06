@@ -4,7 +4,7 @@ interface ButtonProps {
   onClick?: () => void;
   children: React.ReactNode;
   className?: string;
-  variant?: 'primary' | 'secondary' | 'outline';
+  variant?: 'primary' | 'secondary' | 'outline' | 'tertiary';
   disabled?: boolean;
 }
 
@@ -15,11 +15,25 @@ const Button: React.FC<ButtonProps> = ({
   variant = 'primary',
   disabled = false,
 }) => {
-  const baseStyles = 'px-4 py-2 rounded focus:outline-none transition duration-200';
+  if (variant === 'tertiary') {
+    return (
+      <button
+        onClick={onClick}
+        disabled={disabled}
+        className={`link-gold label-caps bg-transparent pb-1 disabled:opacity-50 disabled:cursor-not-allowed ${className}`}
+      >
+        {children}
+      </button>
+    );
+  }
+
+  const baseStyles =
+    'inline-flex items-center justify-center px-7 py-3 label-caps rounded-sm transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed';
   const variantStyles = {
-    primary: 'bg-dusty-rose text-white hover:bg-dusty-rose-dark',
-    secondary: 'bg-sage-green text-white hover:bg-sage-green-dark',
-    outline: 'border border-dusty-rose text-dusty-rose hover:bg-dusty-rose-light',
+    primary: 'bg-deep-rose text-white hover:bg-deep-rose-dark shadow-soft hover:shadow-lift',
+    secondary: 'border border-charcoal/60 text-charcoal bg-transparent hover:border-deep-rose hover:text-deep-rose',
+    // legacy alias, styled as the charcoal-outline secondary
+    outline: 'border border-charcoal/60 text-charcoal bg-transparent hover:border-deep-rose hover:text-deep-rose',
   };
 
   return (

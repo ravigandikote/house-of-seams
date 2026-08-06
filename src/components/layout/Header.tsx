@@ -2,11 +2,13 @@
 
 import React, { useState, useRef, useEffect } from 'react';
 import Link from 'next/link';
+import { usePathname } from 'next/navigation';
 import { useAuth } from '../../hooks/useAuth';
 import { WhatsAppButton } from '../ui/WhatsAppButton';
 import { useCartStore } from '../../store/cartStore';
 
 const Header: React.FC = () => {
+    const pathname = usePathname();
     const { user, signOut } = useAuth();
     const [menuOpen, setMenuOpen] = useState(false);
     const [userMenuOpen, setUserMenuOpen] = useState(false);
@@ -35,23 +37,34 @@ const Header: React.FC = () => {
     ];
 
     return (
-        <header className="bg-white shadow-sm sticky top-0 z-40">
-            <div className="max-w-5xl mx-auto flex justify-between items-center px-4 py-4">
+        <header className="bg-cream/90 backdrop-blur-md border-b border-champagne-gold/25 sticky top-0 z-40">
+            <div className="max-w-6xl mx-auto flex justify-between items-center px-4 py-3">
                 <Link href="/" className="flex flex-col">
-                    <span className="font-heading text-2xl font-bold text-dusty-rose hover:text-dusty-rose-dark transition-colors duration-200">
+                    <span className="font-heading text-title font-bold text-ink hover:text-deep-rose transition-colors duration-300">
                         House of Seams
                     </span>
-                    <span className="text-[10px] tracking-widest uppercase text-warm-gray -mt-1">
-                        A Contemporary Expression of Lifestyle &amp; Jewellery
+                    <span className="text-[9px] tracking-[0.22em] uppercase text-champagne-gold-dark -mt-0.5">
+                        Couture &amp; Curated Jewellery
                     </span>
                 </Link>
 
                 <nav className="hidden md:flex items-center space-x-6">
-                    {navLinks.map((link) => (
-                        <Link key={link.href} href={link.href} className="text-charcoal hover:text-dusty-rose transition-colors duration-200">
-                            {link.label}
-                        </Link>
-                    ))}
+                    {navLinks.map((link) => {
+                        const isActive = pathname === link.href || (link.href !== '/' && pathname?.startsWith(link.href));
+                        return (
+                            <Link
+                                key={link.href}
+                                href={link.href}
+                                className={`label-caps pb-1 border-b transition-colors duration-300 ${
+                                    isActive
+                                        ? 'text-ink border-champagne-gold'
+                                        : 'text-warm-gray border-transparent hover:text-ink hover:border-champagne-gold/50'
+                                }`}
+                            >
+                                {link.label}
+                            </Link>
+                        );
+                    })}
 
                     {/* Cart icon */}
                     <Link href="/checkout" className="relative text-charcoal hover:text-dusty-rose transition-colors duration-200">
@@ -120,24 +133,31 @@ const Header: React.FC = () => {
                 <WhatsAppButton />
             </div>
 
-            {/* Mobile menu */}
+            {/* Mobile drawer */}
             {menuOpen && (
-                <div className="md:hidden bg-white border-t border-gray-100 px-4 py-4 space-y-3">
+                <div className="md:hidden bg-ivory border-t border-champagne-gold/25 px-5 py-3 animate-fade-in">
                     {navLinks.map((link) => (
-                        <Link key={link.href} href={link.href} onClick={() => setMenuOpen(false)} className="block text-charcoal hover:text-dusty-rose">
+                        <Link
+                            key={link.href}
+                            href={link.href}
+                            onClick={() => setMenuOpen(false)}
+                            className={`label-caps block py-3.5 border-b border-champagne-gold/15 transition-colors ${
+                                pathname === link.href ? 'text-deep-rose' : 'text-charcoal hover:text-deep-rose'
+                            }`}
+                        >
                             {link.label}
                         </Link>
                     ))}
-                    <Link href="/checkout" onClick={() => setMenuOpen(false)} className="block text-charcoal hover:text-dusty-rose">
+                    <Link href="/checkout" onClick={() => setMenuOpen(false)} className="label-caps block py-3.5 border-b border-champagne-gold/15 text-charcoal hover:text-deep-rose">
                         Cart {totalItems > 0 && `(${totalItems})`}
                     </Link>
                     {user ? (
                         <>
-                            <Link href="/account" onClick={() => setMenuOpen(false)} className="block text-charcoal hover:text-dusty-rose">My Account</Link>
-                            <button onClick={() => { signOut(); setMenuOpen(false); }} className="block text-red-600 hover:text-red-700">Sign Out</button>
+                            <Link href="/account" onClick={() => setMenuOpen(false)} className="label-caps block py-3.5 border-b border-champagne-gold/15 text-charcoal hover:text-deep-rose">My Account</Link>
+                            <button onClick={() => { signOut(); setMenuOpen(false); }} className="label-caps block py-3.5 text-red-700 hover:text-red-800">Sign Out</button>
                         </>
                     ) : (
-                        <Link href="/login" onClick={() => setMenuOpen(false)} className="block text-charcoal hover:text-dusty-rose">Login</Link>
+                        <Link href="/login" onClick={() => setMenuOpen(false)} className="label-caps block py-3.5 text-charcoal hover:text-deep-rose">Login</Link>
                     )}
                 </div>
             )}

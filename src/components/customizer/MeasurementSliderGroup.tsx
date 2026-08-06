@@ -34,18 +34,26 @@ const MeasurementSliderGroup: React.FC<MeasurementSliderGroupProps> = ({
     if (fields.length === 0) return null;
 
     return (
-        <section className="mb-4">
+        <section className="mb-6">
+            {/* Atelier chapter heading: gold kicker over a hairline */}
             <button
                 type="button"
                 onClick={() => setOpen((o) => !o)}
                 aria-expanded={open}
-                className="w-full flex items-center justify-between font-heading text-base font-bold text-charcoal border-b border-dusty-rose/40 pb-1 mb-3"
+                className="w-full flex items-end justify-between border-b border-champagne-gold/40 pb-2 mb-4 group"
             >
-                <span>{group.label}</span>
-                <span aria-hidden className="text-warm-gray text-sm">{open ? '−' : '+'}</span>
+                <span className="flex flex-col items-start text-left">
+                    <span className="label-caps text-champagne-gold-dark">{group.label}</span>
+                </span>
+                <span
+                    aria-hidden
+                    className="text-champagne-gold-dark text-body transition-transform duration-300 group-hover:scale-110"
+                >
+                    {open ? '−' : '+'}
+                </span>
             </button>
             {open && (
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-6">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-8">
                     {fields.map((field) => (
                         <MeasurementSlider
                             key={field.key}

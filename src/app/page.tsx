@@ -2,6 +2,7 @@ import React from 'react';
 import { createClient } from '@/lib/supabase/server';
 import { toCamelCase } from '@/lib/caseTransform';
 import Hero from '../components/home/Hero';
+import Reveal from '../components/ui/Reveal';
 import Categories from '../components/home/Categories';
 import FeaturedProducts from '../components/home/FeaturedProducts';
 import InstagramFeed from '../components/home/InstagramFeed';
@@ -28,9 +29,15 @@ const HomePage = async () => {
     return (
         <div>
             <Hero />
-            <Categories categories={categories} />
-            <FeaturedProducts products={products} />
-            <InstagramFeed />
+            <Reveal>
+                <Categories categories={categories} />
+            </Reveal>
+            <Reveal>
+                <FeaturedProducts products={products} />
+            </Reveal>
+            <Reveal>
+                <InstagramFeed />
+            </Reveal>
         </div>
     );
 };

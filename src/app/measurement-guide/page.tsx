@@ -1,5 +1,6 @@
 import React from 'react';
 import Link from 'next/link';
+import { GoldDivider } from '@/components/ui/decor';
 import {
     MeasurementField,
     MEASUREMENT_DESCRIPTIONS,
@@ -53,17 +54,15 @@ const TIPS = [
 const MeasurementGuidePage = () => {
     return (
         <div className="max-w-5xl mx-auto px-4 py-12">
-            <h1 className="font-heading text-4xl font-bold text-center mb-2 text-charcoal animate-fade-in-up">
-                Blouse Measurement Guide
-            </h1>
-            <p className="text-center text-warm-gray mb-10 max-w-2xl mx-auto">
-                Twenty-three numbers turn a design into a blouse that fits perfectly. Here is what each one
-                is, how to take it, and what it shapes — the same set our customizer asks for.
-            </p>
+            <p className="label-caps text-champagne-gold-dark text-center mb-3">The Tailoring Manual</p>
+            <h1 className="font-heading text-display-lg text-center mb-3 text-ink">Blouse Measurement Guide</h1>
+            <p className="font-accent italic text-lede text-center text-warm-gray mb-5 max-w-2xl mx-auto">Twenty-three numbers turn a design into a blouse that fits perfectly. Here is what each one
+                is, how to take it, and what it shapes — the same set our customizer asks for.</p>
+            <GoldDivider className="mb-12" />
 
             {/* Mind map */}
             <section className="mb-14 animate-fade-in">
-                <div className="bg-cream rounded-lg p-4 sm:p-8">
+                <div className="paper-card border border-champagne-gold/40 rounded-sm p-4 sm:p-8">
                     {/* eslint-disable-next-line @next/next/no-img-element */}
                     <img
                         src="/images/guide/mindmap.svg"
@@ -78,7 +77,7 @@ const MeasurementGuidePage = () => {
 
             {/* Annotated diagrams */}
             <section className="mb-14">
-                <h2 className="font-heading text-2xl font-bold text-charcoal mb-2">
+                <h2 className="font-heading text-display text-ink mb-2">
                     The core measurements, illustrated
                 </h2>
                 <p className="text-warm-gray mb-6">
@@ -86,7 +85,7 @@ const MeasurementGuidePage = () => {
                     values drive the live preview; the full list below refines the final fit.
                 </p>
                 <div className="grid grid-cols-1 md:grid-cols-5 gap-6 items-start">
-                    <div className="bg-cream rounded-lg p-4 md:col-span-3">
+                    <div className="paper-card border border-champagne-gold/40 rounded-sm p-4 md:col-span-3">
                         {/* eslint-disable-next-line @next/next/no-img-element */}
                         <img
                             src="/images/guide/measure-front.svg"
@@ -94,7 +93,7 @@ const MeasurementGuidePage = () => {
                             className="w-full h-auto"
                         />
                     </div>
-                    <div className="bg-cream rounded-lg p-4 md:col-span-2">
+                    <div className="paper-card border border-champagne-gold/40 rounded-sm p-4 md:col-span-2">
                         {/* eslint-disable-next-line @next/next/no-img-element */}
                         <img
                             src="/images/guide/measure-back.svg"
@@ -107,22 +106,25 @@ const MeasurementGuidePage = () => {
 
             {/* How to measure, by group */}
             <section className="mb-14">
-                <h2 className="font-heading text-2xl font-bold text-charcoal mb-2">
+                <h2 className="font-heading text-display text-ink mb-2">
                     How each one is measured
                 </h2>
                 <p className="text-warm-gray mb-6">
                     The customizer accepts the ranges shown and will let you know if a value looks off.
                 </p>
-                {MEASUREMENT_GROUPS.map((group) => (
-                    <div key={group.id} className="mb-8">
-                        <h3 className="font-heading text-lg font-bold text-charcoal border-b-2 border-dusty-rose inline-block pb-1 mb-4">
+                {MEASUREMENT_GROUPS.map((group, groupIndex) => (
+                    <div key={group.id} className="mb-10">
+                        <p className="label-caps text-champagne-gold-dark mb-1">
+                            Chapter {['I', 'II', 'III', 'IV', 'V'][groupIndex] ?? groupIndex + 1}
+                        </p>
+                        <h3 className="font-heading text-headline text-ink border-b border-champagne-gold/40 pb-2 mb-5">
                             {group.label}
                         </h3>
                         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
                             {group.fields.map((field) => {
                                 const { min, max } = MEASUREMENT_RANGES[field];
                                 return (
-                                    <div key={field} className="bg-white border border-gray-200 rounded-lg p-4 shadow-sm">
+                                    <div key={field} className="bg-white border border-champagne-gold/25 rounded-sm p-5 shadow-soft card-lift">
                                         <div className="flex items-baseline justify-between mb-1">
                                             <h4 className="font-heading text-base font-bold text-charcoal">
                                                 {MEASUREMENT_LABELS[field]}
@@ -147,13 +149,13 @@ const MeasurementGuidePage = () => {
 
             {/* Additional details */}
             <section className="mb-14">
-                <h2 className="font-heading text-2xl font-bold text-charcoal mb-2">Additional details</h2>
+                <h2 className="font-heading text-display text-ink mb-2">Additional details</h2>
                 <p className="text-warm-gray mb-6">
                     Beyond the tape measure — a few choices that complete the order.
                 </p>
                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
                     {ADDITIONAL_DETAILS.map((d) => (
-                        <div key={d.label} className="bg-white border border-gray-200 rounded-lg p-4 shadow-sm">
+                        <div key={d.label} className="bg-white border border-champagne-gold/25 rounded-sm p-5 shadow-soft card-lift">
                             <h4 className="font-heading text-base font-bold text-charcoal mb-1">{d.label}</h4>
                             <p className="text-sm text-warm-gray">{d.text}</p>
                         </div>
@@ -174,8 +176,8 @@ const MeasurementGuidePage = () => {
             </section>
 
             {/* CTA */}
-            <section className="text-center bg-cream rounded-lg py-10 px-6">
-                <h2 className="font-heading text-2xl font-bold text-charcoal mb-2">
+            <section className="text-center texture-dots bg-ivory border border-champagne-gold/30 rounded-sm py-12 px-6">
+                <h2 className="font-heading text-display text-ink mb-2">
                     Ready to design yours?
                 </h2>
                 <p className="text-warm-gray mb-6">
@@ -184,7 +186,7 @@ const MeasurementGuidePage = () => {
                 </p>
                 <Link
                     href="/customize"
-                    className="inline-block px-6 py-3 rounded bg-dusty-rose text-white hover:bg-dusty-rose-dark transition duration-200 font-medium"
+                    className="label-caps inline-block px-8 py-3.5 rounded-sm bg-deep-rose text-white shadow-soft hover:bg-deep-rose-dark hover:shadow-lift transition-all duration-300"
                 >
                     Design Your Blouse
                 </Link>
