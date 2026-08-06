@@ -2,7 +2,7 @@ import React from 'react';
 import { Metadata } from 'next';
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
-import BlousePreview from '@/components/customizer/BlousePreview';
+import AnnotatedSketch from '@/components/atelier/AnnotatedSketch';
 import ShareBar from '@/components/atelier/ShareBar';
 import StoryTimeline from '@/components/atelier/StoryTimeline';
 import { CornerFlourish, GoldDivider } from '@/components/ui/decor';
@@ -57,7 +57,7 @@ const AtelierPage = async ({ params }: { params: { token: string } }) => {
     if (result.kind === 'demo') return <DemoFallback />;
     if (result.kind === 'not_found') notFound();
 
-    const { request, events } = result.story;
+    const { request, events, museImageUrls } = result.story;
     const firstName = request.customerName.trim().split(/\s+/)[0];
     const design = {
         ...request.designSnapshot,
@@ -89,40 +89,45 @@ const AtelierPage = async ({ params }: { params: { token: string } }) => {
                         </cite>
                     </blockquote>
                 )}
-                {/* PHASE C SLOT: the client's Muse Board (inspiration images +
-                    occasion note) renders here as a small "Inspiration" gallery
-                    once the uploads feature lands. */}
+                {/* The client's Muse Board — inspiration images via short-lived
+                    signed URLs (private bucket) + the occasion note. */}
+                {(museImageUrls.length > 0 || request.museBoard?.occasionNote) && (
+                    <div className="mt-10">
+                        <p className="label-caps text-champagne-gold-dark mb-4">Inspiration</p>
+                        {museImageUrls.length > 0 && (
+                            <div className="flex justify-center gap-3 flex-wrap">
+                                {museImageUrls.map((src, i) => (
+                                    <div
+                                        key={src}
+                                        className="w-20 h-20 sm:w-24 sm:h-24 bg-cream border border-champagne-gold/40 rounded-sm overflow-hidden shadow-soft rotate-[-1.5deg] even:rotate-[1.5deg]"
+                                    >
+                                        {/* eslint-disable-next-line @next/next/no-img-element */}
+                                        <img
+                                            src={src}
+                                            alt={`Inspiration ${i + 1}`}
+                                            className="w-full h-full object-cover"
+                                        />
+                                    </div>
+                                ))}
+                            </div>
+                        )}
+                        {request.museBoard?.occasionNote && (
+                            <p className="font-accent italic text-body text-warm-gray mt-4 max-w-md mx-auto">
+                                &ldquo;{request.museBoard.occasionNote}&rdquo;
+                            </p>
+                        )}
+                    </div>
+                )}
             </header>
 
-            {/* ——— The sketch ——— */}
+            {/* ——— The sketch (with Kavya's pins when she has annotated) ——— */}
             <section className="mb-12">
                 <p className="label-caps text-champagne-gold-dark text-center mb-4">The Sketch</p>
-                {/* PHASE D SLOT: this container will carry the absolutely-positioned
-                    annotation-pin overlay ("Notes from Kavya") — pins anchor to the
-                    SVG frames below without touching BlousePreview internals. */}
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-5 max-w-xl mx-auto">
-                    {(['front', 'back'] as const).map((view) => (
-                        <div
-                            key={view}
-                            className="relative paper-card border border-champagne-gold/40 rounded-sm p-5"
-                        >
-                            <CornerFlourish position="tl" />
-                            <CornerFlourish position="br" />
-                            <BlousePreview
-                                design={design}
-                                measurements={request.measurements}
-                                view={view}
-                                showCaption={false}
-                            />
-                            <p className="font-accent italic text-body-sm text-warm-gray text-center mt-1">
-                                {view === 'front' ? 'Front' : 'Back'}
-                            </p>
-                        </div>
-                    ))}
-                </div>
-                <p className="font-accent italic text-body-sm text-warm-gray text-center mt-3">
-                    Illustrative sketch — not to scale
-                </p>
+                <AnnotatedSketch
+                    design={design}
+                    measurements={request.measurements}
+                    annotations={request.annotations ?? []}
+                />
             </section>
 
             {/* ——— Spec sheet ——— */}

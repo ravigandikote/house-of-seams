@@ -1,29 +1,29 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { promises as fs } from 'fs';
-import path from 'path';
+import { createAdminClient } from '@/lib/supabase/admin';
 
 // Never serve admin data from the route-handler static cache: Next 14
 // caches parameterless GET handlers (in dev AND at build time), which
 // froze list responses. Admin reads must always hit the database.
 export const dynamic = 'force-dynamic';
 
-
-const UPLOAD_DIR = path.join(process.cwd(), 'public', 'images', 'uploads');
+// Admin media library → Supabase Storage `media` bucket (public read).
+// Replaces the old filesystem listing of public/images/uploads. Response
+// contract unchanged: [{ filename, url }].
 
 export async function GET() {
-  try {
-    await fs.mkdir(UPLOAD_DIR, { recursive: true });
-    const files = await fs.readdir(UPLOAD_DIR);
-    const images = files
-      .filter((f) => !f.startsWith('.'))
-      .map((filename) => ({
-        filename,
-        url: `/images/uploads/${filename}`,
-      }));
-    return NextResponse.json(images);
-  } catch {
-    return NextResponse.json([]);
-  }
+  const supabase = createAdminClient();
+  if (!supabase) return NextResponse.json([]);
+  const { data, error } = await supabase.storage
+    .from('media')
+    .list('', { limit: 1000, sortBy: { column: 'created_at', order: 'desc' } });
+  if (error) return NextResponse.json({ error: error.message }, { status: 500 });
+  const images = (data || [])
+    .filter((f) => f.name && !f.name.startsWith('.'))
+    .map((f) => ({
+      filename: f.name,
+      url: supabase.storage.from('media').getPublicUrl(f.name).data.publicUrl,
+    }));
+  return NextResponse.json(images);
 }
 
 export async function DELETE(request: NextRequest) {
@@ -34,14 +34,14 @@ export async function DELETE(request: NextRequest) {
     return NextResponse.json({ error: 'Filename required' }, { status: 400 });
   }
 
-  // Prevent directory traversal
-  const safeName = path.basename(filename);
-  const filePath = path.join(UPLOAD_DIR, safeName);
+  const supabase = createAdminClient();
+  if (!supabase) return NextResponse.json({ error: 'Supabase is not configured' }, { status: 503 });
 
-  try {
-    await fs.unlink(filePath);
-    return NextResponse.json({ success: true });
-  } catch {
-    return NextResponse.json({ error: 'File not found' }, { status: 404 });
-  }
+  // Keys are flat (no folders) — strip any path segments defensively.
+  const safeName = filename.split('/').pop() || '';
+  if (!safeName) return NextResponse.json({ error: 'Invalid filename' }, { status: 400 });
+
+  const { error } = await supabase.storage.from('media').remove([safeName]);
+  if (error) return NextResponse.json({ error: error.message }, { status: 500 });
+  return NextResponse.json({ success: true });
 }

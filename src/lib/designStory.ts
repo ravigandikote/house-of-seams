@@ -10,6 +10,10 @@ import { CustomDesignRequest, RequestStatusEvent } from '@/types/customDesignReq
 export interface DesignStory {
     request: CustomDesignRequest;
     events: RequestStatusEvent[];
+    // Short-lived signed URLs for the muse-boards bucket, in the same
+    // order as request.museBoard.imagePaths (private bucket — paths are
+    // never rendered directly).
+    museImageUrls: string[];
 }
 
 export type DesignStoryResult =
@@ -37,11 +41,25 @@ export async function getDesignStoryByToken(token: string): Promise<DesignStoryR
         .eq('request_id', request.id)
         .order('created_at', { ascending: true });
 
+    const camelRequest = toCamelCase(request) as CustomDesignRequest;
+
+    let museImageUrls: string[] = [];
+    const paths = camelRequest.museBoard?.imagePaths ?? [];
+    if (paths.length > 0) {
+        const { data: signed } = await admin.storage
+            .from('muse-boards')
+            .createSignedUrls(paths, 60 * 60);
+        museImageUrls = (signed ?? [])
+            .filter((s) => s.signedUrl && !s.error)
+            .map((s) => s.signedUrl);
+    }
+
     return {
         kind: 'found',
         story: {
-            request: toCamelCase(request) as CustomDesignRequest,
+            request: camelRequest,
             events: toCamelCase(events || []) as RequestStatusEvent[],
+            museImageUrls,
         },
     };
 }

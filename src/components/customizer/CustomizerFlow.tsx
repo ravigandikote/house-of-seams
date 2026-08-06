@@ -9,6 +9,7 @@ import LehengaFlow from './LehengaFlow';
 import LehengaPreview from './LehengaPreview';
 import { SAMPLE_LEHENGA_DESIGNS } from './lehengaSamples';
 import MeasurementSliderGroup from './MeasurementSliderGroup';
+import MuseBoardPanel from './MuseBoardPanel';
 import Button from '../ui/Button';
 import { CornerFlourish, GoldDivider } from '../ui/decor';
 import { LEHENGA_MEASUREMENT_SPEC } from '../../types/lehengaMeasurements';
@@ -95,6 +96,12 @@ const CustomizerFlow: React.FC<CustomizerFlowProps> = ({ designs, brackets }) =>
     const [reference, setReference] = useState<string | null>(null);
     // Private token for the request's /atelier Design Story page.
     const [atelierToken, setAtelierToken] = useState<string | null>(null);
+    // Muse Board: optional inspiration images + occasion note, uploaded
+    // AFTER the request is created (keyed by its atelier token) so no
+    // orphaned files can exist. A failed upload never fails the submit.
+    const [museFiles, setMuseFiles] = useState<File[]>([]);
+    const [museNote, setMuseNote] = useState('');
+    const [museWarning, setMuseWarning] = useState<string | null>(null);
     const [preferences, setPreferences] = useState<BlousePreferences>(DEFAULT_PREFERENCES);
     const [isGeneratingPdf, setIsGeneratingPdf] = useState(false);
     const [pdfError, setPdfError] = useState<string | null>(null);
@@ -220,9 +227,24 @@ const CustomizerFlow: React.FC<CustomizerFlowProps> = ({ designs, brackets }) =>
                 customerPhone: values.customerPhone || null,
                 notes: values.notes || null,
                 preferences: { ...preferences, braSize: preferences.braSize?.trim() || null },
-            }).then((created) => {
+            }).then(async (created) => {
                 setReference(created.id ? created.id.slice(0, 8).toUpperCase() : null);
                 setAtelierToken(created.atelierToken ?? null);
+                // Attach the Muse Board after the request exists (best-effort).
+                if (created.atelierToken && (museFiles.length > 0 || museNote.trim())) {
+                    try {
+                        const fd = new FormData();
+                        fd.append('token', created.atelierToken);
+                        fd.append('occasionNote', museNote.trim());
+                        museFiles.forEach((f) => fd.append('images', f));
+                        const res = await fetch('/api/customize/muse-upload', { method: 'POST', body: fd });
+                        if (!res.ok) throw new Error();
+                    } catch {
+                        setMuseWarning(
+                            'Your design is safely submitted, but the inspiration images could not be attached — you can send them to the boutique on WhatsApp instead.'
+                        );
+                    }
+                }
             });
             setSubmitted(true);
         } catch (err) {
@@ -249,6 +271,11 @@ const CustomizerFlow: React.FC<CustomizerFlowProps> = ({ designs, brackets }) =>
                 <p className="font-accent italic text-lede text-warm-gray mb-2 max-w-md mx-auto">
                     Your design has been handed to the atelier.
                 </p>
+                {museWarning && (
+                    <p className="text-body-sm text-warm-gray bg-blush/60 border border-champagne-gold/25 rounded-sm px-4 py-3 mb-4 max-w-md mx-auto" role="alert">
+                        {museWarning}
+                    </p>
+                )}
                 {reference && (
                     <p className="text-body-sm text-warm-gray mb-6">
                         Reference <span className="font-medium text-ink tracking-widest">{reference}</span>
@@ -677,6 +704,13 @@ const CustomizerFlow: React.FC<CustomizerFlowProps> = ({ designs, brackets }) =>
                         {pdfError && (
                             <p className="text-body-sm text-red-500 text-center mt-2" role="alert">{pdfError}</p>
                         )}
+
+                        <MuseBoardPanel
+                            files={museFiles}
+                            note={museNote}
+                            onFilesChange={setMuseFiles}
+                            onNoteChange={setMuseNote}
+                        />
                     </div>
 
                     <div>

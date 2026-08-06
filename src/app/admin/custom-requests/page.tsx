@@ -9,7 +9,9 @@ import {
     RequestStatus,
     REQUEST_STATUSES,
     STATUS_LABELS,
+    SketchAnnotation,
 } from '@/types/customDesignRequest';
+import SketchAnnotator from '@/components/admin/SketchAnnotator';
 import { MEASUREMENT_GROUPS, MEASUREMENT_LABELS } from '@/types/measurements';
 import AdminPageHeader from '@/components/admin/AdminPageHeader';
 import AdminTable from '@/components/admin/AdminTable';
@@ -17,7 +19,6 @@ import AdminFormModal from '@/components/admin/AdminFormModal';
 import { showToast } from '@/components/admin/Toast';
 import SelectField from '@/components/ui/SelectField';
 import TextArea from '@/components/ui/TextArea';
-import BlousePreview from '@/components/customizer/BlousePreview';
 
 const STATUS_COLORS: Record<RequestStatus, string> = {
     submitted: 'bg-yellow-100 text-yellow-800',
@@ -40,6 +41,10 @@ const AdminCustomRequestsPage = () => {
     const [linkCopied, setLinkCopied] = useState(false);
     const [previewView, setPreviewView] = useState<'front' | 'back'>('front');
     const [isSubmitting, setIsSubmitting] = useState(false);
+    // Kavya's sketch pins — edited in the modal, saved with the request.
+    const [annotations, setAnnotations] = useState<SketchAnnotation[]>([]);
+    // Muse Board images arrive as fresh signed URLs from the admin API.
+    const [muse, setMuse] = useState<{ urls: string[]; occasionNote: string | null } | null>(null);
 
     const openDetails = (request: CustomDesignRequest) => {
         setViewItem(request);
@@ -48,6 +53,14 @@ const AdminCustomRequestsPage = () => {
         setDesignerNote(request.designerNote ?? '');
         setLinkCopied(false);
         setPreviewView('front');
+        setAnnotations(request.annotations ?? []);
+        setMuse(null);
+        if (request.museBoard?.imagePaths?.length || request.museBoard?.occasionNote) {
+            fetch(`/api/admin/custom-requests/${request.id}/muse`)
+                .then((res) => (res.ok ? res.json() : null))
+                .then((data) => data && setMuse(data))
+                .catch(() => {});
+        }
     };
 
     // Full URL so Kavya can paste it straight into WhatsApp. The modal only
@@ -76,6 +89,8 @@ const AdminCustomRequestsPage = () => {
                 status,
                 statusNote: statusNote.trim() || undefined,
                 designerNote: designerNote.trim() || null,
+                // Unsaved (empty-note) pins are dropped, not persisted.
+                annotations: annotations.filter((a) => a.note.trim()),
             };
             await update(viewItem.id, payload);
             showToast('Request updated successfully');
@@ -172,12 +187,38 @@ const AdminCustomRequestsPage = () => {
                                 </div>
                             </div>
                             <div className="bg-cream rounded-lg p-4">
-                                <BlousePreview
+                                <SketchAnnotator
                                     design={previewDesign}
                                     measurements={viewItem.measurements}
                                     view={previewView}
+                                    annotations={annotations}
+                                    onChange={setAnnotations}
                                 />
                             </div>
+                            {muse && (muse.urls.length > 0 || muse.occasionNote) && (
+                                <div className="mt-4 bg-gray-50 border border-gray-200 rounded-lg p-3">
+                                    <span className="block text-xs font-medium text-gray-500 mb-2">
+                                        Customer&apos;s Muse Board
+                                    </span>
+                                    {muse.urls.length > 0 && (
+                                        <div className="flex gap-2 flex-wrap mb-2">
+                                            {muse.urls.map((src, i) => (
+                                                <a key={src} href={src} target="_blank" rel="noopener noreferrer">
+                                                    {/* eslint-disable-next-line @next/next/no-img-element */}
+                                                    <img
+                                                        src={src}
+                                                        alt={`Inspiration ${i + 1}`}
+                                                        className="w-16 h-16 object-cover rounded border border-gray-200 hover:opacity-80 transition-opacity"
+                                                    />
+                                                </a>
+                                            ))}
+                                        </div>
+                                    )}
+                                    {muse.occasionNote && (
+                                        <p className="text-xs text-charcoal italic">&ldquo;{muse.occasionNote}&rdquo;</p>
+                                    )}
+                                </div>
+                            )}
                         </div>
                         <div>
                             <dl className="text-sm space-y-1 mb-4">

@@ -36,12 +36,39 @@ export interface RequestStatusEvent {
     createdAt: string;
 }
 
+// The client's inspiration images + occasion note (muse_board JSONB).
+// imagePaths are object keys in the private muse-boards storage bucket —
+// never URLs; every render signs them fresh via the service-role client.
+export const MUSE_MAX_IMAGES = 4;
+export const MUSE_NOTE_MAX_LENGTH = 280;
+
+export interface MuseBoard {
+    imagePaths: string[];
+    occasionNote?: string | null;
+}
+
+// A pin Kavya drops on the submitted sketch (annotations JSONB).
+// Coordinates are percentages of the rendered SVG box so pins land in the
+// same spot at any resolution, in admin and on the atelier page.
+export const SKETCH_VIEWS = ['front', 'back'] as const;
+export type SketchView = (typeof SKETCH_VIEWS)[number];
+
+export interface SketchAnnotation {
+    id: string;
+    view: SketchView;
+    xPct: number;
+    yPct: number;
+    note: string;
+    createdAt: string;
+}
+
 // Fields the admin panel may change on a request; statusNote becomes the
 // note on the status event written for the change (never a column).
 export interface AdminRequestUpdate {
     status?: RequestStatus;
     statusNote?: string;
     designerNote?: string | null;
+    annotations?: SketchAnnotation[];
 }
 
 // "Additional details" from the boutique's standard blouse guide.
@@ -101,6 +128,8 @@ export interface CustomDesignRequest {
     atelierToken?: string;
     // Kavya's headline note shown at the top of the Design Story page.
     designerNote?: string | null;
+    museBoard?: MuseBoard | null;
+    annotations?: SketchAnnotation[] | null;
     createdAt?: string;
     updatedAt?: string;
 }

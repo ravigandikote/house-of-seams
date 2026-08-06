@@ -112,9 +112,8 @@ const StoryTimeline: React.FC<StoryTimelineProps> = ({ events, currentStatus }) 
                                     </cite>
                                 </blockquote>
                             )}
-                            {/* PHASE D SLOT: designer sketch-annotation summary for this
-                                chapter ("Kavya added her thoughts to your design") renders
-                                here when the annotations feature lands. */}
+                            {/* Annotation nudges ("Kavya has added her thoughts…") arrive
+                                as ordinary events with a note — no special casing here. */}
                         </div>
                     </li>
                 );
