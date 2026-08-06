@@ -2,6 +2,12 @@ import { NextRequest, NextResponse } from 'next/server';
 import { promises as fs } from 'fs';
 import path from 'path';
 
+// Never serve admin data from the route-handler static cache: Next 14
+// caches parameterless GET handlers (in dev AND at build time), which
+// froze list responses. Admin reads must always hit the database.
+export const dynamic = 'force-dynamic';
+
+
 const UPLOAD_DIR = path.join(process.cwd(), 'public', 'images', 'uploads');
 
 export async function GET() {

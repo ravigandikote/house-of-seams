@@ -1,9 +1,48 @@
 import { BlouseDesignAttributes } from './blouseDesign';
 import { Measurements } from './measurements';
 
-// Matches the CHECK constraint on custom_design_requests.status exactly.
-export const REQUEST_STATUSES = ['submitted', 'reviewed', 'quoted', 'confirmed', 'cancelled'] as const;
+// Matches the CHECK constraint on custom_design_requests.status exactly
+// (extended in 005_design_story.sql). Order = the canonical journey;
+// cancelled is the exit at any point.
+export const REQUEST_STATUSES = [
+    'submitted',
+    'reviewed',
+    'quoted',
+    'confirmed',
+    'in_stitching',
+    'ready',
+    'cancelled',
+] as const;
 export type RequestStatus = (typeof REQUEST_STATUSES)[number];
+
+export const STATUS_LABELS: Record<RequestStatus, string> = {
+    submitted: 'Submitted',
+    reviewed: 'Reviewed',
+    quoted: 'Quoted',
+    confirmed: 'Confirmed',
+    in_stitching: 'In Stitching',
+    ready: 'Ready',
+    cancelled: 'Cancelled',
+};
+
+// One chapter of a request's Design Story timeline
+// (request_status_events — service-role access only).
+export interface RequestStatusEvent {
+    id: string;
+    requestId: string;
+    status: RequestStatus;
+    // Kavya's client-visible message for this chapter
+    note?: string | null;
+    createdAt: string;
+}
+
+// Fields the admin panel may change on a request; statusNote becomes the
+// note on the status event written for the change (never a column).
+export interface AdminRequestUpdate {
+    status?: RequestStatus;
+    statusNote?: string;
+    designerNote?: string | null;
+}
 
 // "Additional details" from the boutique's standard blouse guide.
 // Stored as JSONB in custom_design_requests.preferences.
@@ -57,6 +96,11 @@ export interface CustomDesignRequest {
     preferences?: BlousePreferences | null;
     status: RequestStatus;
     linkedBookingId?: string | null;
+    // Unguessable token for the private /atelier/[token] Design Story page.
+    // Optional only because fallback/demo rows predate 005.
+    atelierToken?: string;
+    // Kavya's headline note shown at the top of the Design Story page.
+    designerNote?: string | null;
     createdAt?: string;
     updatedAt?: string;
 }

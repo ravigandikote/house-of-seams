@@ -4,9 +4,11 @@ import React, { useState } from 'react';
 import Link from 'next/link';
 import { useAdminCrud } from '@/hooks/useAdminCrud';
 import {
+    AdminRequestUpdate,
     CustomDesignRequest,
     RequestStatus,
     REQUEST_STATUSES,
+    STATUS_LABELS,
 } from '@/types/customDesignRequest';
 import { MEASUREMENT_GROUPS, MEASUREMENT_LABELS } from '@/types/measurements';
 import AdminPageHeader from '@/components/admin/AdminPageHeader';
@@ -14,6 +16,7 @@ import AdminTable from '@/components/admin/AdminTable';
 import AdminFormModal from '@/components/admin/AdminFormModal';
 import { showToast } from '@/components/admin/Toast';
 import SelectField from '@/components/ui/SelectField';
+import TextArea from '@/components/ui/TextArea';
 import BlousePreview from '@/components/customizer/BlousePreview';
 
 const STATUS_COLORS: Record<RequestStatus, string> = {
@@ -21,6 +24,8 @@ const STATUS_COLORS: Record<RequestStatus, string> = {
     reviewed: 'bg-blue-100 text-blue-800',
     quoted: 'bg-purple-100 text-purple-800',
     confirmed: 'bg-green-100 text-green-800',
+    in_stitching: 'bg-indigo-100 text-indigo-800',
+    ready: 'bg-emerald-100 text-emerald-800',
     cancelled: 'bg-red-100 text-red-800',
 };
 
@@ -28,13 +33,38 @@ const AdminCustomRequestsPage = () => {
     const { items: requests, isLoading, error, update } = useAdminCrud<CustomDesignRequest>('custom-requests');
     const [viewItem, setViewItem] = useState<CustomDesignRequest | null>(null);
     const [status, setStatus] = useState<RequestStatus>('submitted');
+    // Optional client-visible message written onto the status event; it
+    // appears on the customer's Design Story page under the new chapter.
+    const [statusNote, setStatusNote] = useState('');
+    const [designerNote, setDesignerNote] = useState('');
+    const [linkCopied, setLinkCopied] = useState(false);
     const [previewView, setPreviewView] = useState<'front' | 'back'>('front');
     const [isSubmitting, setIsSubmitting] = useState(false);
 
     const openDetails = (request: CustomDesignRequest) => {
         setViewItem(request);
         setStatus(request.status);
+        setStatusNote('');
+        setDesignerNote(request.designerNote ?? '');
+        setLinkCopied(false);
         setPreviewView('front');
+    };
+
+    // Full URL so Kavya can paste it straight into WhatsApp. The modal only
+    // renders after user interaction, so window is available.
+    const atelierUrl = viewItem?.atelierToken
+        ? `${window.location.origin}/atelier/${viewItem.atelierToken}`
+        : null;
+
+    const handleCopyLink = async () => {
+        if (!atelierUrl) return;
+        try {
+            await navigator.clipboard.writeText(atelierUrl);
+            setLinkCopied(true);
+            setTimeout(() => setLinkCopied(false), 2000);
+        } catch {
+            window.prompt('Copy the Design Story link:', atelierUrl);
+        }
     };
 
     const handleStatusSave = async (e: React.FormEvent) => {
@@ -42,11 +72,16 @@ const AdminCustomRequestsPage = () => {
         if (!viewItem) return;
         setIsSubmitting(true);
         try {
-            await update(viewItem.id, { status });
-            showToast('Status updated successfully');
+            const payload: Partial<CustomDesignRequest> & AdminRequestUpdate = {
+                status,
+                statusNote: statusNote.trim() || undefined,
+                designerNote: designerNote.trim() || null,
+            };
+            await update(viewItem.id, payload);
+            showToast('Request updated successfully');
             setViewItem(null);
         } catch {
-            showToast('Failed to update status', 'error');
+            showToast('Failed to update the request', 'error');
         } finally {
             setIsSubmitting(false);
         }
@@ -111,7 +146,7 @@ const AdminCustomRequestsPage = () => {
                 title={viewItem ? `Request from ${viewItem.customerName}` : ''}
                 onSubmit={handleStatusSave}
                 isSubmitting={isSubmitting}
-                submitLabel="Save Status"
+                submitLabel="Save"
             >
                 {viewItem && previewDesign && (
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-x-6">
@@ -221,11 +256,50 @@ const AdminCustomRequestsPage = () => {
                                     </div>
                                 )}
                             </dl>
+                            {atelierUrl && (
+                                <div className="mb-4 bg-gray-50 border border-gray-200 rounded-lg p-3">
+                                    <span className="block text-xs font-medium text-gray-500 mb-1.5">
+                                        Design Story page (share with the customer on WhatsApp)
+                                    </span>
+                                    <div className="flex gap-2">
+                                        <input
+                                            type="text"
+                                            readOnly
+                                            value={atelierUrl}
+                                            onFocus={(e) => e.target.select()}
+                                            className="flex-1 min-w-0 text-xs text-gray-600 bg-white border border-gray-200 rounded px-2 py-1.5"
+                                        />
+                                        <button
+                                            type="button"
+                                            onClick={handleCopyLink}
+                                            className="shrink-0 text-xs font-medium px-3 py-1.5 rounded bg-dusty-rose text-white hover:bg-dusty-rose-dark transition-colors"
+                                        >
+                                            {linkCopied ? 'Copied ✓' : 'Copy'}
+                                        </button>
+                                    </div>
+                                </div>
+                            )}
                             <SelectField
                                 label="Status"
                                 value={status}
                                 onChange={(e) => setStatus(e.target.value as RequestStatus)}
-                                options={REQUEST_STATUSES.map((s) => ({ value: s, label: s.charAt(0).toUpperCase() + s.slice(1) }))}
+                                options={REQUEST_STATUSES.map((s) => ({ value: s, label: STATUS_LABELS[s] }))}
+                            />
+                            {status !== viewItem.status && (
+                                <TextArea
+                                    label="Message to the customer (optional)"
+                                    value={statusNote}
+                                    onChange={(e) => setStatusNote(e.target.value)}
+                                    rows={2}
+                                    placeholder="Shown on their Design Story page with this status change…"
+                                />
+                            )}
+                            <TextArea
+                                label="Designer's note (shown at the top of their Design Story)"
+                                value={designerNote}
+                                onChange={(e) => setDesignerNote(e.target.value)}
+                                rows={2}
+                                placeholder="e.g. The sweetheart neckline will sit beautifully with this sleeve…"
                             />
                         </div>
                     </div>

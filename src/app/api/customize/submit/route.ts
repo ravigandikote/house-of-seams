@@ -81,6 +81,13 @@ export async function POST(request: NextRequest) {
     .single();
   if (error) return NextResponse.json({ error: error.message }, { status: 500 });
 
+  // Opening chapter of the request's Design Story timeline (see
+  // 005_design_story.sql — events are app-inserted, not triggered).
+  // Best-effort: a failed event must never fail the request.
+  await admin
+    .from('request_status_events')
+    .insert({ request_id: created.id, status: 'submitted' });
+
   // Best-effort companion booking so the request is immediately visible in
   // the existing admin Bookings view. A failure here must not fail the
   // request itself.

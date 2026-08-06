@@ -93,6 +93,8 @@ const CustomizerFlow: React.FC<CustomizerFlowProps> = ({ designs, brackets }) =>
     const [submitted, setSubmitted] = useState(false);
     // Short human-friendly reference from the created request (display only).
     const [reference, setReference] = useState<string | null>(null);
+    // Private token for the request's /atelier Design Story page.
+    const [atelierToken, setAtelierToken] = useState<string | null>(null);
     const [preferences, setPreferences] = useState<BlousePreferences>(DEFAULT_PREFERENCES);
     const [isGeneratingPdf, setIsGeneratingPdf] = useState(false);
     const [pdfError, setPdfError] = useState<string | null>(null);
@@ -220,6 +222,7 @@ const CustomizerFlow: React.FC<CustomizerFlowProps> = ({ designs, brackets }) =>
                 preferences: { ...preferences, braSize: preferences.braSize?.trim() || null },
             }).then((created) => {
                 setReference(created.id ? created.id.slice(0, 8).toUpperCase() : null);
+                setAtelierToken(created.atelierToken ?? null);
             });
             setSubmitted(true);
         } catch (err) {
@@ -250,6 +253,22 @@ const CustomizerFlow: React.FC<CustomizerFlowProps> = ({ designs, brackets }) =>
                     <p className="text-body-sm text-warm-gray mb-6">
                         Reference <span className="font-medium text-ink tracking-widest">{reference}</span>
                     </p>
+                )}
+                {/* The celebratory centerpiece: every request now has a private,
+                    shareable Design Story journal at /atelier/[token]. */}
+                {atelierToken && (
+                    <div className="mb-10">
+                        <Link
+                            href={`/atelier/${atelierToken}`}
+                            className="label-caps inline-block bg-deep-rose text-white hover:bg-deep-rose-dark transition-colors duration-300 rounded-sm px-8 py-3.5 shadow-soft"
+                        >
+                            Follow your Design Story →
+                        </Link>
+                        <p className="font-accent italic text-body-sm text-warm-gray mt-3 max-w-sm mx-auto">
+                            Your private journal — watch your blouse move from sketch to stitching,
+                            and share the page with anyone you love.
+                        </p>
+                    </div>
                 )}
                 <div className="relative paper-card border border-champagne-gold/40 rounded-sm p-8 mb-10 max-w-xs mx-auto">
                     <CornerFlourish position="tl" />

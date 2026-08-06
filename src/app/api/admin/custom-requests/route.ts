@@ -2,6 +2,12 @@ import { NextResponse } from 'next/server';
 import { createAdminClient } from '@/lib/supabase/admin';
 import { toCamelCase } from '@/lib/caseTransform';
 
+// Never serve admin data from the route-handler static cache: Next 14
+// caches parameterless GET handlers (in dev AND at build time), which
+// froze list responses. Admin reads must always hit the database.
+export const dynamic = 'force-dynamic';
+
+
 // Auth: /api/admin/* is gated by the ADMIN_EMAILS allowlist in
 // src/middleware.ts (401/403 before reaching this handler). This route
 // uses the service-role client, which bypasses RLS.

@@ -2,6 +2,12 @@ import { NextRequest, NextResponse } from 'next/server';
 import { createAdminClient } from '@/lib/supabase/admin';
 import { toCamelCase, toSnakeCase } from '@/lib/caseTransform';
 
+// Never serve admin data from the route-handler static cache: Next 14
+// caches parameterless GET handlers (in dev AND at build time), which
+// froze list responses. Admin reads must always hit the database.
+export const dynamic = 'force-dynamic';
+
+
 export async function GET() {
   const supabase = createAdminClient();
   const { data, error } = await supabase.from('faqs').select('*').order('sort_order', { ascending: true });
