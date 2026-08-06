@@ -188,29 +188,26 @@ export interface MeasurementDefault extends Measurements {
 // slider editor and future category-generic UI consume this; the
 // existing named exports above remain unchanged for current consumers.
 // ------------------------------------------------------------------
-import { CategoryMeasurementSpec } from './measurementSpec';
+import { CategoryMeasurementSpec, composeSpec, ownGroup } from './measurementSpec';
 
-function groupOf(field: MeasurementField): string {
-    return MEASUREMENT_GROUPS.find((g) => g.fields.includes(field))?.id ?? 'other';
-}
-
-export const BLOUSE_MEASUREMENT_SPEC: CategoryMeasurementSpec = {
-    category: 'blouse',
-    groups: MEASUREMENT_GROUPS.map((g, i) => ({ key: g.id, label: g.label, order: i })),
-    fields: MEASUREMENT_FIELDS.map((f) => ({
-        key: f,
-        label: MEASUREMENT_LABELS[f],
-        description: MEASUREMENT_DESCRIPTIONS[f],
-        unit: 'in' as const,
-        min: MEASUREMENT_RANGES[f].min,
-        max: MEASUREMENT_RANGES[f].max,
-        step: 0.25,
-        defaultValue: TYPICAL_MEASUREMENTS[f],
-        group: groupOf(f),
-        optional: f === 'hip',
-    })),
-    typicalDefaults: TYPICAL_MEASUREMENTS,
-};
+export const BLOUSE_MEASUREMENT_SPEC: CategoryMeasurementSpec = composeSpec(
+    'blouse',
+    MEASUREMENT_GROUPS.map((g) =>
+        ownGroup({ key: g.id, label: g.label }, g.fields.map((f) => ({
+            key: f,
+            label: MEASUREMENT_LABELS[f],
+            description: MEASUREMENT_DESCRIPTIONS[f],
+            unit: 'in' as const,
+            min: MEASUREMENT_RANGES[f].min,
+            max: MEASUREMENT_RANGES[f].max,
+            step: 0.25,
+            defaultValue: TYPICAL_MEASUREMENTS[f],
+            group: g.id,
+            optional: f === 'hip',
+        })))
+    ),
+    { typicalDefaults: TYPICAL_MEASUREMENTS }
+);
 
 // Find the bracket matching an age (undefined if none matches).
 export function findBracketForAge(

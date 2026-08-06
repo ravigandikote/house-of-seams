@@ -1,11 +1,13 @@
 import { BlouseDesignAttributes } from './blouseDesign';
+import { BottomsDesignAttributes } from './bottomsDesign';
+import { KurtiDesignAttributes } from './kurtiDesign';
 import { LehengaDesignAttributes } from './lehengaDesign';
 import { Measurements } from './measurements';
 
 // Matches the CHECK constraint on custom_design_requests.category exactly
-// (008_request_category.sql). shirt/trousers are reserved for the
-// coming-soon categories.
-export const REQUEST_CATEGORIES = ['blouse', 'lehenga', 'shirt', 'trousers'] as const;
+// (widened by 010_request_category_expansion.sql). Only categories the app
+// can actually accept live here — the DB CHECK pre-registers more.
+export const REQUEST_CATEGORIES = ['blouse', 'lehenga', 'kurti', 'bottoms', 'salwar_suit', 'shirt', 'trousers'] as const;
 export type RequestCategory = (typeof REQUEST_CATEGORIES)[number];
 
 // Matches the CHECK constraint on custom_design_requests.status exactly
@@ -106,6 +108,18 @@ export const DEFAULT_PREFERENCES: BlousePreferences = {
     seamAllowance: 'standard',
 };
 
+// Lehenga-journey preferences. The dupatta is a standard ~2.5m drape,
+// matched to the ensemble by the boutique.
+export interface LehengaPreferences {
+    dupatta: boolean;
+}
+
+export type RequestPreferences = BlousePreferences | LehengaPreferences;
+
+export function isBlousePreferences(p: RequestPreferences): p is BlousePreferences {
+    return 'blouseOpening' in p;
+}
+
 // Denormalised copy of the chosen design at submit time, so the request
 // stays meaningful if the design is later edited or deleted.
 export interface DesignSnapshot extends BlouseDesignAttributes {
@@ -113,12 +127,42 @@ export interface DesignSnapshot extends BlouseDesignAttributes {
     slug: string;
 }
 
-export interface LehengaDesignSnapshot extends LehengaDesignAttributes {
+// The choli of a lehenga ensemble IS a blouse — same attributes, same
+// renderer, same measurement spec (labels say "Choli" in the UI).
+export interface CholiSnapshot extends BlouseDesignAttributes {
     name: string;
     slug: string;
 }
 
-export type AnyDesignSnapshot = DesignSnapshot | LehengaDesignSnapshot;
+export interface LehengaDesignSnapshot extends LehengaDesignAttributes {
+    name: string;
+    slug: string;
+    // null/absent = skirt only (a first-class choice, not a fallback)
+    choli?: CholiSnapshot | null;
+}
+
+export interface KurtiDesignSnapshot extends KurtiDesignAttributes {
+    name: string;
+    slug: string;
+}
+
+// The bottoms half of a salwar suit (or a standalone bottoms request).
+export interface BottomsSnapshot extends BottomsDesignAttributes {
+    name: string;
+    slug: string;
+}
+
+// A salwar suit = a kameez (kurti attributes) + its bottoms.
+export interface SalwarSuitSnapshot extends KurtiDesignSnapshot {
+    bottoms: BottomsSnapshot;
+}
+
+export type AnyDesignSnapshot =
+    | DesignSnapshot
+    | LehengaDesignSnapshot
+    | KurtiDesignSnapshot
+    | BottomsSnapshot
+    | SalwarSuitSnapshot;
 
 // Narrow a snapshot by shape (category is the authority where available).
 export function isLehengaSnapshot(s: AnyDesignSnapshot): s is LehengaDesignSnapshot {
@@ -143,7 +187,7 @@ export interface CustomDesignRequest {
     customerEmail?: string | null;
     customerPhone?: string | null;
     notes?: string | null;
-    preferences?: BlousePreferences | null;
+    preferences?: RequestPreferences | null;
     status: RequestStatus;
     linkedBookingId?: string | null;
     // Unguessable token for the private /atelier/[token] Design Story page.

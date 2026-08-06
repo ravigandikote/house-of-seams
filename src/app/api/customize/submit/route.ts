@@ -11,11 +11,20 @@ import {
     FIT_PREFERENCES,
     LehengaDesignSnapshot,
     RequestCategory,
+    RequestPreferences,
+    SalwarSuitSnapshot,
     SEAM_ALLOWANCES,
+    isBlousePreferences,
 } from '@/types/customDesignRequest';
 import { MEASUREMENT_FIELDS, MEASUREMENT_LABELS, MEASUREMENT_RANGES } from '@/types/measurements';
+import { BACK_STYLES, CLOSURES, EMBELLISHMENTS, NECK_STYLES, SLEEVE_STYLES } from '@/types/blouseDesign';
 import { LEHENGA_CLOSURES, LEHENGA_EMBELLISHMENTS, LEHENGA_SILHOUETTES } from '@/types/lehengaDesign';
 import { LEHENGA_MEASUREMENT_SPEC } from '@/types/lehengaMeasurements';
+import { categoryById } from '@/types/customizerCategories';
+import { StyleAttributes, effectiveField } from '@/types/measurementSpec';
+import { KURTI_CUTS, KURTI_NECKLINES, KURTI_SLITS } from '@/types/kurtiDesign';
+import { BOTTOM_PLEATS, BOTTOM_STYLES, WAISTBANDS } from '@/types/bottomsDesign';
+import { SALWAR_SUIT_MEASUREMENT_SPEC } from '@/types/salwarSuitMeasurements';
 
 // Public endpoint: guests can submit a custom design request (same
 // public-insert policy as bookings). Category-aware: blouse requests are
@@ -31,7 +40,13 @@ function validationError(message: string) {
 
 export async function POST(request: NextRequest) {
   const body = (await request.json()) as CustomDesignRequestInput & { category?: RequestCategory };
-  const category: RequestCategory = body.category === 'lehenga' ? 'lehenga' : 'blouse';
+  const category: RequestCategory = body.category ?? 'blouse';
+  const manifest = categoryById(category);
+  // Only categories the manifest declares open can submit — the DB CHECK
+  // pre-registers future slugs, but the app is the gatekeeper.
+  if (!manifest?.available || !manifest.spec) {
+    return validationError('This category is not open for orders yet');
+  }
 
   // --- Shared validation ---
   if (!body.customerName?.trim()) return validationError('Name is required');
@@ -42,7 +57,7 @@ export async function POST(request: NextRequest) {
 
   // --- Category validation: measurements + preferences ---
   let measurements: Record<string, number>;
-  let preferences: BlousePreferences | null = null;
+  let preferences: RequestPreferences | null = null;
 
   if (category === 'blouse') {
     for (const field of MEASUREMENT_FIELDS) {
@@ -55,7 +70,9 @@ export async function POST(request: NextRequest) {
     measurements = body.measurements;
 
     // Additional details: normalise and validate against the allowed values.
-    const raw = body.preferences ?? DEFAULT_PREFERENCES;
+    const rawPrefs = body.preferences ?? DEFAULT_PREFERENCES;
+    if (!isBlousePreferences(rawPrefs)) return validationError('Invalid preferences');
+    const raw = rawPrefs;
     if (!BLOUSE_OPENINGS.includes(raw.blouseOpening)) return validationError('Invalid blouse opening');
     if (!FIT_PREFERENCES.includes(raw.fitPreference)) return validationError('Invalid fit preference');
     if (!SEAM_ALLOWANCES.includes(raw.seamAllowance)) return validationError('Invalid seam allowance');
@@ -67,7 +84,7 @@ export async function POST(request: NextRequest) {
       fitPreference: raw.fitPreference,
       seamAllowance: raw.seamAllowance,
     };
-  } else {
+  } else if (category === 'lehenga') {
     const snapshot = body.designSnapshot as LehengaDesignSnapshot;
     if (!LEHENGA_SILHOUETTES.includes(snapshot.silhouette)) return validationError('Invalid silhouette');
     if (!LEHENGA_CLOSURES.includes(snapshot.closure)) return validationError('Invalid closure');
@@ -88,6 +105,105 @@ export async function POST(request: NextRequest) {
       }
       measurements[field.key] = value;
     }
+
+    // The choli is optional ("skirt only" is first-class); when present it
+    // IS a blouse — same enums, same 23-field measurement chart.
+    const choli = snapshot.choli ?? null;
+    if (choli) {
+      if (!choli.name) return validationError('The choli design is missing its name');
+      if (!NECK_STYLES.includes(choli.neckStyle)) return validationError('Invalid choli neck style');
+      if (!BACK_STYLES.includes(choli.backStyle)) return validationError('Invalid choli back style');
+      if (!SLEEVE_STYLES.includes(choli.sleeveStyle)) return validationError('Invalid choli sleeve style');
+      if (!CLOSURES.includes(choli.closure)) return validationError('Invalid choli closure');
+      if (!EMBELLISHMENTS.includes(choli.embellishment)) return validationError('Invalid choli embellishment');
+      for (const field of MEASUREMENT_FIELDS) {
+        const value = raw[field];
+        const { min, max } = MEASUREMENT_RANGES[field];
+        if (typeof value !== 'number' || !Number.isFinite(value) || value < min || value > max) {
+          return validationError(
+            `Choli ${MEASUREMENT_LABELS[field]} must be between ${min} and ${max} inches`
+          );
+        }
+        measurements[field] = value;
+      }
+    }
+
+    // Lehenga preferences carry only the dupatta choice.
+    const rawPrefs = (body.preferences ?? {}) as Record<string, unknown>;
+    preferences = { dupatta: rawPrefs.dupatta === true };
+  } else if (category === 'salwar_suit') {
+    // A suit = kameez (kurti attrs) + bottoms; both garments validate
+    // against their own enums, then ONE combined chart (shared body
+    // fields deduped by the suit spec) with merged style attrs driving
+    // visibleWhen and per-style ranges.
+    const snapshot = body.designSnapshot as SalwarSuitSnapshot;
+    if (!KURTI_CUTS.includes(snapshot.cut)) return validationError('Invalid kameez cut');
+    if (!KURTI_SLITS.includes(snapshot.slit)) return validationError('Invalid kameez slit');
+    if (!KURTI_NECKLINES.includes(snapshot.neckline)) return validationError('Invalid kameez neckline');
+    if (!SLEEVE_STYLES.includes(snapshot.sleeveStyle)) return validationError('Invalid kameez sleeves');
+    if (!EMBELLISHMENTS.includes(snapshot.embellishment)) return validationError('Invalid kameez embellishment');
+    const suitBottoms = snapshot.bottoms;
+    if (!suitBottoms?.name) return validationError('The suit is missing its bottoms');
+    if (!BOTTOM_STYLES.includes(suitBottoms.bottomStyle)) return validationError('Invalid bottom style');
+    if (!WAISTBANDS.includes(suitBottoms.waistband)) return validationError('Invalid waistband');
+    if (!BOTTOM_PLEATS.includes(suitBottoms.pleats)) return validationError('Invalid pleats');
+
+    const styleAttrs: StyleAttributes = {
+      cut: snapshot.cut,
+      slit: snapshot.slit,
+      neckline: snapshot.neckline,
+      sleeveStyle: snapshot.sleeveStyle,
+      embellishment: snapshot.embellishment,
+      bottomStyle: suitBottoms.bottomStyle,
+      waistband: suitBottoms.waistband,
+      pleats: suitBottoms.pleats,
+    };
+    measurements = {};
+    const raw = (body.measurements ?? {}) as Record<string, unknown>;
+    for (const field of SALWAR_SUIT_MEASUREMENT_SPEC.fields) {
+      if (field.visibleWhen && !field.visibleWhen(styleAttrs)) continue;
+      const eff = effectiveField(field, styleAttrs);
+      const value = raw[field.key];
+      if (value == null && field.optional) continue;
+      if (typeof value !== 'number' || !Number.isFinite(value) || value < eff.min || value > eff.max) {
+        return validationError(
+          `${eff.label} must be between ${eff.min} and ${eff.max}${eff.unit === 'in' ? ' inches' : ''}`
+        );
+      }
+      measurements[field.key] = value;
+    }
+    const rawPrefs = (body.preferences ?? {}) as Record<string, unknown>;
+    preferences = { dupatta: rawPrefs.dupatta === true };
+  } else {
+    // Generic manifest-driven categories (kurti today; more tomorrow):
+    // style attrs validate against the manifest enums, measurements
+    // against the spec honouring visibleWhen AND per-style ranges.
+    if (!manifest.styleEnums) return validationError('This category is not open for orders yet');
+    const snapshot = body.designSnapshot as unknown as Record<string, string>;
+    const styleAttrs: StyleAttributes = {};
+    for (const [key, allowed] of Object.entries(manifest.styleEnums)) {
+      const value = snapshot[key];
+      if (typeof value !== 'string' || !allowed.includes(value)) {
+        return validationError(`${key} must be one of: ${allowed.join(', ')}`);
+      }
+      styleAttrs[key] = value;
+    }
+
+    measurements = {};
+    const raw = (body.measurements ?? {}) as Record<string, unknown>;
+    for (const field of manifest.spec.fields) {
+      if (field.visibleWhen && !field.visibleWhen(styleAttrs)) continue;
+      const eff = effectiveField(field, styleAttrs);
+      const value = raw[field.key];
+      if (value == null && field.optional) continue;
+      if (typeof value !== 'number' || !Number.isFinite(value) || value < eff.min || value > eff.max) {
+        return validationError(
+          `${eff.label} must be between ${eff.min} and ${eff.max}${eff.unit === 'in' ? ' inches' : ''}`
+        );
+      }
+      measurements[field.key] = value;
+    }
+    preferences = null;
   }
 
   const admin = createAdminClient();
@@ -147,24 +263,60 @@ export async function POST(request: NextRequest) {
       neckStyle: string; sleeveStyle: string; embellishment: string; baseColor: string;
     };
     const CORE_FIELDS = ['bust', 'waist', 'shoulderWidth', 'blouseLength', 'sleeveLength'] as const;
+    const blousePrefs = preferences as BlousePreferences;
     service = 'Custom Blouse Design';
     summary =
       `Custom blouse request: ${snapshot.name} — ` +
       `${snapshot.neckStyle} neck, ${snapshot.sleeveStyle} sleeves, ` +
       `${snapshot.embellishment}, color ${body.selectedColor ?? snapshot.baseColor}, ` +
-      `${preferences!.blouseOpening} opening, ${preferences!.fitPreference} fit. ` +
+      `${blousePrefs.blouseOpening} opening, ${blousePrefs.fitPreference} fit. ` +
       CORE_FIELDS.map((f) => `${MEASUREMENT_LABELS[f]} ${measurements[f]}"`).join(', ') +
       (body.notes?.trim() ? `. Notes: ${body.notes.trim()}` : '') +
       '. Full measurements in Admin > Custom Requests.';
-  } else {
+  } else if (category === 'lehenga') {
     const snapshot = body.designSnapshot as LehengaDesignSnapshot;
+    const withDupatta = preferences !== null && !isBlousePreferences(preferences) && preferences.dupatta;
     service = 'Custom Lehenga Design';
     summary =
       `Custom lehenga request: ${snapshot.name} — ` +
       `${snapshot.silhouette.replace(/_/g, ' ')} silhouette, ${snapshot.embellishment}, ` +
-      `color ${body.selectedColor ?? snapshot.baseColor}. ` +
-      `Waist ${measurements.waistRound}", hip ${measurements.hipRound}", ` +
+      `color ${body.selectedColor ?? snapshot.baseColor}` +
+      (snapshot.choli ? ` + ${snapshot.choli.name} choli (${snapshot.choli.neckStyle} neck)` : ', skirt only') +
+      (withDupatta ? ', with dupatta' : '') +
+      `. Waist ${measurements.waistRound}", hip ${measurements.hipRound}", ` +
       `length ${measurements.lehengaLength}", ghera ${measurements.flareGhera}"` +
+      (snapshot.choli ? `, bust ${measurements.bust}"` : '') +
+      (body.notes?.trim() ? `. Notes: ${body.notes.trim()}` : '') +
+      '. Full measurements in Admin > Custom Requests.';
+  } else if (category === 'salwar_suit') {
+    const snapshot = body.designSnapshot as SalwarSuitSnapshot;
+    const withDupatta = preferences !== null && !isBlousePreferences(preferences) && preferences.dupatta;
+    service = 'Custom Salwar Suit';
+    summary =
+      `Custom salwar suit request: ${snapshot.name} kameez (${snapshot.cut.replace(/_/g, ' ')} cut, ` +
+      `${snapshot.neckline} neck) + ${snapshot.bottoms.name} ` +
+      `(${snapshot.bottoms.bottomStyle.replace(/_/g, ' ')})` +
+      (withDupatta ? ', with dupatta' : '') +
+      `. Bust ${measurements.bust}", waist ${measurements.waistRound}", ` +
+      `kameez length ${measurements.kurtiLength}", bottom length ${measurements.bottomLength}"` +
+      (body.notes?.trim() ? `. Notes: ${body.notes.trim()}` : '') +
+      '. Full measurements in Admin > Custom Requests.';
+  } else {
+    // Generic manifest categories: name + style values + leading numbers.
+    const snapshot = body.designSnapshot as unknown as Record<string, string>;
+    const styleBits = Object.keys(manifest.styleEnums ?? {})
+      .map((k) => snapshot[k]?.replace(/_/g, ' '))
+      .filter(Boolean)
+      .join(', ');
+    const numberBits = manifest.spec.fields
+      .slice(0, 4)
+      .filter((f) => typeof measurements[f.key] === 'number')
+      .map((f) => `${f.label} ${measurements[f.key]}${f.unit === 'in' ? '"' : ''}`)
+      .join(', ');
+    service = `Custom ${manifest.label} Design`;
+    summary =
+      `Custom ${manifest.label.toLowerCase()} request: ${snapshot.name} — ${styleBits}, ` +
+      `color ${body.selectedColor ?? snapshot.baseColor}. ${numberBits}` +
       (body.notes?.trim() ? `. Notes: ${body.notes.trim()}` : '') +
       '. Full measurements in Admin > Custom Requests.';
   }

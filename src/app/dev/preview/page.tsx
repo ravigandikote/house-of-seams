@@ -5,8 +5,10 @@
 
 import React, { useState } from 'react';
 import BlousePreview from '../../../components/customizer/BlousePreview';
+import ComposedPreview from '../../../components/customizer/ComposedPreview';
 import LehengaPreview from '../../../components/customizer/LehengaPreview';
 import MeasurementSliderGroup from '../../../components/customizer/MeasurementSliderGroup';
+import { anchorStack } from '../../../types/composition';
 import {
     BlouseDesignAttributes,
     NECK_STYLES,
@@ -126,6 +128,23 @@ const DevPreviewPage = () => {
     const [lehengaValues, setLehengaValues] = useState<Record<string, number>>({
         ...LEHENGA_MEASUREMENT_SPEC.typicalDefaults,
     });
+    // Phase-0 harness for ComposedPreview: choli (blouse renderer) anchored
+    // above the lehenga skirt, plus a demo pin proving that %-based
+    // annotation overlays land on composed sketches exactly as on single
+    // ones (same container, same coordinate space).
+    const [showComposed, setShowComposed] = useState(false);
+    // Numbers tuned against a rendered composite (see Phase-0 notes):
+    // BlousePreview viewBox 300×240 → aspect 0.8, garment hem ≈ 56% of its
+    // height with ~17% empty header (hence the negative start);
+    // LehengaPreview 400×372 → 0.93, waistband ≈ 7.5% down.
+    const COMPOSED_FRAME_ASPECT = 1.12;
+    const composedSlots = anchorStack(
+        [
+            { key: 'choli', widthPct: 84, childAspect: 0.8, anchorBottomFrac: 0.56 },
+            { key: 'skirt', widthPct: 92, childAspect: 0.93, anchorTopFrac: 0.075 },
+        ],
+        { frameAspect: COMPOSED_FRAME_ASPECT, startTopPct: -9 }
+    );
 
     const isBlouse = category === 'blouse';
     const spec = isBlouse ? BLOUSE_MEASUREMENT_SPEC : LEHENGA_MEASUREMENT_SPEC;
@@ -182,11 +201,57 @@ const DevPreviewPage = () => {
                             </div>
                         ) : (
                             <div className="bg-cream rounded-lg p-4 shadow-sm">
-                                <LehengaPreview
-                                    styleAttributes={lehengaAttrs}
-                                    measurements={lehengaValues}
-                                    className="max-w-[240px] sm:max-w-xs mx-auto"
-                                />
+                                <label className="flex items-center gap-2 text-xs text-gray-600 mb-2 cursor-pointer">
+                                    <input
+                                        type="checkbox"
+                                        checked={showComposed}
+                                        onChange={(e) => setShowComposed(e.target.checked)}
+                                    />
+                                    Composed choli + skirt (Phase-0 harness)
+                                </label>
+                                {showComposed ? (
+                                    <div className="relative max-w-[300px] mx-auto">
+                                        <ComposedPreview
+                                            aspect={COMPOSED_FRAME_ASPECT}
+                                            slots={[
+                                                {
+                                                    config: composedSlots[0],
+                                                    node: (
+                                                        <BlousePreview
+                                                            design={blouseAttrs}
+                                                            measurements={blouseValues as Measurements}
+                                                            view="front"
+                                                            showCaption={false}
+                                                        />
+                                                    ),
+                                                },
+                                                {
+                                                    config: composedSlots[1],
+                                                    node: (
+                                                        <LehengaPreview
+                                                            styleAttributes={lehengaAttrs}
+                                                            measurements={lehengaValues}
+                                                        />
+                                                    ),
+                                                },
+                                            ]}
+                                        />
+                                        {/* Demo annotation pin at a fixed % — must sit on the
+                                            composed sketch exactly like AnnotatedSketch pins. */}
+                                        <span
+                                            className="absolute w-7 h-7 -ml-3.5 -mt-3.5 rounded-full border-2 border-white bg-champagne-gold-dark text-white text-xs font-bold flex items-center justify-center shadow-soft"
+                                            style={{ left: '50%', top: '30%' }}
+                                        >
+                                            1
+                                        </span>
+                                    </div>
+                                ) : (
+                                    <LehengaPreview
+                                        styleAttributes={lehengaAttrs}
+                                        measurements={lehengaValues}
+                                        className="max-w-[240px] sm:max-w-xs mx-auto"
+                                    />
+                                )}
                             </div>
                         )}
                     </div>

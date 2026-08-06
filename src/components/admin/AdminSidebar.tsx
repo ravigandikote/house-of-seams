@@ -12,6 +12,7 @@ const navItems = [
   { label: 'Blog', href: '/admin/blog', icon: '\u270E' },
   { label: 'Testimonials', href: '/admin/testimonials', icon: '\u201C' },
   { label: 'Blouse Designs', href: '/admin/blouse-designs', icon: '✂' },
+  { label: 'Designs', href: '/admin/designs', icon: '✎' },
   { label: 'Measurements', href: '/admin/measurement-defaults', icon: '⇔' },
   { label: 'FAQs', href: '/admin/faqs', icon: '?' },
   { label: 'Pricing', href: '/admin/pricing', icon: '$' },

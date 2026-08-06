@@ -2,11 +2,16 @@
 
 import React, { useRef, useState } from 'react';
 import BlousePreview from '@/components/customizer/BlousePreview';
-import LehengaPreview from '@/components/customizer/LehengaPreview';
+import LehengaEnsemblePreview from '@/components/customizer/LehengaEnsemblePreview';
+import { renderGarment } from '@/components/customizer/rendererRegistry';
 import { CornerFlourish } from '@/components/ui/decor';
+import SalwarSuitEnsemblePreview from '@/components/customizer/SalwarSuitEnsemblePreview';
 import { BlouseDesignAttributes } from '@/types/blouseDesign';
+import { BottomsDesignAttributes } from '@/types/bottomsDesign';
+import { KurtiDesignAttributes } from '@/types/kurtiDesign';
 import { LehengaDesignAttributes } from '@/types/lehengaDesign';
 import { Measurements } from '@/types/measurements';
+import { categoryById } from '@/types/customizerCategories';
 import { RequestCategory, SketchAnnotation } from '@/types/customDesignRequest';
 
 // The atelier page's sketch section. When Kavya has annotated the design,
@@ -20,9 +25,14 @@ import { RequestCategory, SketchAnnotation } from '@/types/customDesignRequest';
 
 interface AnnotatedSketchProps {
     category?: RequestCategory;
-    design: BlouseDesignAttributes | LehengaDesignAttributes;
+    design: BlouseDesignAttributes | LehengaDesignAttributes | KurtiDesignAttributes | BottomsDesignAttributes;
     measurements: Measurements | Record<string, number>;
     annotations: SketchAnnotation[];
+    /** Lehenga ensembles: the choli worn above the skirt, and the dupatta. */
+    choli?: BlouseDesignAttributes | null;
+    /** Salwar suits: the bottoms worn under the kameez. */
+    bottoms?: BottomsDesignAttributes | null;
+    dupatta?: boolean;
 }
 
 const AnnotatedSketch: React.FC<AnnotatedSketchProps> = ({
@@ -30,13 +40,24 @@ const AnnotatedSketch: React.FC<AnnotatedSketchProps> = ({
     design,
     measurements,
     annotations,
+    choli = null,
+    bottoms = null,
+    dupatta = false,
 }) => {
     const [activeId, setActiveId] = useState<string | null>(null);
     const noteRefs = useRef<Record<string, HTMLLIElement | null>>({});
     const sketchRef = useRef<HTMLDivElement>(null);
 
     const isLehenga = category === 'lehenga';
-    const views = isLehenga ? (['front'] as const) : (['front', 'back'] as const);
+    // Only the blouse renderer has two views — every other category is a
+    // single sheet (all pins live on 'front').
+    const singleSheet = category !== 'blouse';
+    const genericRendererId = (() => {
+        if (category === 'blouse' || isLehenga) return null;
+        const manifest = categoryById(category);
+        return manifest?.renderer?.kind === 'single' ? manifest.renderer.rendererId : null;
+    })();
+    const views = singleSheet ? (['front'] as const) : (['front', 'back'] as const);
     const numbered = annotations.map((a, i) => ({ ...a, number: i + 1 }));
 
     const focusNote = (id: string) => {
@@ -54,7 +75,7 @@ const AnnotatedSketch: React.FC<AnnotatedSketchProps> = ({
             <div
                 ref={sketchRef}
                 className={`grid grid-cols-1 gap-5 mx-auto ${
-                    isLehenga ? 'max-w-sm' : 'sm:grid-cols-2 max-w-xl'
+                    singleSheet ? 'max-w-sm' : 'sm:grid-cols-2 max-w-xl'
                 }`}
             >
                 {views.map((view) => (
@@ -66,10 +87,24 @@ const AnnotatedSketch: React.FC<AnnotatedSketchProps> = ({
                         <CornerFlourish position="br" />
                         <div className="relative">
                             {isLehenga ? (
-                                <LehengaPreview
-                                    styleAttributes={design as LehengaDesignAttributes}
+                                <LehengaEnsemblePreview
+                                    skirt={design as LehengaDesignAttributes}
+                                    choli={choli}
+                                    dupatta={dupatta}
                                     measurements={measurements as Record<string, number>}
                                 />
+                            ) : category === 'salwar_suit' && bottoms ? (
+                                <SalwarSuitEnsemblePreview
+                                    kameez={design as unknown as KurtiDesignAttributes}
+                                    bottoms={bottoms}
+                                    dupatta={dupatta}
+                                    measurements={measurements as Record<string, number>}
+                                />
+                            ) : genericRendererId ? (
+                                renderGarment(genericRendererId, {
+                                    style: design as unknown as Record<string, string>,
+                                    measurements: measurements as Record<string, number>,
+                                })
                             ) : (
                                 <BlousePreview
                                     design={design as BlouseDesignAttributes}
@@ -97,7 +132,7 @@ const AnnotatedSketch: React.FC<AnnotatedSketchProps> = ({
                                     </button>
                                 ))}
                         </div>
-                        {!isLehenga && (
+                        {!singleSheet && (
                             <p className="font-accent italic text-body-sm text-warm-gray text-center mt-1">
                                 {view === 'front' ? 'Front' : 'Back'}
                             </p>
@@ -141,7 +176,7 @@ const AnnotatedSketch: React.FC<AnnotatedSketchProps> = ({
                                         <span className="font-accent italic text-body text-charcoal block">
                                             {a.note}
                                         </span>
-                                        {!isLehenga && (
+                                        {!singleSheet && (
                                             <span className="label-caps text-[9px] text-warm-gray block mt-1.5">
                                                 On the {a.view} view
                                             </span>

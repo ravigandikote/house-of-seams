@@ -1,4 +1,5 @@
 import { BlouseDesign } from '../../types/blouseDesign';
+import { GarmentDesign } from '../../types/garmentDesign';
 import { MeasurementDefault, Measurements, TYPICAL_MEASUREMENTS } from '../../types/measurements';
 
 // Fallback data mirroring supabase/seed.sql, used only when Supabase is
@@ -125,4 +126,53 @@ export const FALLBACK_BRACKETS: MeasurementDefault[] = [
         elbowRound: 10.5, wristRound: 7.5, sleeveLength: 7, blouseLength: 15, frontLength: 15.5,
         backLength: 16, sideSeamLength: 9, waist: 34, hip: 42,
     }),
+];
+
+// Demo-mode lehenga skirt designs (mirror of the seeded garment_designs
+// rows — the live journey loads those; this keeps demo mode walkable).
+export const FALLBACK_LEHENGA_DESIGNS: GarmentDesign[] = [
+    {
+        id: 'fallback-lehenga-1',
+        category: 'lehenga',
+        name: 'Classic A-Line',
+        slug: 'classic-a-line',
+        description: 'A graceful everyday silhouette that skims the hips and falls clean to the floor.',
+        styleAttributes: { silhouette: 'a_line', closure: 'side_zip', embellishment: 'plain', baseColor: '#D6A6B1' },
+        isSignature: false,
+        sortOrder: 1,
+        isActive: true,
+    },
+    {
+        id: 'fallback-lehenga-2',
+        category: 'lehenga',
+        name: 'Grand Circular Twirl',
+        slug: 'grand-circular-twirl',
+        description: 'A full circular cut with maximum ghera — made for twirling photographs.',
+        styleAttributes: { silhouette: 'circular', closure: 'drawstring', embellishment: 'zari', baseColor: '#8FA88D' },
+        isSignature: true,
+        sortOrder: 2,
+        isActive: true,
+    },
+    {
+        id: 'fallback-lehenga-3',
+        category: 'lehenga',
+        name: 'Mermaid Muse',
+        slug: 'mermaid-muse',
+        description: 'Fitted through the hip and thigh, flaring dramatically below the knee.',
+        styleAttributes: { silhouette: 'mermaid', closure: 'side_zip', embellishment: 'sequin', baseColor: '#2D2D2D' },
+        isSignature: false,
+        sortOrder: 3,
+        isActive: true,
+    },
+    {
+        id: 'fallback-lehenga-4',
+        category: 'lehenga',
+        name: 'Paneled Heritage',
+        slug: 'paneled-heritage',
+        description: 'Traditional kali construction with bold mirror-work panels.',
+        styleAttributes: { silhouette: 'paneled', closure: 'hook', embellishment: 'mirror', baseColor: '#B7C9B5' },
+        isSignature: false,
+        sortOrder: 4,
+        isActive: true,
+    },
 ];

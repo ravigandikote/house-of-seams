@@ -6,14 +6,17 @@ import { useAdminCrud } from '@/hooks/useAdminCrud';
 import {
     AdminRequestUpdate,
     CustomDesignRequest,
+    LehengaDesignSnapshot,
     RequestStatus,
     REQUEST_STATUSES,
     STATUS_LABELS,
     SketchAnnotation,
+    isBlousePreferences,
 } from '@/types/customDesignRequest';
 import SketchAnnotator from '@/components/admin/SketchAnnotator';
 import { MEASUREMENT_GROUPS, MEASUREMENT_LABELS } from '@/types/measurements';
 import { LEHENGA_MEASUREMENT_SPEC } from '@/types/lehengaMeasurements';
+import { categoryById } from '@/types/customizerCategories';
 import AdminPageHeader from '@/components/admin/AdminPageHeader';
 import AdminTable from '@/components/admin/AdminTable';
 import AdminFormModal from '@/components/admin/AdminFormModal';
@@ -142,6 +145,17 @@ const AdminCustomRequestsPage = () => {
         : null;
     const viewCategory = viewItem?.category ?? 'blouse';
     const isLehengaItem = viewCategory === 'lehenga';
+    // Lehenga ensembles: choli on the snapshot, dupatta on preferences.
+    const viewCholi = isLehengaItem
+        ? (viewItem?.designSnapshot as LehengaDesignSnapshot).choli ?? null
+        : null;
+    const isSuitItem = viewCategory === 'salwar_suit';
+    const viewBottoms = isSuitItem
+        ? ((viewItem?.designSnapshot as unknown as { bottoms?: Record<string, string> }).bottoms ?? null)
+        : null;
+    const viewPrefs = viewItem?.preferences ?? null;
+    const viewDupatta =
+        (isLehengaItem || isSuitItem) && !!viewPrefs && !isBlousePreferences(viewPrefs) && viewPrefs.dupatta;
 
     return (
         <div>
@@ -205,6 +219,9 @@ const AdminCustomRequestsPage = () => {
                                     view={isLehengaItem ? 'front' : previewView}
                                     annotations={annotations}
                                     onChange={setAnnotations}
+                                    choli={viewCholi}
+                                    bottoms={viewBottoms as unknown as import('@/types/bottomsDesign').BottomsDesignAttributes | null}
+                                    dupatta={viewDupatta}
                                 />
                             </div>
                             {muse && (muse.urls.length > 0 || muse.occasionNote) && (
@@ -255,37 +272,82 @@ const AdminCustomRequestsPage = () => {
                                         {previewDesign.baseColor}
                                     </dd>
                                 </div>
-                                {viewItem.preferences && (
+                                {viewPrefs && isBlousePreferences(viewPrefs) && (
                                     <>
                                         <div className="flex justify-between border-b border-gray-100 py-1">
                                             <dt className="text-gray-500">Opening / Fit / Seams</dt>
                                             <dd className="text-charcoal text-right capitalize">
-                                                {viewItem.preferences.blouseOpening} · {viewItem.preferences.fitPreference} ·{' '}
-                                                {viewItem.preferences.seamAllowance}
+                                                {viewPrefs.blouseOpening} · {viewPrefs.fitPreference} ·{' '}
+                                                {viewPrefs.seamAllowance}
                                             </dd>
                                         </div>
                                         <div className="flex justify-between border-b border-gray-100 py-1">
                                             <dt className="text-gray-500">Cup Padding / Inner-wear</dt>
                                             <dd className="text-charcoal text-right">
-                                                {viewItem.preferences.cupPadding ? 'Yes' : 'No'}
-                                                {viewItem.preferences.braSize ? ` · ${viewItem.preferences.braSize}` : ''}
+                                                {viewPrefs.cupPadding ? 'Yes' : 'No'}
+                                                {viewPrefs.braSize ? ` · ${viewPrefs.braSize}` : ''}
                                             </dd>
                                         </div>
                                     </>
                                 )}
+                                {isSuitItem && viewBottoms && (
+                                    <div className="flex justify-between border-b border-gray-100 py-1">
+                                        <dt className="text-gray-500">Ensemble</dt>
+                                        <dd className="text-charcoal text-right">
+                                            {viewBottoms.name} ({String(viewBottoms.bottomStyle ?? '').replace(/_/g, ' ')})
+                                            {viewDupatta ? ' · with dupatta' : ''}
+                                        </dd>
+                                    </div>
+                                )}
+                                {isLehengaItem && (
+                                    <div className="flex justify-between border-b border-gray-100 py-1">
+                                        <dt className="text-gray-500">Ensemble</dt>
+                                        <dd className="text-charcoal text-right">
+                                            {viewCholi ? `${viewCholi.name} choli` : 'Skirt only'}
+                                            {viewDupatta ? ' · with dupatta' : ''}
+                                        </dd>
+                                    </div>
+                                )}
                                 {isLehengaItem
-                                    ? LEHENGA_MEASUREMENT_SPEC.fields
-                                          .filter((f) => typeof (viewItem.measurements as Record<string, number>)[f.key] === 'number')
-                                          .map((f) => (
-                                              <div key={f.key} className="flex justify-between border-b border-gray-100 py-1">
-                                                  <dt className="text-gray-500">{f.label}</dt>
-                                                  <dd className="text-charcoal">
-                                                      {(viewItem.measurements as Record<string, number>)[f.key]}
-                                                      {f.unit === 'in' ? '″' : ''}
-                                                  </dd>
+                                    ? (
+                                          <>
+                                              <div className="pt-1">
+                                                  <dt className="font-heading text-xs font-bold text-charcoal uppercase tracking-wide">
+                                                      Skirt
+                                                  </dt>
                                               </div>
-                                          ))
-                                    : MEASUREMENT_GROUPS.map((group) => {
+                                              {LEHENGA_MEASUREMENT_SPEC.fields
+                                                  .filter((f) => typeof (viewItem.measurements as Record<string, number>)[f.key] === 'number')
+                                                  .map((f) => (
+                                                      <div key={f.key} className="flex justify-between border-b border-gray-100 py-1">
+                                                          <dt className="text-gray-500">{f.label}</dt>
+                                                          <dd className="text-charcoal">
+                                                              {(viewItem.measurements as Record<string, number>)[f.key]}
+                                                              {f.unit === 'in' ? '″' : ''}
+                                                          </dd>
+                                                      </div>
+                                                  ))}
+                                              {viewCholi && (
+                                                  <>
+                                                      <div className="pt-1">
+                                                          <dt className="font-heading text-xs font-bold text-charcoal uppercase tracking-wide">
+                                                              Choli
+                                                          </dt>
+                                                      </div>
+                                                      {MEASUREMENT_GROUPS.flatMap((g) => g.fields)
+                                                          .filter((f) => typeof viewItem.measurements[f] === 'number')
+                                                          .map((field) => (
+                                                              <div key={field} className="flex justify-between border-b border-gray-100 py-1">
+                                                                  <dt className="text-gray-500">{MEASUREMENT_LABELS[field]}</dt>
+                                                                  <dd className="text-charcoal">{viewItem.measurements[field]}&Prime;</dd>
+                                                              </div>
+                                                          ))}
+                                                  </>
+                                              )}
+                                          </>
+                                      )
+                                    : viewCategory === 'blouse'
+                                    ? MEASUREMENT_GROUPS.map((group) => {
                                           // Older requests may predate some fields — show only what was submitted.
                                           const present = group.fields.filter(
                                               (f) => typeof viewItem.measurements[f] === 'number'
@@ -306,7 +368,19 @@ const AdminCustomRequestsPage = () => {
                                                   ))}
                                               </React.Fragment>
                                           );
-                                      })}
+                                      })
+                                    : // Generic manifest categories: the category's own spec labels.
+                                      (categoryById(viewCategory)?.spec?.fields ?? [])
+                                          .filter((f) => typeof (viewItem.measurements as Record<string, number>)[f.key] === 'number')
+                                          .map((f) => (
+                                              <div key={f.key} className="flex justify-between border-b border-gray-100 py-1">
+                                                  <dt className="text-gray-500">{f.label}</dt>
+                                                  <dd className="text-charcoal">
+                                                      {(viewItem.measurements as Record<string, number>)[f.key]}
+                                                      {f.unit === 'in' ? '″' : ''}
+                                                  </dd>
+                                              </div>
+                                          ))}
                                 {viewItem.notes && (
                                     <div className="py-1">
                                         <dt className="text-gray-500 mb-1">Notes</dt>

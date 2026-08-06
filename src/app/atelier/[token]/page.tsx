@@ -11,6 +11,8 @@ import { MEASUREMENT_LABELS, MeasurementField } from '@/types/measurements';
 import { LEHENGA_MEASUREMENT_SPEC } from '@/types/lehengaMeasurements';
 import { BlouseDesignAttributes } from '@/types/blouseDesign';
 import { LehengaDesignAttributes } from '@/types/lehengaDesign';
+import { LehengaDesignSnapshot as LehengaDesignSnapshotWithCholi, isBlousePreferences } from '@/types/customDesignRequest';
+import { categoryById } from '@/types/customizerCategories';
 
 // The Design Story portal — a private, shareable design journal for one
 // custom request. The unguessable token in the URL is the only auth
@@ -75,21 +77,49 @@ const AtelierPage = async ({ params }: { params: { token: string } }) => {
         ...request.designSnapshot,
         baseColor: request.selectedColor || request.designSnapshot.baseColor,
     };
+    // Lehenga ensembles: the choli rides on the snapshot, the dupatta on
+    // preferences ({ dupatta: boolean } for this category).
+    const choli = isLehenga ? (request.designSnapshot as LehengaDesignSnapshotWithCholi).choli ?? null : null;
+    const isSuit = category === 'salwar_suit';
+    const suitBottoms = isSuit
+        ? (request.designSnapshot as unknown as { bottoms?: Record<string, string> }).bottoms ?? null
+        : null;
+    const prefs = request.preferences ?? null;
+    const dupatta = (isLehenga || isSuit) && !!prefs && !isBlousePreferences(prefs) && prefs.dupatta;
     const rawMeasurements = request.measurements as Record<string, number>;
     // Key numbers, labelled from the right category's single source.
     const keyMeasurements: { label: string; value: number; inches: boolean }[] = isLehenga
-        ? LEHENGA_KEY_FIELDS.flatMap((key) => {
-              const spec = LEHENGA_MEASUREMENT_SPEC.fields.find((f) => f.key === key);
-              const value = rawMeasurements[key];
-              return spec && typeof value === 'number'
-                  ? [{ label: spec.label, value, inches: spec.unit === 'in' }]
-                  : [];
-          })
-        : BLOUSE_KEY_FIELDS.filter((f) => typeof rawMeasurements[f] === 'number').map((f) => ({
-              label: MEASUREMENT_LABELS[f],
-              value: rawMeasurements[f],
-              inches: true,
-          }));
+        ? [
+              ...(choli && typeof rawMeasurements.bust === 'number'
+                  ? [{ label: 'Bust', value: rawMeasurements.bust, inches: true }]
+                  : []),
+              ...LEHENGA_KEY_FIELDS.flatMap((key) => {
+                  const spec = LEHENGA_MEASUREMENT_SPEC.fields.find((f) => f.key === key);
+                  const value = rawMeasurements[key];
+                  return spec && typeof value === 'number'
+                      ? [{ label: spec.label, value, inches: spec.unit === 'in' }]
+                      : [];
+              }),
+          ]
+        : category === 'blouse'
+          ? BLOUSE_KEY_FIELDS.filter((f) => typeof rawMeasurements[f] === 'number').map((f) => ({
+                label: MEASUREMENT_LABELS[f],
+                value: rawMeasurements[f],
+                inches: true,
+            }))
+          : // Generic manifest categories: the category's declared key
+            // fields, else the first six recorded numbers.
+            (() => {
+                const manifest = categoryById(category);
+                const fields = manifest?.spec?.fields ?? [];
+                const picked = manifest?.keyFields
+                    ? manifest.keyFields.flatMap((k) => fields.filter((f) => f.key === k))
+                    : fields;
+                return picked
+                    .filter((f) => typeof rawMeasurements[f.key] === 'number')
+                    .slice(0, 6)
+                    .map((f) => ({ label: f.label, value: rawMeasurements[f.key], inches: f.unit === 'in' }));
+            })();
 
     return (
         <div className="max-w-3xl mx-auto px-4 py-12 sm:py-16">
@@ -152,6 +182,9 @@ const AtelierPage = async ({ params }: { params: { token: string } }) => {
                     design={design}
                     measurements={request.measurements}
                     annotations={request.annotations ?? []}
+                    choli={choli}
+                    bottoms={suitBottoms as unknown as import('@/types/bottomsDesign').BottomsDesignAttributes | null}
+                    dupatta={dupatta}
                 />
             </section>
 
@@ -163,21 +196,43 @@ const AtelierPage = async ({ params }: { params: { token: string } }) => {
                     <h2 className="font-heading text-headline text-ink mb-5">{request.designSnapshot.name}</h2>
                     <dl className="space-y-2 text-body-sm">
                         {isLehenga ? (
-                            <div className="flex justify-between border-b border-champagne-gold/15 pb-2">
-                                <dt className="text-warm-gray">Silhouette / Closure / Finish</dt>
-                                <dd className="text-charcoal text-right">
-                                    {labelize((design as LehengaDesignAttributes).silhouette)} ·{' '}
-                                    {labelize((design as LehengaDesignAttributes).closure)} ·{' '}
-                                    {labelize((design as LehengaDesignAttributes).embellishment)}
-                                </dd>
-                            </div>
-                        ) : (
+                            <>
+                                <div className="flex justify-between border-b border-champagne-gold/15 pb-2">
+                                    <dt className="text-warm-gray">Silhouette / Closure / Finish</dt>
+                                    <dd className="text-charcoal text-right">
+                                        {labelize((design as LehengaDesignAttributes).silhouette)} ·{' '}
+                                        {labelize((design as LehengaDesignAttributes).closure)} ·{' '}
+                                        {labelize((design as LehengaDesignAttributes).embellishment)}
+                                    </dd>
+                                </div>
+                                <div className="flex justify-between border-b border-champagne-gold/15 pb-2">
+                                    <dt className="text-warm-gray">Ensemble</dt>
+                                    <dd className="text-charcoal text-right">
+                                        {choli
+                                            ? `${choli.name} choli — ${labelize(choli.neckStyle)} neck, ${labelize(choli.sleeveStyle)} sleeves`
+                                            : 'Skirt only'}
+                                        {dupatta ? ' · with dupatta' : ''}
+                                    </dd>
+                                </div>
+                            </>
+                        ) : category === 'blouse' ? (
                             <div className="flex justify-between border-b border-champagne-gold/15 pb-2">
                                 <dt className="text-warm-gray">Neckline / Back / Sleeves</dt>
                                 <dd className="text-charcoal text-right">
                                     {labelize((design as BlouseDesignAttributes).neckStyle)} ·{' '}
                                     {labelize((design as BlouseDesignAttributes).backStyle)} ·{' '}
                                     {labelize((design as BlouseDesignAttributes).sleeveStyle)}
+                                </dd>
+                            </div>
+                        ) : (
+                            <div className="flex justify-between border-b border-champagne-gold/15 pb-2">
+                                <dt className="text-warm-gray">Design</dt>
+                                <dd className="text-charcoal text-right">
+                                    {Object.keys(categoryById(category)?.styleEnums ?? {})
+                                        .map((k) => (design as unknown as Record<string, string>)[k])
+                                        .filter(Boolean)
+                                        .map(labelize)
+                                        .join(' · ')}
                                 </dd>
                             </div>
                         )}
@@ -191,13 +246,23 @@ const AtelierPage = async ({ params }: { params: { token: string } }) => {
                                 {design.baseColor}
                             </dd>
                         </div>
-                        {request.preferences && (
+                        {isSuit && suitBottoms && (
+                            <div className="flex justify-between border-b border-champagne-gold/15 pb-2">
+                                <dt className="text-warm-gray">Ensemble</dt>
+                                <dd className="text-charcoal text-right">
+                                    {(request.designSnapshot as unknown as { name: string }).name} kameez ·{' '}
+                                    {labelize(String(suitBottoms.bottomStyle ?? ''))} bottoms
+                                    {dupatta ? ' · with dupatta' : ''}
+                                </dd>
+                            </div>
+                        )}
+                        {prefs && isBlousePreferences(prefs) && (
                             <div className="flex justify-between border-b border-champagne-gold/15 pb-2">
                                 <dt className="text-warm-gray">Opening / Fit / Seams</dt>
                                 <dd className="text-charcoal text-right">
-                                    {labelize(request.preferences.blouseOpening)} ·{' '}
-                                    {labelize(request.preferences.fitPreference)} ·{' '}
-                                    {labelize(request.preferences.seamAllowance)}
+                                    {labelize(prefs.blouseOpening)} ·{' '}
+                                    {labelize(prefs.fitPreference)} ·{' '}
+                                    {labelize(prefs.seamAllowance)}
                                 </dd>
                             </div>
                         )}

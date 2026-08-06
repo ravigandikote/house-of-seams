@@ -5,9 +5,13 @@ import Link from 'next/link';
 import { useForm } from 'react-hook-form';
 import AtelierStepper from './AtelierStepper';
 import BlousePreview from './BlousePreview';
+import BottomsPreview from './BottomsPreview';
+import KurtiPreview from './KurtiPreview';
 import LehengaFlow from './LehengaFlow';
 import LehengaPreview from './LehengaPreview';
-import { SAMPLE_LEHENGA_DESIGNS } from './lehengaSamples';
+import SalwarSuitEnsemblePreview from './SalwarSuitEnsemblePreview';
+import SalwarSuitFlow from './SalwarSuitFlow';
+import SingleGarmentFlow from './SingleGarmentFlow';
 import MeasurementSliderGroup from './MeasurementSliderGroup';
 import MuseBoardPanel from './MuseBoardPanel';
 import Button from '../ui/Button';
@@ -27,6 +31,7 @@ import {
     SEAM_ALLOWANCES,
 } from '../../types/customDesignRequest';
 import { CUSTOMIZER_CATEGORIES } from '../../types/customizerCategories';
+import { GarmentDesign } from '../../types/garmentDesign';
 import {
     Measurements,
     MeasurementDefault,
@@ -43,6 +48,8 @@ import {
 interface CustomizerFlowProps {
     designs: BlouseDesign[];
     brackets: MeasurementDefault[];
+    /** All active garment_designs rows — filtered per category here. */
+    garmentDesigns: GarmentDesign[];
 }
 
 interface CustomizerFormValues extends Measurements {
@@ -55,16 +62,51 @@ interface CustomizerFormValues extends Measurements {
 
 const STEPS = ['Choose Design', 'Measurements', 'Preview & Submit'] as const;
 
-// Poetic one-liners revealed on category-card hover.
-const CATEGORY_POETRY: Record<string, string> = {
-    blouse: 'Tailored to the last quarter-inch — your blouse, your story.',
-    lehenga: 'Twirl-worthy gheras, stitched to your silhouette.',
-    shirt: 'Joining the atelier soon.',
-    trousers: 'Joining the atelier soon.',
-};
+// Category card poetry now lives on the manifest (tagline).
 
 // Used when no age bracket matches (or none are configured).
 const BASE_MEASUREMENTS: Measurements = TYPICAL_MEASUREMENTS;
+
+// Category-card sketch attrs (the lehenga card renders before any design
+// is chosen; designs themselves now come from garment_designs).
+const lehengaCardAttrs = {
+    silhouette: 'a_line',
+    closure: 'side_zip',
+    embellishment: 'zari',
+    baseColor: '#B87A88',
+} as const;
+
+const kurtiCardAttrs = {
+    cut: 'a_line',
+    slit: 'side_slits',
+    neckline: 'band',
+    sleeveStyle: 'three-quarter',
+    embellishment: 'embroidery',
+    baseColor: '#8FA88D',
+} as const;
+
+const suitCardKameez = {
+    cut: 'straight',
+    slit: 'side_slits',
+    neckline: 'round',
+    sleeveStyle: 'three-quarter',
+    embellishment: 'plain',
+    baseColor: '#A4586A',
+} as const;
+
+const suitCardBottoms = {
+    bottomStyle: 'churidar',
+    waistband: 'elastic',
+    pleats: 'none',
+    baseColor: '#D6A6B1',
+} as const;
+
+const bottomsCardAttrs = {
+    bottomStyle: 'palazzo',
+    waistband: 'drawstring',
+    pleats: 'none',
+    baseColor: '#B7C9B5',
+} as const;
 
 const DEFAULT_AGE = 25;
 
@@ -84,7 +126,7 @@ function toMeasurements(values: CustomizerFormValues): Measurements {
     return result;
 }
 
-const CustomizerFlow: React.FC<CustomizerFlowProps> = ({ designs, brackets }) => {
+const CustomizerFlow: React.FC<CustomizerFlowProps> = ({ designs, brackets, garmentDesigns }) => {
     const [category, setCategory] = useState('blouse');
     const [step, setStep] = useState(0);
     const [selected, setSelected] = useState<BlouseDesign | null>(null);
@@ -256,6 +298,23 @@ const CustomizerFlow: React.FC<CustomizerFlowProps> = ({ designs, brackets }) =>
         }
     };
 
+    // Editorial page header — follows the selected category so "Design
+    // Your Blouse" becomes "Design Your Kurti / Kameez" and so on.
+    const activeCategory = CUSTOMIZER_CATEGORIES.find((c) => c.id === category);
+    const atelierHeader = (
+        <header className="text-center">
+            <p className="label-caps text-champagne-gold-dark mb-3">The Atelier</p>
+            <h1 className="font-heading text-display-lg mb-3 text-ink">
+                Design Your {activeCategory?.label ?? 'Garment'}
+            </h1>
+            <p className="font-accent italic text-lede text-warm-gray mb-5 max-w-xl mx-auto">
+                Pick a design, adjust your measurements, and preview your custom{' '}
+                {(activeCategory?.label ?? 'garment').toLowerCase()}
+            </p>
+            <GoldDivider className="mb-10" />
+        </header>
+    );
+
     // Celebratory, refined confirmation
     if (submitted && previewDesign) {
         const nextSteps = [
@@ -265,6 +324,7 @@ const CustomizerFlow: React.FC<CustomizerFlowProps> = ({ designs, brackets }) =>
         ];
         return (
             <div className="max-w-2xl mx-auto text-center py-8 animate-fade-in">
+                {atelierHeader}
                 <GoldDivider className="mb-8" />
                 <p className="label-caps text-champagne-gold-dark mb-3">Request received</p>
                 <h2 className="font-heading text-display-lg text-ink mb-3">
@@ -402,9 +462,32 @@ const CustomizerFlow: React.FC<CustomizerFlowProps> = ({ designs, brackets }) =>
                                 )}
                                 {c.id === 'lehenga' && (
                                     <LehengaPreview
-                                        styleAttributes={SAMPLE_LEHENGA_DESIGNS[0]}
+                                        styleAttributes={lehengaCardAttrs}
                                         measurements={LEHENGA_MEASUREMENT_SPEC.typicalDefaults}
                                         className="max-w-[110px]"
+                                    />
+                                )}
+                                {c.id === 'kurti' && c.spec && (
+                                    <KurtiPreview
+                                        design={kurtiCardAttrs}
+                                        measurements={c.spec.typicalDefaults}
+                                        className="max-w-[120px]"
+                                    />
+                                )}
+                                {c.id === 'salwar_suit' && c.spec && (
+                                    <SalwarSuitEnsemblePreview
+                                        kameez={suitCardKameez}
+                                        bottoms={suitCardBottoms}
+                                        dupatta
+                                        measurements={c.spec.typicalDefaults}
+                                        className="w-[120px]"
+                                    />
+                                )}
+                                {c.id === 'bottoms' && c.spec && (
+                                    <BottomsPreview
+                                        design={bottomsCardAttrs}
+                                        measurements={c.spec.typicalDefaults}
+                                        className="max-w-[120px]"
                                     />
                                 )}
                                 {!c.available && (
@@ -421,7 +504,7 @@ const CustomizerFlow: React.FC<CustomizerFlowProps> = ({ designs, brackets }) =>
                                     )}
                                 </span>
                                 <span className="font-accent italic text-body-sm text-warm-gray block mt-1 sm:opacity-0 sm:group-hover:opacity-100 transition-opacity duration-500">
-                                    {CATEGORY_POETRY[c.id]}
+                                    {c.tagline}
                                 </span>
                             </div>
                         </button>
@@ -436,6 +519,7 @@ const CustomizerFlow: React.FC<CustomizerFlowProps> = ({ designs, brackets }) =>
     if (category === 'blouse' && designs.length === 0) {
         return (
             <div>
+                {atelierHeader}
                 {categoryCards}
                 <p className="text-center text-warm-gray py-16">
                     The blouse customizer is being set up — please check back soon, or{' '}
@@ -448,14 +532,55 @@ const CustomizerFlow: React.FC<CustomizerFlowProps> = ({ designs, brackets }) =>
     if (category === 'lehenga') {
         return (
             <div>
+                {atelierHeader}
                 {categoryPills}
-                <LehengaFlow />
+                <LehengaFlow
+                    cholis={designs}
+                    skirts={garmentDesigns.filter((d) => d.category === 'lehenga')}
+                />
+            </div>
+        );
+    }
+
+    if (category === 'salwar_suit') {
+        return (
+            <div>
+                {atelierHeader}
+                {categoryPills}
+                <SalwarSuitFlow
+                    kameezes={garmentDesigns.filter((d) => d.category === 'kurti')}
+                    bottoms={garmentDesigns.filter((d) => d.category === 'bottoms')}
+                    brackets={brackets}
+                />
+            </div>
+        );
+    }
+
+    // Manifest-driven single-garment journeys (kurti today; bottoms,
+    // petticoat, gown… tomorrow — no changes needed here).
+    const manifestCategory = CUSTOMIZER_CATEGORIES.find((c) => c.id === category);
+    if (
+        category !== 'blouse' &&
+        manifestCategory?.available &&
+        manifestCategory.spec &&
+        manifestCategory.renderer?.kind === 'single'
+    ) {
+        return (
+            <div>
+                {atelierHeader}
+                {categoryPills}
+                <SingleGarmentFlow
+                    category={manifestCategory}
+                    designs={garmentDesigns.filter((d) => d.category === category)}
+                    brackets={brackets}
+                />
             </div>
         );
     }
 
     return (
         <div>
+            {atelierHeader}
             {showEditorialCategories ? categoryCards : categoryPills}
 
             <AtelierStepper steps={STEPS} current={step} />

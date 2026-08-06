@@ -2,7 +2,7 @@
 // measurement guide; expect labels/ranges/fields here to change when it
 // arrives, with no UI changes needed). All tape values in INCHES.
 
-import { CategoryMeasurementSpec, MeasurementFieldSpec, StyleAttributes } from './measurementSpec';
+import { CategoryMeasurementSpec, MeasurementFieldSpec, StyleAttributes, composeSpec, ownGroup } from './measurementSpec';
 
 const mermaidOnly = (attrs: StyleAttributes) => attrs.silhouette === 'mermaid';
 
@@ -73,14 +73,9 @@ const FIELDS: readonly MeasurementFieldSpec[] = [
     },
 ];
 
-export const LEHENGA_MEASUREMENT_SPEC: CategoryMeasurementSpec = {
-    category: 'lehenga',
-    groups: [
-        { key: 'skirt-fit', label: 'Skirt Fit', order: 0 },
-        { key: 'lengths', label: 'Lengths', order: 1 },
-        { key: 'silhouette-rounds', label: 'Silhouette Rounds', order: 2 },
-        { key: 'flare-construction', label: 'Flare & Construction', order: 3 },
-    ],
-    fields: FIELDS,
-    typicalDefaults: Object.fromEntries(FIELDS.map((f) => [f.key, f.defaultValue])),
-};
+export const LEHENGA_MEASUREMENT_SPEC: CategoryMeasurementSpec = composeSpec('lehenga', [
+    { key: 'skirt-fit', label: 'Skirt Fit' },
+    { key: 'lengths', label: 'Lengths' },
+    { key: 'silhouette-rounds', label: 'Silhouette Rounds' },
+    { key: 'flare-construction', label: 'Flare & Construction' },
+].map((g) => ownGroup(g, FIELDS.filter((f) => f.group === g.key).map((f) => ({ ...f })))));

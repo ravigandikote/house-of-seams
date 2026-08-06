@@ -2,8 +2,13 @@
 
 import React, { useRef, useState } from 'react';
 import BlousePreview from '@/components/customizer/BlousePreview';
-import LehengaPreview from '@/components/customizer/LehengaPreview';
+import LehengaEnsemblePreview from '@/components/customizer/LehengaEnsemblePreview';
+import { renderGarment } from '@/components/customizer/rendererRegistry';
+import { categoryById } from '@/types/customizerCategories';
+import SalwarSuitEnsemblePreview from '@/components/customizer/SalwarSuitEnsemblePreview';
 import { BlouseDesignAttributes } from '@/types/blouseDesign';
+import { BottomsDesignAttributes } from '@/types/bottomsDesign';
+import { KurtiDesignAttributes } from '@/types/kurtiDesign';
 import { LehengaDesignAttributes } from '@/types/lehengaDesign';
 import { Measurements } from '@/types/measurements';
 import { RequestCategory, SketchAnnotation, SketchView } from '@/types/customDesignRequest';
@@ -17,11 +22,16 @@ import { RequestCategory, SketchAnnotation, SketchView } from '@/types/customDes
 
 interface SketchAnnotatorProps {
     category?: RequestCategory;
-    design: BlouseDesignAttributes | LehengaDesignAttributes;
+    design: BlouseDesignAttributes | LehengaDesignAttributes | KurtiDesignAttributes | BottomsDesignAttributes;
     measurements: Measurements | Record<string, number>;
     view: SketchView;
     annotations: SketchAnnotation[];
     onChange: (annotations: SketchAnnotation[]) => void;
+    /** Lehenga ensembles: the choli worn above the skirt, and the dupatta. */
+    choli?: BlouseDesignAttributes | null;
+    /** Salwar suits: the bottoms worn under the kameez. */
+    bottoms?: BottomsDesignAttributes | null;
+    dupatta?: boolean;
 }
 
 const clampPct = (n: number) => Math.min(97, Math.max(3, n));
@@ -35,6 +45,9 @@ const SketchAnnotator: React.FC<SketchAnnotatorProps> = ({
     view,
     annotations,
     onChange,
+    choli = null,
+    bottoms = null,
+    dupatta = false,
 }) => {
     const [annotateMode, setAnnotateMode] = useState(false);
     const [editingId, setEditingId] = useState<string | null>(null);
@@ -130,10 +143,27 @@ const SketchAnnotator: React.FC<SketchAnnotatorProps> = ({
                 className={`relative select-none ${annotateMode ? 'cursor-crosshair' : ''}`}
             >
                 {category === 'lehenga' ? (
-                    <LehengaPreview
-                        styleAttributes={design as LehengaDesignAttributes}
+                    <LehengaEnsemblePreview
+                        skirt={design as LehengaDesignAttributes}
+                        choli={choli}
+                        dupatta={dupatta}
                         measurements={measurements as Record<string, number>}
                     />
+                ) : category === 'salwar_suit' && bottoms ? (
+                    <SalwarSuitEnsemblePreview
+                        kameez={design as unknown as KurtiDesignAttributes}
+                        bottoms={bottoms}
+                        dupatta={dupatta}
+                        measurements={measurements as Record<string, number>}
+                    />
+                ) : category !== 'blouse' && categoryById(category)?.renderer?.kind === 'single' ? (
+                    renderGarment(
+                        (categoryById(category)!.renderer as { kind: 'single'; rendererId: 'blouse' | 'lehenga' | 'kurti' }).rendererId,
+                        {
+                            style: design as unknown as Record<string, string>,
+                            measurements: measurements as Record<string, number>,
+                        }
+                    )
                 ) : (
                     <BlousePreview
                         design={design as BlouseDesignAttributes}
