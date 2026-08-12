@@ -28,7 +28,7 @@ const Button: React.FC<ButtonProps> = ({
   }
 
   const baseStyles =
-    'inline-flex items-center justify-center px-7 py-3 label-caps rounded-sm transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed';
+    'inline-flex items-center justify-center min-h-[44px] px-7 py-3 label-caps rounded-sm transition-all duration-300 touch-manipulation disabled:opacity-50 disabled:cursor-not-allowed';
   const variantStyles = {
     primary: 'bg-deep-rose text-white hover:bg-deep-rose-dark shadow-soft hover:shadow-lift',
     secondary: 'border border-charcoal/60 text-charcoal bg-transparent hover:border-deep-rose hover:text-deep-rose',

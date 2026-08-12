@@ -14,6 +14,7 @@ import SalwarSuitFlow from './SalwarSuitFlow';
 import SingleGarmentFlow from './SingleGarmentFlow';
 import MeasurementSliderGroup from './MeasurementSliderGroup';
 import MuseBoardPanel from './MuseBoardPanel';
+import VariationPicker from './VariationPicker';
 import Button from '../ui/Button';
 import { CornerFlourish, GoldDivider } from '../ui/decor';
 import { LEHENGA_MEASUREMENT_SPEC } from '../../types/lehengaMeasurements';
@@ -22,7 +23,7 @@ import TextArea from '../ui/TextArea';
 import ToggleSwitch from '../ui/ToggleSwitch';
 import { submitCustomDesignRequest } from '../../services/customizerService';
 import { downloadBlouseDesignPdf } from '../../lib/blouseDesignPdf';
-import { BlouseDesign } from '../../types/blouseDesign';
+import { BlouseDesign, VariationKey, allowedOptionsFor } from '../../types/blouseDesign';
 import {
     BlousePreferences,
     BLOUSE_OPENINGS,
@@ -32,6 +33,8 @@ import {
 } from '../../types/customDesignRequest';
 import { CUSTOMIZER_CATEGORIES } from '../../types/customizerCategories';
 import { GarmentDesign } from '../../types/garmentDesign';
+import { PatternListing } from '../../types/pattern';
+import RelatedPatternCard from '../commerce/RelatedPatternCard';
 import {
     Measurements,
     MeasurementDefault,
@@ -50,6 +53,10 @@ interface CustomizerFlowProps {
     brackets: MeasurementDefault[];
     /** All active garment_designs rows — filtered per category here. */
     garmentDesigns: GarmentDesign[];
+    /** Pattern listings for cross-links (may be empty). */
+    patterns?: PatternListing[];
+    /** Deep-link start category (/customize?category=kurti). */
+    initialCategory?: string;
 }
 
 interface CustomizerFormValues extends Measurements {
@@ -60,7 +67,29 @@ interface CustomizerFormValues extends Measurements {
     customerPhone: string;
 }
 
-const STEPS = ['Choose Design', 'Measurements', 'Preview & Submit'] as const;
+const STEPS = ['Choose Your Blouse', 'Make It Yours', 'Measurements', 'Preview & Submit'] as const;
+
+// The three attributes a design may offer alternatives for, and which
+// side of the sketch shows each one.
+const VARIATION_ROWS = [
+    { key: 'sleeves', attribute: 'sleeveStyle', label: 'Sleeves', view: 'front' },
+    { key: 'necklines', attribute: 'neckStyle', label: 'Neckline', view: 'front' },
+    { key: 'backs', attribute: 'backStyle', label: 'Back design', view: 'back' },
+] as const satisfies readonly {
+    key: VariationKey;
+    attribute: 'sleeveStyle' | 'neckStyle' | 'backStyle';
+    label: string;
+    view: 'front' | 'back';
+}[];
+
+// Beat between "the gold frame appears" and "the next step opens" — long
+// enough to see the selection register, short enough to feel like one tap.
+const ADVANCE_DELAY_MS = 300;
+
+const prefersReducedMotion = (): boolean =>
+    typeof window !== 'undefined' &&
+    typeof window.matchMedia === 'function' &&
+    window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
 // Category card poetry now lives on the manifest (tagline).
 
@@ -126,10 +155,31 @@ function toMeasurements(values: CustomizerFormValues): Measurements {
     return result;
 }
 
-const CustomizerFlow: React.FC<CustomizerFlowProps> = ({ designs, brackets, garmentDesigns }) => {
-    const [category, setCategory] = useState('blouse');
+const CustomizerFlow: React.FC<CustomizerFlowProps> = ({
+    designs,
+    brackets,
+    garmentDesigns,
+    patterns = [],
+    initialCategory,
+}) => {
+    const deepLinked = !!(
+        initialCategory && CUSTOMIZER_CATEGORIES.some((c) => c.id === initialCategory && c.available)
+    );
+    const [category, setCategory] = useState(deepLinked ? (initialCategory as string) : 'blouse');
+    // Once a category is tapped the editorial cards collapse to the compact
+    // pill row, so the design grid — 2,000px below the fold on a phone —
+    // becomes the top of the screen instead of staying invisible. A deep link
+    // has already made that choice.
+    const [categoryChosen, setCategoryChosen] = useState(deepLinked);
     const [step, setStep] = useState(0);
     const [selected, setSelected] = useState<BlouseDesign | null>(null);
+    // "Make It Yours" overrides on the chosen design. Seeded from the
+    // design itself, so an untouched journey submits exactly what it does
+    // today.
+    const [variations, setVariations] = useState<Pick<
+        BlouseDesign,
+        'neckStyle' | 'backStyle' | 'sleeveStyle'
+    > | null>(null);
     const [color, setColor] = useState('#D6A6B1');
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [submitError, setSubmitError] = useState<string | null>(null);
@@ -149,6 +199,11 @@ const CustomizerFlow: React.FC<CustomizerFlowProps> = ({ designs, brackets, garm
     const [pdfError, setPdfError] = useState<string | null>(null);
     // Hidden front+back renders used as the PDF's image sources.
     const pdfRenderRef = useRef<HTMLDivElement>(null);
+    // Top of the step area — every tap that changes what's on screen brings
+    // this back into view, so progress is never below the fold on a phone.
+    const stepTopRef = useRef<HTMLDivElement>(null);
+    const advanceTimer = useRef<number | null>(null);
+    const lastRevealedStep = useRef(0);
 
     const initialBracket = findBracketForAge(brackets, DEFAULT_AGE);
     const {
@@ -192,13 +247,69 @@ const CustomizerFlow: React.FC<CustomizerFlowProps> = ({ designs, brackets, garm
         }
     }, [age, brackets, setValue]);
 
+    const relatedPattern = (slug: string | undefined): PatternListing | null =>
+        (slug && patterns.find((l) => l.product && l.profile.relatedDesignSlugs.includes(slug))) || null;
+
+    // Brings the freshly-revealed step to the top of the viewport. Runs after
+    // paint so the new markup is mounted; falls back to the page top for the
+    // categories that hand off to a different flow component entirely.
+    const revealStep = () => {
+        if (typeof window === 'undefined') return;
+        const behavior: ScrollBehavior = prefersReducedMotion() ? 'auto' : 'smooth';
+        window.requestAnimationFrame(() => {
+            if (stepTopRef.current) stepTopRef.current.scrollIntoView({ behavior, block: 'start' });
+            else window.scrollTo({ top: 0, behavior });
+        });
+    };
+
+    const chooseCategory = (id: string) => {
+        setCategory(id);
+        setCategoryChosen(true);
+        revealStep();
+    };
+
+    // Bring each new step into view. Comparing against the last step actually
+    // revealed (rather than a "first render" flag) keeps a fresh page load —
+    // and StrictMode's double-invoked effects in dev — from scrolling.
+    useEffect(() => {
+        if (lastRevealedStep.current === step) return;
+        lastRevealedStep.current = step;
+        revealStep();
+        // revealStep only reads refs; re-running it on every render would be
+        // wrong — this must fire on step changes alone.
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [step]);
+
+    useEffect(
+        () => () => {
+            if (advanceTimer.current !== null) window.clearTimeout(advanceTimer.current);
+        },
+        [],
+    );
+
     const selectDesign = (design: BlouseDesign) => {
         setSelected(design);
+        setVariations({
+            neckStyle: design.neckStyle,
+            backStyle: design.backStyle,
+            sleeveStyle: design.sleeveStyle,
+        });
         setColor(design.baseColor);
+        // On a phone the Continue button sits ~2,000px below the finger, so a
+        // tap that only tints a border reads as "nothing happened". Open the
+        // next step ourselves, after a beat that lets the gold frame register.
+        if (advanceTimer.current !== null) window.clearTimeout(advanceTimer.current);
+        const offersChoices = VARIATION_ROWS.some(
+            (row) => allowedOptionsFor(design, row.key).length > 1,
+        );
+        advanceTimer.current = window.setTimeout(
+            () => setStep((s) => (s === 0 ? (offersChoices ? 1 : 2) : s)),
+            prefersReducedMotion() ? 0 : ADVANCE_DELAY_MS,
+        );
     };
 
     const goNext = async () => {
-        if (step === 1) {
+        if (step === 2) {
             // Measurement values are slider-clamped and can't be invalid;
             // only the free-typed age needs checking.
             const valid = await trigger('age');
@@ -207,7 +318,30 @@ const CustomizerFlow: React.FC<CustomizerFlowProps> = ({ designs, brackets, garm
         setStep((s) => Math.min(s + 1, STEPS.length - 1));
     };
 
-    const previewDesign = selected ? { ...selected, baseColor: color } : null;
+    // The design as varied in "Make It Yours" — what every preview, the
+    // PDF, and the submitted snapshot are built from.
+    const previewDesign = selected ? { ...selected, ...variations, baseColor: color } : null;
+
+    // Applies one variation choice; the hero preview and every downstream
+    // artefact read from previewDesign, so this is the only writer.
+    const pickVariation = (attribute: 'sleeveStyle' | 'neckStyle' | 'backStyle', option: string) => {
+        setVariations((prev) =>
+            prev
+                ? attribute === 'sleeveStyle'
+                    ? { ...prev, sleeveStyle: option as BlouseDesign['sleeveStyle'] }
+                    : attribute === 'neckStyle'
+                      ? { ...prev, neckStyle: option as BlouseDesign['neckStyle'] }
+                      : { ...prev, backStyle: option as BlouseDesign['backStyle'] }
+                : prev,
+        );
+    };
+
+    // Options this design offers per row. A row with fewer than two is
+    // hidden by VariationPicker — the design is simply cut that way.
+    const variationRows = selected
+        ? VARIATION_ROWS.map((row) => ({ ...row, options: allowedOptionsFor(selected, row.key) }))
+        : [];
+    const hasVariationChoices = variationRows.some((row) => row.options.length > 1);
 
     const handleGeneratePdf = async () => {
         if (!selected) return;
@@ -221,7 +355,7 @@ const CustomizerFlow: React.FC<CustomizerFlowProps> = ({ designs, brackets, garm
             await downloadBlouseDesignPdf(
                 {
                     designName: selected.name,
-                    design: { ...selected, baseColor: color },
+                    design: previewDesign!,
                     color,
                     measurements,
                     preferences: { ...preferences, braSize: preferences.braSize?.trim() || null },
@@ -256,9 +390,12 @@ const CustomizerFlow: React.FC<CustomizerFlowProps> = ({ designs, brackets, garm
                 designSnapshot: {
                     name: selected.name,
                     slug: selected.slug,
-                    neckStyle: selected.neckStyle,
-                    backStyle: selected.backStyle,
-                    sleeveStyle: selected.sleeveStyle,
+                    // Resolved "Make It Yours" attributes. Identical keys
+                    // and value domain as before, so atelier pages, admin
+                    // detail, and annotations need no changes.
+                    neckStyle: previewDesign!.neckStyle,
+                    backStyle: previewDesign!.backStyle,
+                    sleeveStyle: previewDesign!.sleeveStyle,
                     closure: selected.closure,
                     embellishment: selected.embellishment,
                     baseColor: selected.baseColor,
@@ -400,12 +537,13 @@ const CustomizerFlow: React.FC<CustomizerFlowProps> = ({ designs, brackets, garm
                     type="button"
                     disabled={!c.available}
                     title={c.description}
-                    onClick={() => c.available && setCategory(c.id)}
-                    className={`label-caps relative px-5 py-2.5 rounded-full border transition-colors duration-300 ${
+                    aria-pressed={c.id === category}
+                    onClick={() => c.available && chooseCategory(c.id)}
+                    className={`label-caps relative min-h-[44px] px-5 py-2.5 rounded-full border transition-colors duration-300 touch-manipulation ${
                         c.id === category
                             ? 'bg-deep-rose border-deep-rose text-white'
                             : c.available
-                                ? 'bg-ivory border-champagne-gold/40 text-charcoal hover:border-deep-rose hover:text-deep-rose'
+                                ? 'bg-ivory border-champagne-gold/40 text-charcoal active:border-deep-rose active:text-deep-rose [@media(hover:hover)]:hover:border-deep-rose [@media(hover:hover)]:hover:text-deep-rose'
                                 : 'bg-ivory border-champagne-gold/20 text-warm-gray/60 cursor-not-allowed'
                     }`}
                 >
@@ -417,6 +555,12 @@ const CustomizerFlow: React.FC<CustomizerFlowProps> = ({ designs, brackets, garm
                     )}
                 </button>
             ))}
+            <Link
+                href="/patterns"
+                className="label-caps relative inline-flex items-center min-h-[44px] px-5 py-2.5 rounded-full border bg-ivory border-champagne-gold/40 text-champagne-gold-dark transition-colors duration-300 touch-manipulation active:border-deep-rose active:text-deep-rose [@media(hover:hover)]:hover:border-deep-rose [@media(hover:hover)]:hover:text-deep-rose"
+            >
+                Sewing Patterns
+            </Link>
         </div>
     );
 
@@ -440,12 +584,16 @@ const CustomizerFlow: React.FC<CustomizerFlowProps> = ({ designs, brackets, garm
                             key={c.id}
                             type="button"
                             disabled={!c.available}
-                            onClick={() => c.available && setCategory(c.id)}
-                            className={`group relative text-left rounded-sm border transition-all duration-300 overflow-hidden ${
+                            aria-pressed={isCurrent}
+                            onClick={() => c.available && chooseCategory(c.id)}
+                            // The lift is hover-only on purpose: on a touch screen the
+                            // browser applies :hover on touchstart, so the card would
+                            // slide out from under the finger mid-tap.
+                            className={`group relative text-left rounded-sm border transition-all duration-300 overflow-hidden touch-manipulation ${
                                 isCurrent
                                     ? 'border-champagne-gold shadow-lift'
                                     : c.available
-                                        ? 'border-champagne-gold/30 shadow-soft hover:shadow-lift hover:-translate-y-1'
+                                        ? 'border-champagne-gold/30 shadow-soft active:border-champagne-gold active:shadow-lift [@media(hover:hover)]:hover:shadow-lift [@media(hover:hover)]:hover:-translate-y-1'
                                         : 'border-champagne-gold/15 opacity-60 cursor-not-allowed'
                             }`}
                         >
@@ -510,11 +658,31 @@ const CustomizerFlow: React.FC<CustomizerFlowProps> = ({ designs, brackets, garm
                         </button>
                     );
                 })}
+                {/* Sewing Patterns — the shop's entry in the category family */}
+                <Link
+                    href="/patterns"
+                    className="group relative text-left rounded-sm border border-champagne-gold/30 shadow-soft transition-all duration-300 overflow-hidden touch-manipulation active:border-champagne-gold active:shadow-lift [@media(hover:hover)]:hover:shadow-lift [@media(hover:hover)]:hover:-translate-y-1"
+                >
+                    <div className="relative paper-card p-5 h-44 flex flex-col items-center justify-center">
+                        <CornerFlourish position="tl" />
+                        <svg width="54" height="54" viewBox="0 0 24 24" fill="none" stroke="#8F6D2A" strokeWidth="1" aria-hidden="true">
+                            <path d="M7 3 L17 3 L20 8 L12 21 L4 8 Z" />
+                            <path d="M4 8 L20 8 M12 21 L7 3 M12 21 L17 3" opacity="0.45" />
+                        </svg>
+                        <span className="label-caps text-[9px] text-champagne-gold-dark mt-3">Instant PDF</span>
+                    </div>
+                    <div className="bg-white px-5 py-4 border-t border-champagne-gold/25">
+                        <span className="font-heading text-title text-ink">Sewing Patterns</span>
+                        <span className="font-accent italic text-body-sm text-warm-gray block mt-1 sm:opacity-0 sm:group-hover:opacity-100 transition-opacity duration-500">
+                            Our cuts, your hands — patterns to sew at home.
+                        </span>
+                    </div>
+                </Link>
             </div>
         </div>
     );
 
-    const showEditorialCategories = step === 0;
+    const showEditorialCategories = step === 0 && !categoryChosen;
 
     if (category === 'blouse' && designs.length === 0) {
         return (
@@ -537,6 +705,7 @@ const CustomizerFlow: React.FC<CustomizerFlowProps> = ({ designs, brackets, garm
                 <LehengaFlow
                     cholis={designs}
                     skirts={garmentDesigns.filter((d) => d.category === 'lehenga')}
+                    patterns={patterns}
                 />
             </div>
         );
@@ -551,6 +720,7 @@ const CustomizerFlow: React.FC<CustomizerFlowProps> = ({ designs, brackets, garm
                     kameezes={garmentDesigns.filter((d) => d.category === 'kurti')}
                     bottoms={garmentDesigns.filter((d) => d.category === 'bottoms')}
                     brackets={brackets}
+                    patterns={patterns}
                 />
             </div>
         );
@@ -573,6 +743,7 @@ const CustomizerFlow: React.FC<CustomizerFlowProps> = ({ designs, brackets, garm
                     category={manifestCategory}
                     designs={garmentDesigns.filter((d) => d.category === category)}
                     brackets={brackets}
+                    patterns={patterns}
                 />
             </div>
         );
@@ -583,6 +754,7 @@ const CustomizerFlow: React.FC<CustomizerFlowProps> = ({ designs, brackets, garm
             {atelierHeader}
             {showEditorialCategories ? categoryCards : categoryPills}
 
+            <div ref={stepTopRef} className="scroll-mt-24" />
             <AtelierStepper steps={STEPS} current={step} />
 
             {/* Step 1: pick a design */}
@@ -595,11 +767,13 @@ const CustomizerFlow: React.FC<CustomizerFlowProps> = ({ designs, brackets, garm
                                 <button
                                     key={design.id}
                                     type="button"
+                                    aria-pressed={isSelected}
                                     onClick={() => selectDesign(design)}
-                                    className={`text-left bg-white rounded-sm overflow-hidden transition-all duration-300 border ${
+                                    // Lift stays hover-only — see the category card note.
+                                    className={`text-left bg-white rounded-sm overflow-hidden transition-all duration-300 border touch-manipulation ${
                                         isSelected
                                             ? 'border-champagne-gold ring-1 ring-champagne-gold shadow-lift scale-[1.015]'
-                                            : 'border-champagne-gold/25 shadow-soft hover:shadow-lift hover:-translate-y-1'
+                                            : 'border-champagne-gold/25 shadow-soft active:border-champagne-gold active:ring-1 active:ring-champagne-gold [@media(hover:hover)]:hover:shadow-lift [@media(hover:hover)]:hover:-translate-y-1'
                                     }`}
                                 >
                                     <div className="relative paper-card p-4">
@@ -634,11 +808,90 @@ const CustomizerFlow: React.FC<CustomizerFlowProps> = ({ designs, brackets, garm
                             );
                         })}
                     </div>
+                    <p className="text-center mt-8">
+                        <Link
+                            href="/patterns?category=blouse"
+                            className="link-gold text-body-sm inline-flex items-center min-h-[44px] touch-manipulation"
+                        >
+                            Sew it yourself — browse blouse patterns →
+                        </Link>
+                    </p>
                 </div>
             )}
 
-            {/* Step 2: measurements */}
-            {step === 1 && previewDesign && (
+            {/* Step 2: Make It Yours — the chosen design, and the
+                variations it is cut for */}
+            {step === 1 && previewDesign && selected && (
+                <div className="animate-fade-in">
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+                        {/* Hero sketchbook — the live combination */}
+                        <div>
+                            <p className="label-caps text-champagne-gold-dark text-center mb-3">
+                                {selected.name}
+                            </p>
+                            <div className="grid grid-cols-2 gap-3">
+                                {(['front', 'back'] as const).map((v) => (
+                                    <div
+                                        key={v}
+                                        className="relative paper-card border border-champagne-gold/40 rounded-sm p-3"
+                                    >
+                                        <CornerFlourish position="tl" />
+                                        <BlousePreview
+                                            design={previewDesign}
+                                            measurements={measurements}
+                                            view={v}
+                                            showCaption={false}
+                                        />
+                                        <p className="font-accent italic text-caption text-warm-gray text-center mt-1">
+                                            {v === 'front' ? 'Front' : 'Back'}
+                                        </p>
+                                    </div>
+                                ))}
+                            </div>
+                            <p className="font-accent italic text-body-sm text-warm-gray text-center mt-3">
+                                The sketch follows every choice you make.
+                            </p>
+                        </div>
+
+                        {/* Variation rows */}
+                        <div>
+                            {hasVariationChoices ? (
+                                <>
+                                    {variationRows.map((row) => (
+                                        <VariationPicker
+                                            key={row.key}
+                                            label={row.label}
+                                            options={row.options}
+                                            value={previewDesign[row.attribute]}
+                                            baseDesign={selected}
+                                            attribute={row.attribute}
+                                            view={row.view}
+                                            measurements={BASE_MEASUREMENTS}
+                                            onPick={(option) => pickVariation(row.attribute, option)}
+                                        />
+                                    ))}
+                                    <p className="text-body-sm text-warm-gray">
+                                        These are the variations this design is cut for. Colour and every
+                                        measurement come next.
+                                    </p>
+                                </>
+                            ) : (
+                                <div className="paper-card border border-champagne-gold/30 rounded-sm p-6 text-center">
+                                    <p className="font-accent italic text-lede text-warm-gray">
+                                        {selected.name} is cut one way, exactly as drawn.
+                                    </p>
+                                    <p className="text-body-sm text-warm-gray mt-2">
+                                        Colour and every measurement come next.
+                                    </p>
+                                </div>
+                            )}
+                        </div>
+                    </div>
+                </div>
+            )}
+
+            {/* Step 3: measurements */}
+            {step === 2 && previewDesign && (
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-8 animate-fade-in">
                     <div>
                         <div className="mb-8 bg-blush/60 border border-champagne-gold/25 rounded-sm p-4">
@@ -788,7 +1041,7 @@ const CustomizerFlow: React.FC<CustomizerFlowProps> = ({ designs, brackets, garm
             )}
 
             {/* Step 3: preview & review */}
-            {step === 2 && previewDesign && selected && (
+            {step === 3 && previewDesign && selected && (
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-8 animate-fade-in">
                     <div>
                         {/* Both views shown together; this container is also the
@@ -840,6 +1093,9 @@ const CustomizerFlow: React.FC<CustomizerFlowProps> = ({ designs, brackets, garm
                             onFilesChange={setMuseFiles}
                             onNoteChange={setMuseNote}
                         />
+                        {relatedPattern(selected.slug) && (
+                            <RelatedPatternCard listing={relatedPattern(selected.slug)!} className="mt-6" />
+                        )}
                     </div>
 
                     <div>
@@ -971,7 +1227,13 @@ const CustomizerFlow: React.FC<CustomizerFlowProps> = ({ designs, brackets, garm
                 </Button>
                 {step < STEPS.length - 1 && (
                     <Button onClick={goNext} disabled={!selected}>
-                        {step === 0 ? (selected ? 'Continue' : 'Select a design') : 'Preview'}
+                        {step === 0
+                            ? selected
+                                ? 'Continue'
+                                : 'Select a design'
+                            : step === 1
+                              ? 'Continue to Measurements'
+                              : 'Preview'}
                     </Button>
                 )}
             </div>

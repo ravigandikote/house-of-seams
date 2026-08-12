@@ -13,6 +13,8 @@ import { downloadGarmentDesignPdf } from '../../lib/garmentDesignPdf';
 import { submitCustomDesignRequest } from '../../services/customizerService';
 import { CustomizerCategory } from '../../types/customizerCategories';
 import { GarmentDesign } from '../../types/garmentDesign';
+import { PatternListing } from '../../types/pattern';
+import RelatedPatternCard from '../commerce/RelatedPatternCard';
 import {
     MEASUREMENT_FIELDS,
     Measurements,
@@ -49,9 +51,12 @@ interface SingleGarmentFlowProps {
     category: CustomizerCategory;
     designs: GarmentDesign[];
     brackets: MeasurementDefault[];
+    patterns?: PatternListing[];
 }
 
-const SingleGarmentFlow: React.FC<SingleGarmentFlowProps> = ({ category, designs, brackets }) => {
+const SingleGarmentFlow: React.FC<SingleGarmentFlowProps> = ({ category, designs, brackets, patterns = [] }) => {
+    const relatedPattern = (slug: string | undefined): PatternListing | null =>
+        (slug && patterns.find((l) => l.product && l.profile.relatedDesignSlugs.includes(slug))) || null;
     const spec = category.spec!;
     const rendererId = category.renderer?.kind === 'single' ? category.renderer.rendererId : 'blouse';
     // Spec keys shared with the blouse chart can prefill from age brackets.
@@ -319,10 +324,10 @@ const SingleGarmentFlow: React.FC<SingleGarmentFlowProps> = ({ category, designs
                                     key={design.id}
                                     type="button"
                                     onClick={() => selectDesign(design)}
-                                    className={`text-left bg-white rounded-sm overflow-hidden transition-all duration-300 border ${
+                                    className={`text-left bg-white rounded-sm overflow-hidden transition-all duration-300 border touch-manipulation ${
                                         isSelected
                                             ? 'border-champagne-gold ring-1 ring-champagne-gold shadow-lift scale-[1.015]'
-                                            : 'border-champagne-gold/25 shadow-soft hover:shadow-lift hover:-translate-y-1'
+                                            : 'border-champagne-gold/25 shadow-soft active:border-champagne-gold active:shadow-lift [@media(hover:hover)]:hover:shadow-lift [@media(hover:hover)]:hover:-translate-y-1'
                                     }`}
                                 >
                                     <div className="relative paper-card p-4">
@@ -362,6 +367,11 @@ const SingleGarmentFlow: React.FC<SingleGarmentFlowProps> = ({ category, designs
                             );
                         })}
                     </div>
+                    <p className="text-center mt-8">
+                        <Link href={`/patterns?category=${category.id}`} className="link-gold text-body-sm">
+                            Sew it yourself — browse {category.label.toLowerCase()} patterns →
+                        </Link>
+                    </p>
                 </div>
             )}
 
@@ -471,6 +481,9 @@ const SingleGarmentFlow: React.FC<SingleGarmentFlowProps> = ({ category, designs
                             onFilesChange={setMuseFiles}
                             onNoteChange={setMuseNote}
                         />
+                        {relatedPattern(selected?.slug) && (
+                            <RelatedPatternCard listing={relatedPattern(selected?.slug)!} className="mt-6" />
+                        )}
                     </div>
                     <div>
                         <p className="label-caps text-champagne-gold-dark mb-1.5">The Design Sheet</p>

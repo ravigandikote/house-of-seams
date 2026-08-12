@@ -52,7 +52,13 @@ const Hero: React.FC = () => {
                         >
                             Design Your Blouse
                         </Link>
-                        <Link href="/collections" className="link-gold text-body-sm">
+                        {/* The "collections" a customer can actually browse are the
+                            blouse designs themselves. /collections is an image-only
+                            editorial page, so this used to dead-end there. */}
+                        <Link
+                            href="/customize?category=blouse"
+                            className="link-gold text-body-sm inline-flex items-center min-h-[44px] touch-manipulation"
+                        >
                             Explore Collections
                         </Link>
                     </div>

@@ -33,6 +33,7 @@ const defaultForm: Partial<Product> = {
   image: "",
   imageUrl: "",
   isFeatured: false,
+  shopifyHandle: null,
 };
 
 const columns = [
@@ -185,6 +186,12 @@ export default function AdminProductsPage() {
           value={form.price ?? 0}
           onChange={(e) => setForm({ ...form, price: parseFloat(e.target.value) || 0 })}
           required
+        />
+        <Input
+          label="Shopify handle (optional — makes this product purchasable via the store)"
+          value={form.shopifyHandle ?? ""}
+          onChange={(e) => setForm({ ...form, shopifyHandle: e.target.value.trim() || null })}
+          placeholder="silver-jhumka-earrings"
         />
         <SelectField
           label="Category"

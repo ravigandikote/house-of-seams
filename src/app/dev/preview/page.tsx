@@ -9,6 +9,10 @@ import ComposedPreview from '../../../components/customizer/ComposedPreview';
 import LehengaPreview from '../../../components/customizer/LehengaPreview';
 import MeasurementSliderGroup from '../../../components/customizer/MeasurementSliderGroup';
 import { anchorStack } from '../../../types/composition';
+import { demoProducts, isCommerceConfigured } from '../../../lib/shopify';
+import { formatPrice } from '../../../types/commerce';
+import { useRegion } from '../../../lib/region';
+import { usePatternCartStore } from '../../../store/patternCartStore';
 import {
     BlouseDesignAttributes,
     NECK_STYLES,
@@ -307,8 +311,49 @@ const DevPreviewPage = () => {
                     />
                 </div>
             </div>
+
+            <CommerceHarness />
         </div>
     );
 };
+
+// Phase-S1 harness: exercises the pattern bag (demo fixtures, region
+// pricing, drawer) before the /patterns pages exist in Phase S2.
+function CommerceHarness() {
+    const [region] = useRegion();
+    const addProduct = usePatternCartStore((s) => s.addProduct);
+    const products = demoProducts(region);
+    return (
+        <div className="mt-12 border-t border-gray-200 pt-8">
+            <h2 className="font-heading text-lg font-bold text-charcoal mb-1">
+                Commerce harness (Phase S1)
+            </h2>
+            <p className="text-sm text-gray-500 mb-4">
+                {isCommerceConfigured()
+                    ? 'Shopify is configured — these cards still use demo fixtures.'
+                    : 'Commerce demo mode — no Shopify store connected.'}{' '}
+                Region: {region}
+            </p>
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+                {products.map((p) => (
+                    <div key={p.id} className="bg-white border border-gray-200 rounded-lg p-4 flex flex-col">
+                        <p className="font-heading text-sm font-bold text-charcoal">{p.title}</p>
+                        <p className="text-xs text-gray-500 mt-1 flex-1">{p.description.slice(0, 80)}…</p>
+                        <div className="flex items-center justify-between mt-3">
+                            <span className="text-sm text-charcoal font-medium">{formatPrice(p.price)}</span>
+                            <button
+                                type="button"
+                                onClick={() => addProduct(p, region)}
+                                className="text-xs font-medium px-3 py-1.5 rounded bg-dusty-rose text-white hover:bg-dusty-rose-dark transition-colors"
+                            >
+                                Add to bag
+                            </button>
+                        </div>
+                    </div>
+                ))}
+            </div>
+        </div>
+    );
+}
 
 export default DevPreviewPage;

@@ -11,5 +11,7 @@ export interface Product {
     createdAt?: Date;
     updatedAt?: Date;
     isFeatured?: boolean;
+    /** When set, the product page sells via Shopify (same rail as patterns). */
+    shopifyHandle?: string | null;
     isCustomizable?: boolean;
 }

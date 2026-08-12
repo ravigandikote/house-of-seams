@@ -2,6 +2,7 @@ import React from 'react';
 import FooterLinks from './FooterLinks';
 import FooterNewsletter from './FooterNewsletter';
 import FooterSocial from './FooterSocial';
+import RegionSelector from '../commerce/RegionSelector';
 
 const Footer = () => {
     return (
@@ -27,10 +28,11 @@ const Footer = () => {
                     <FooterNewsletter />
                     <FooterSocial />
                 </div>
-                <div className="border-t border-champagne-gold/20 mt-12 pt-6 text-center">
+                <div className="border-t border-champagne-gold/20 mt-12 pt-6 flex flex-col sm:flex-row items-center justify-between gap-4">
                     <p className="text-cream/50 text-body-sm">
                         &copy; {new Date().getFullYear()} House of Seams. All rights reserved.
                     </p>
+                    <RegionSelector tone="dark" />
                 </div>
             </div>
         </footer>

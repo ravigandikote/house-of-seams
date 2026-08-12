@@ -5,6 +5,7 @@ import { useParams } from 'next/navigation';
 import { useProducts } from '../../hooks/useProducts';
 import { Product } from '../../types/product';
 import PriceRangeDisplay from './PriceRangeDisplay';
+import ProductCommerce from '../commerce/ProductCommerce';
 import SizeGuide from './SizeGuide';
 
 const ProductDetail: React.FC = () => {
@@ -21,11 +22,17 @@ const ProductDetail: React.FC = () => {
             <h1 className="text-3xl font-bold mb-4">{product.name}</h1>
             <img src={product.imageUrl || product.image} alt={product.name} className="w-full h-auto mb-4" />
             <p className="text-lg mb-4">{product.description}</p>
-            <PriceRangeDisplay price={product.price} />
+            {product.shopifyHandle ? (
+                <ProductCommerce shopifyHandle={product.shopifyHandle} className="mb-4" />
+            ) : (
+                <PriceRangeDisplay price={product.price} />
+            )}
             <SizeGuide sizes={product.sizes} />
-            <button className="mt-4 bg-dusty-rose text-white py-2 px-4 rounded">
-                Add to Cart
-            </button>
+            {!product.shopifyHandle && (
+                <button className="mt-4 bg-dusty-rose text-white py-2 px-4 rounded">
+                    Add to Cart
+                </button>
+            )}
         </div>
     );
 };

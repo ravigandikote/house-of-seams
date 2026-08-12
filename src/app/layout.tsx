@@ -3,6 +3,7 @@ import { Playfair_Display, Inter, Cormorant_Garamond } from 'next/font/google';
 import { headers } from 'next/headers';
 import Header from '../components/layout/Header';
 import Footer from '../components/layout/Footer';
+import PatternCartDrawer from '../components/commerce/PatternCartDrawer';
 import { AuthProvider } from '../components/providers/AuthProvider';
 import '../styles/globals.css';
 
@@ -27,6 +28,9 @@ const cormorant = Cormorant_Garamond({
 });
 
 export const metadata = {
+    metadataBase: process.env.NEXT_PUBLIC_BASE_URL
+        ? new URL(process.env.NEXT_PUBLIC_BASE_URL)
+        : undefined,
     title: 'House of Seams | Contemporary Fashion & Jewellery',
     description: 'A contemporary expression of lifestyle and jewellery. Custom blouses, bridal couture, and curated collections.',
 };
@@ -47,6 +51,7 @@ const RootLayout = ({ children }: { children: React.ReactNode }) => {
                             <Header />
                             <main className="flex-grow">{children}</main>
                             <Footer />
+                            <PatternCartDrawer />
                         </div>
                     )}
                 </AuthProvider>

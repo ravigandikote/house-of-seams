@@ -41,6 +41,26 @@ export interface BlouseDesignAttributes {
     baseColor: string;
 }
 
+// Per-design variation whitelist. Every key is optional and an absent or
+// empty list means "every option allowed" — which is how the legacy rows
+// (allowed_variations IS NULL) keep offering the full range.
+export interface BlouseAllowedVariations {
+    sleeves?: SleeveStyle[];
+    necklines?: NeckStyle[];
+    backs?: BackStyle[];
+}
+
+// The attribute each variation key constrains, so UI and validation can
+// iterate the three keys instead of repeating them.
+export const VARIATION_KEYS = ['sleeves', 'necklines', 'backs'] as const;
+export type VariationKey = (typeof VARIATION_KEYS)[number];
+
+export const VARIATION_OPTIONS: Record<VariationKey, readonly string[]> = {
+    sleeves: SLEEVE_STYLES,
+    necklines: NECK_STYLES,
+    backs: BACK_STYLES,
+};
+
 export interface BlouseDesign extends BlouseDesignAttributes {
     id: string;
     name: string;
@@ -50,6 +70,46 @@ export interface BlouseDesign extends BlouseDesignAttributes {
     thumbnailUrl?: string | null;
     isActive: boolean;
     sortOrder: number;
+    /** Kavya's signature cuts lead the customizer gallery. */
+    isSignature: boolean;
+    /** null = this design is offered in every sleeve/neck/back style. */
+    allowedVariations?: BlouseAllowedVariations | null;
     createdAt?: string;
     updatedAt?: string;
+}
+
+// The options a design offers for one variation key. An unset or empty
+// list means every option, so callers never special-case legacy rows.
+export function allowedOptionsFor(
+    design: Pick<BlouseDesign, 'allowedVariations'> | null | undefined,
+    key: VariationKey,
+): readonly string[] {
+    const all = VARIATION_OPTIONS[key];
+    const allowed = design?.allowedVariations?.[key];
+    if (!allowed || allowed.length === 0) return all;
+    const filtered = all.filter((option) => (allowed as readonly string[]).includes(option));
+    // A list that filters everything out is a data error, not an intent to
+    // offer nothing — fall back to the full range rather than a dead step.
+    return filtered.length > 0 ? filtered : all;
+}
+
+// Immutably set (or clear, with null) one key. Each key holds its own
+// style union, so the branches replace a cast on a generic index write.
+// Values must already be validated members of that key's enum.
+export function withVariation(
+    current: BlouseAllowedVariations | null | undefined,
+    key: VariationKey,
+    values: readonly string[] | null,
+): BlouseAllowedVariations {
+    const next: BlouseAllowedVariations = { ...(current ?? {}) };
+    if (values === null) {
+        delete next[key];
+    } else if (key === 'sleeves') {
+        next.sleeves = values as SleeveStyle[];
+    } else if (key === 'necklines') {
+        next.necklines = values as NeckStyle[];
+    } else {
+        next.backs = values as BackStyle[];
+    }
+    return next;
 }

@@ -6,6 +6,7 @@ import { usePathname } from 'next/navigation';
 import { useAuth } from '../../hooks/useAuth';
 import { WhatsAppButton } from '../ui/WhatsAppButton';
 import { useCartStore } from '../../store/cartStore';
+import { usePatternCartStore } from '../../store/patternCartStore';
 
 const Header: React.FC = () => {
     const pathname = usePathname();
@@ -14,6 +15,8 @@ const Header: React.FC = () => {
     const [userMenuOpen, setUserMenuOpen] = useState(false);
     const userMenuRef = useRef<HTMLDivElement>(null);
     const totalItems = useCartStore((s) => s.getTotalItems());
+    const patternCount = usePatternCartStore((s) => s.lines.reduce((sum, l) => sum + l.quantity, 0));
+    const openPatternBag = usePatternCartStore((s) => s.openDrawer);
 
     useEffect(() => {
         function handleClickOutside(e: MouseEvent) {
@@ -30,6 +33,7 @@ const Header: React.FC = () => {
         { href: '/collections', label: 'Collections' },
         { href: '/products', label: 'Products' },
         { href: '/customize', label: 'Customize' },
+        { href: '/patterns', label: 'Patterns' },
         { href: '/gallery', label: 'Gallery' },
         { href: '/testimonials', label: 'Testimonials' },
         { href: '/blog', label: 'Blog' },
@@ -77,6 +81,23 @@ const Header: React.FC = () => {
                             </span>
                         )}
                     </Link>
+
+                    {/* Pattern bag — appears only once it holds something */}
+                    {patternCount > 0 && (
+                        <button
+                            type="button"
+                            onClick={openPatternBag}
+                            aria-label={`Open the pattern bag (${patternCount})`}
+                            className="relative text-charcoal hover:text-deep-rose transition-colors duration-200"
+                        >
+                            <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.6} d="M7 3 L17 3 L20 8 L12 21 L4 8 Z M4 8 H20 M12 21 L7 3 M12 21 L17 3" />
+                            </svg>
+                            <span className="absolute -top-2 -right-2 bg-champagne-gold-dark text-white text-xs w-4 h-4 flex items-center justify-center rounded-full">
+                                {patternCount}
+                            </span>
+                        </button>
+                    )}
 
                     {/* User menu */}
                     {user ? (

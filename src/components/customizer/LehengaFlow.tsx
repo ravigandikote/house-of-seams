@@ -16,6 +16,8 @@ import { downloadGarmentDesignPdf } from '../../lib/garmentDesignPdf';
 import { submitCustomDesignRequest } from '../../services/customizerService';
 import { BlouseDesign } from '../../types/blouseDesign';
 import { GarmentDesign } from '../../types/garmentDesign';
+import { PatternListing } from '../../types/pattern';
+import RelatedPatternCard from '../commerce/RelatedPatternCard';
 import { LehengaDesignAttributes } from '../../types/lehengaDesign';
 import { LEHENGA_MEASUREMENT_SPEC } from '../../types/lehengaMeasurements';
 import {
@@ -31,6 +33,13 @@ import {
 // (category: 'lehenga'); the dupatta choice rides in preferences.
 
 const STEPS = ['Choose Skirt', 'Choose Choli', 'Measurements', 'Preview & Submit'] as const;
+
+// TODO(variations): the blouse journey now offers a "Make It Yours" step
+// (VariationPicker + blouse_designs.allowed_variations). Not adopted here
+// yet: this flow would need a FIFTH step, and its snapshot nests the choli
+// under designSnapshot.choli — a contract the atelier page and admin detail
+// both read (LehengaDesignSnapshotWithCholi). That is a separate change
+// with its own e2e, not a low-risk graft. Picking a choli is unaffected.
 
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 const PHONE_RE = /^[0-9+\-() ]{7,15}$/;
@@ -63,9 +72,12 @@ interface LehengaFlowProps {
     cholis: BlouseDesign[];
     /** Skirt designs from garment_designs (category: lehenga). */
     skirts: GarmentDesign[];
+    patterns?: PatternListing[];
 }
 
-const LehengaFlow: React.FC<LehengaFlowProps> = ({ cholis, skirts }) => {
+const LehengaFlow: React.FC<LehengaFlowProps> = ({ cholis, skirts, patterns = [] }) => {
+    const relatedPattern = (slug: string | undefined): PatternListing | null =>
+        (slug && patterns.find((l) => l.product && l.profile.relatedDesignSlugs.includes(slug))) || null;
     const skirtDesigns = skirts.map(toSkirtDesign);
     const [step, setStep] = useState(0);
     const [skirt, setSkirt] = useState<SkirtDesign | null>(null);
@@ -336,10 +348,10 @@ const LehengaFlow: React.FC<LehengaFlowProps> = ({ cholis, skirts }) => {
                                         setSkirt(design);
                                         setSkirtColor(design.attrs.baseColor);
                                     }}
-                                    className={`text-left bg-white rounded-sm overflow-hidden transition-all duration-300 border ${
+                                    className={`text-left bg-white rounded-sm overflow-hidden transition-all duration-300 border touch-manipulation ${
                                         isSelected
                                             ? 'border-champagne-gold ring-1 ring-champagne-gold shadow-lift scale-[1.015]'
-                                            : 'border-champagne-gold/25 shadow-soft hover:shadow-lift hover:-translate-y-1'
+                                            : 'border-champagne-gold/25 shadow-soft active:border-champagne-gold active:shadow-lift [@media(hover:hover)]:hover:shadow-lift [@media(hover:hover)]:hover:-translate-y-1'
                                     }`}
                                 >
                                     <div className="relative paper-card p-3">
@@ -380,6 +392,11 @@ const LehengaFlow: React.FC<LehengaFlowProps> = ({ cholis, skirts }) => {
                             );
                         })}
                     </div>
+                    <p className="text-center mt-8">
+                        <Link href="/patterns?category=lehenga" className="link-gold text-body-sm">
+                            Sew it yourself — browse lehenga patterns →
+                        </Link>
+                    </p>
                 </div>
             )}
 
@@ -395,10 +412,10 @@ const LehengaFlow: React.FC<LehengaFlowProps> = ({ cholis, skirts }) => {
                         <button
                             type="button"
                             onClick={() => setCholi('skirt-only')}
-                            className={`text-left bg-white rounded-sm overflow-hidden transition-all duration-300 border ${
+                            className={`text-left bg-white rounded-sm overflow-hidden transition-all duration-300 border touch-manipulation ${
                                 choli === 'skirt-only'
                                     ? 'border-champagne-gold ring-1 ring-champagne-gold shadow-lift scale-[1.015]'
-                                    : 'border-champagne-gold/25 shadow-soft hover:shadow-lift hover:-translate-y-1'
+                                    : 'border-champagne-gold/25 shadow-soft active:border-champagne-gold active:shadow-lift [@media(hover:hover)]:hover:shadow-lift [@media(hover:hover)]:hover:-translate-y-1'
                             }`}
                         >
                             <div className="relative paper-card p-3 h-48 flex items-center justify-center">
@@ -425,10 +442,10 @@ const LehengaFlow: React.FC<LehengaFlowProps> = ({ cholis, skirts }) => {
                                         setCholi(design);
                                         setCholiColor(design.baseColor);
                                     }}
-                                    className={`text-left bg-white rounded-sm overflow-hidden transition-all duration-300 border ${
+                                    className={`text-left bg-white rounded-sm overflow-hidden transition-all duration-300 border touch-manipulation ${
                                         isSelected
                                             ? 'border-champagne-gold ring-1 ring-champagne-gold shadow-lift scale-[1.015]'
-                                            : 'border-champagne-gold/25 shadow-soft hover:shadow-lift hover:-translate-y-1'
+                                            : 'border-champagne-gold/25 shadow-soft active:border-champagne-gold active:shadow-lift [@media(hover:hover)]:hover:shadow-lift [@media(hover:hover)]:hover:-translate-y-1'
                                     }`}
                                 >
                                     <div className="relative paper-card p-4">
@@ -612,6 +629,9 @@ const LehengaFlow: React.FC<LehengaFlowProps> = ({ cholis, skirts }) => {
                             onFilesChange={setMuseFiles}
                             onNoteChange={setMuseNote}
                         />
+                        {relatedPattern(skirt?.slug) && (
+                            <RelatedPatternCard listing={relatedPattern(skirt?.slug)!} className="mt-6" />
+                        )}
                     </div>
                     <div>
                         <p className="label-caps text-champagne-gold-dark mb-1.5">The Design Sheet</p>

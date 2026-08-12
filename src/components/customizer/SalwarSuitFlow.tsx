@@ -16,6 +16,8 @@ import { downloadGarmentDesignPdf } from '../../lib/garmentDesignPdf';
 import { submitCustomDesignRequest } from '../../services/customizerService';
 import { BottomsDesignAttributes } from '../../types/bottomsDesign';
 import { GarmentDesign } from '../../types/garmentDesign';
+import { PatternListing } from '../../types/pattern';
+import RelatedPatternCard from '../commerce/RelatedPatternCard';
 import { KurtiDesignAttributes } from '../../types/kurtiDesign';
 import { SALWAR_SUIT_MEASUREMENT_SPEC } from '../../types/salwarSuitMeasurements';
 import {
@@ -55,9 +57,12 @@ interface SalwarSuitFlowProps {
     /** Bottoms garment_designs. */
     bottoms: GarmentDesign[];
     brackets: MeasurementDefault[];
+    patterns?: PatternListing[];
 }
 
-const SalwarSuitFlow: React.FC<SalwarSuitFlowProps> = ({ kameezes, bottoms, brackets }) => {
+const SalwarSuitFlow: React.FC<SalwarSuitFlowProps> = ({ kameezes, bottoms, brackets, patterns = [] }) => {
+    const relatedPattern = (slug: string | undefined): PatternListing | null =>
+        (slug && patterns.find((l) => l.product && l.profile.relatedDesignSlugs.includes(slug))) || null;
     const bracketKeys = SPEC.fields
         .map((f) => f.key)
         .filter((k): k is MeasurementField => (MEASUREMENT_FIELDS as readonly string[]).includes(k));
@@ -345,10 +350,10 @@ const SalwarSuitFlow: React.FC<SalwarSuitFlowProps> = ({ kameezes, bottoms, brac
             key={design.id}
             type="button"
             onClick={onSelect}
-            className={`text-left bg-white rounded-sm overflow-hidden transition-all duration-300 border ${
+            className={`text-left bg-white rounded-sm overflow-hidden transition-all duration-300 border touch-manipulation ${
                 isSelected
                     ? 'border-champagne-gold ring-1 ring-champagne-gold shadow-lift scale-[1.015]'
-                    : 'border-champagne-gold/25 shadow-soft hover:shadow-lift hover:-translate-y-1'
+                    : 'border-champagne-gold/25 shadow-soft active:border-champagne-gold active:shadow-lift [@media(hover:hover)]:hover:shadow-lift [@media(hover:hover)]:hover:-translate-y-1'
             }`}
         >
             <div className="relative paper-card p-4">
@@ -559,6 +564,9 @@ const SalwarSuitFlow: React.FC<SalwarSuitFlowProps> = ({ kameezes, bottoms, brac
                             onFilesChange={setMuseFiles}
                             onNoteChange={setMuseNote}
                         />
+                        {relatedPattern(kameez?.slug) && (
+                            <RelatedPatternCard listing={relatedPattern(kameez?.slug)!} className="mt-6" />
+                        )}
                     </div>
                     <div>
                         <p className="label-caps text-champagne-gold-dark mb-1.5">The Design Sheet</p>

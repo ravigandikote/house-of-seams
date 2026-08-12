@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createAdminClient } from '@/lib/supabase/admin';
 import { toCamelCase, toSnakeCase } from '@/lib/caseTransform';
+import { validateAllowedVariations } from '@/lib/blouseVariationValidation';
 
 // Auth: /api/admin/* is gated by the ADMIN_EMAILS allowlist in
 // src/middleware.ts (401/403 before reaching this handler). This route
@@ -12,6 +13,13 @@ export async function PUT(request: NextRequest, { params }: { params: { id: stri
   const body = await request.json();
   const snakeBody = toSnakeCase(body) as Record<string, unknown>;
   delete snakeBody.id;
+  // Values are checked against the style enums here; the DB CHECK only
+  // guards the JSONB shape. Absent key = leave the column untouched.
+  if ('allowed_variations' in snakeBody) {
+    const variations = validateAllowedVariations(snakeBody.allowed_variations);
+    if (!variations.ok) return NextResponse.json({ error: variations.error }, { status: 400 });
+    snakeBody.allowed_variations = variations.value;
+  }
   const { data, error } = await supabase.from('blouse_designs').update(snakeBody).eq('id', params.id).select().single();
   if (error) return NextResponse.json({ error: error.message }, { status: error.code === 'PGRST116' ? 404 : 500 });
   return NextResponse.json(toCamelCase(data));

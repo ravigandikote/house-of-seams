@@ -19,6 +19,7 @@ export const FALLBACK_DESIGNS: BlouseDesign[] = [
         baseColor: '#D6A6B1',
         isActive: true,
         sortOrder: 1,
+        isSignature: false,
     },
     {
         id: 'fallback-2',
@@ -33,6 +34,7 @@ export const FALLBACK_DESIGNS: BlouseDesign[] = [
         baseColor: '#B87A88',
         isActive: true,
         sortOrder: 2,
+        isSignature: false,
     },
     {
         id: 'fallback-3',
@@ -47,6 +49,7 @@ export const FALLBACK_DESIGNS: BlouseDesign[] = [
         baseColor: '#8FA88D',
         isActive: true,
         sortOrder: 3,
+        isSignature: false,
     },
     {
         id: 'fallback-4',
@@ -61,6 +64,7 @@ export const FALLBACK_DESIGNS: BlouseDesign[] = [
         baseColor: '#2D2D2D',
         isActive: true,
         sortOrder: 4,
+        isSignature: false,
     },
     {
         id: 'fallback-5',
@@ -75,6 +79,7 @@ export const FALLBACK_DESIGNS: BlouseDesign[] = [
         baseColor: '#B7C9B5',
         isActive: true,
         sortOrder: 5,
+        isSignature: false,
     },
     {
         id: 'fallback-6',
@@ -89,6 +94,7 @@ export const FALLBACK_DESIGNS: BlouseDesign[] = [
         baseColor: '#D6A6B1',
         isActive: true,
         sortOrder: 6,
+        isSignature: false,
     },
 ];
 
