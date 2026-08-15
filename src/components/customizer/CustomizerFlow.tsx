@@ -13,6 +13,7 @@ import SalwarSuitEnsemblePreview from './SalwarSuitEnsemblePreview';
 import SalwarSuitFlow from './SalwarSuitFlow';
 import SingleGarmentFlow from './SingleGarmentFlow';
 import MeasurementSliderGroup from './MeasurementSliderGroup';
+import JumpToPreview from './JumpToPreview';
 import MuseBoardPanel from './MuseBoardPanel';
 import VariationPicker from './VariationPicker';
 import Button from '../ui/Button';
@@ -892,7 +893,7 @@ const CustomizerFlow: React.FC<CustomizerFlowProps> = ({
 
             {/* Step 3: measurements */}
             {step === 2 && previewDesign && (
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-8 animate-fade-in">
+                <div className="flex flex-col md:grid md:grid-cols-2 gap-8 animate-fade-in">
                     <div>
                         <div className="mb-8 bg-blush/60 border border-champagne-gold/25 rounded-sm p-4">
                             <label className="label-caps block text-warm-gray">Your Age</label>
@@ -995,14 +996,22 @@ const CustomizerFlow: React.FC<CustomizerFlowProps> = ({
                         />
                     </div>
 
-                    <div>
-                        <div className="md:sticky md:top-20">
+                    {/* On a phone the sketch leads and stays pinned while the
+                        sliders scroll under it — the same arrangement the
+                        lehenga, suit, and single-garment flows already use.
+                        Without it the drawing sat below every slider, so you
+                        could never see a measurement take effect. */}
+                    <div
+                        className="order-first md:order-last sticky top-0 z-10 bg-cream pt-2 pb-3 md:static md:bg-transparent md:p-0"
+                        data-preview-section
+                    >
+                        <div className="md:sticky md:top-24">
                             <p className="label-caps text-champagne-gold-dark text-center mb-3">The Sketchbook</p>
-                            <div className="flex flex-col gap-5">
+                            <div className="flex flex-row md:flex-col gap-3 md:gap-5">
                                 {(['front', 'back'] as const).map((v) => (
                                     <div
                                         key={v}
-                                        className="relative paper-card border border-champagne-gold/40 rounded-sm p-5 w-full max-w-[360px] mx-auto transition-shadow duration-500"
+                                        className="relative paper-card border border-champagne-gold/40 rounded-sm p-2 md:p-5 w-full max-w-[360px] mx-auto transition-shadow duration-500"
                                     >
                                         <CornerFlourish position="tl" />
                                         <CornerFlourish position="br" />
@@ -1046,7 +1055,7 @@ const CustomizerFlow: React.FC<CustomizerFlowProps> = ({
                     <div>
                         {/* Both views shown together; this container is also the
                             PDF's image source (front svg first, back svg second). */}
-                        <div ref={pdfRenderRef} className="flex flex-col gap-5">
+                        <div ref={pdfRenderRef} className="flex flex-col gap-5" data-preview-section>
                             {(['front', 'back'] as const).map((v) => (
                                 <div
                                     key={v}
@@ -1219,6 +1228,9 @@ const CustomizerFlow: React.FC<CustomizerFlowProps> = ({
                     </div>
                 </div>
             )}
+
+            {/* Appears only while the sketch is scrolled out of view. */}
+            {(step === 2 || step === 3) && <JumpToPreview key={step} />}
 
             {/* Navigation */}
             <div className="flex justify-between mt-10">

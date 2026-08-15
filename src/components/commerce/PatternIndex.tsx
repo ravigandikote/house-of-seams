@@ -44,7 +44,7 @@ const PatternIndex: React.FC<PatternIndexProps> = ({ listings, initialCategory }
     );
 
     const pill = (active: boolean) =>
-        `label-caps text-[10px] px-4 py-2 rounded-full border transition-colors duration-300 ${
+        `label-caps text-[10px] inline-flex min-h-[44px] items-center px-4 py-2 rounded-full border transition-colors duration-300 touch-manipulation ${
             active
                 ? 'bg-deep-rose border-deep-rose text-white'
                 : 'bg-ivory border-champagne-gold/40 text-charcoal hover:border-deep-rose hover:text-deep-rose'

@@ -7,6 +7,7 @@ import Button from '../ui/Button';
 import BlousePreview from './BlousePreview';
 import LehengaEnsemblePreview from './LehengaEnsemblePreview';
 import LehengaPreview from './LehengaPreview';
+import JumpToPreview from './JumpToPreview';
 import MeasurementSliderGroup from './MeasurementSliderGroup';
 import MuseBoardPanel from './MuseBoardPanel';
 import TextArea from '../ui/TextArea';
@@ -480,9 +481,12 @@ const LehengaFlow: React.FC<LehengaFlowProps> = ({ cholis, skirts, patterns = []
 
             {/* Step 3: measurements for every chosen garment */}
             {step === 2 && previewSkirt && (
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-8 animate-fade-in">
-                    <div className="order-first md:order-last">
-                        <div className="sticky top-2 md:top-24 z-10">
+                <div className="flex flex-col md:grid md:grid-cols-2 gap-8 animate-fade-in">
+                    <div
+                        className="order-first md:order-last sticky top-0 z-10 bg-cream pt-2 pb-3 md:static md:bg-transparent md:p-0"
+                        data-preview-section
+                    >
+                        <div className="md:sticky md:top-24">
                             <p className="label-caps text-champagne-gold-dark text-center mb-3">The Sketchbook</p>
                             <div className="relative paper-card border border-champagne-gold/40 rounded-sm p-5 shadow-soft">
                                 <CornerFlourish position="tl" />
@@ -596,7 +600,7 @@ const LehengaFlow: React.FC<LehengaFlowProps> = ({ cholis, skirts, patterns = []
             {step === 3 && previewSkirt && skirt && (
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-8 animate-fade-in">
                     <div>
-                        <div className="relative paper-card border border-champagne-gold/40 rounded-sm p-6">
+                        <div className="relative paper-card border border-champagne-gold/40 rounded-sm p-6" data-preview-section>
                             <CornerFlourish position="tl" />
                             <CornerFlourish position="br" />
                             <div ref={sketchRef}>
@@ -752,6 +756,9 @@ const LehengaFlow: React.FC<LehengaFlowProps> = ({ cholis, skirts, patterns = []
                     </div>
                 </div>
             )}
+
+            {/* Appears only while the sketch is scrolled out of view. */}
+            {(step === 2 || step === 3) && <JumpToPreview key={step} />}
 
             {/* Navigation */}
             <div className="flex justify-between mt-10">

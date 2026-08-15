@@ -41,6 +41,7 @@ const Header: React.FC = () => {
     ];
 
     return (
+        <>
         <header className="bg-cream/90 backdrop-blur-md border-b border-champagne-gold/25 sticky top-0 z-40">
             <div className="max-w-6xl mx-auto flex justify-between items-center px-4 py-3">
                 <Link href="/" className="flex flex-col">
@@ -141,7 +142,13 @@ const Header: React.FC = () => {
                 </nav>
 
                 {/* Mobile hamburger */}
-                <button onClick={() => setMenuOpen(!menuOpen)} className="md:hidden text-charcoal">
+                <button
+                    type="button"
+                    onClick={() => setMenuOpen(!menuOpen)}
+                    aria-label={menuOpen ? 'Close the menu' : 'Open the menu'}
+                    aria-expanded={menuOpen}
+                    className="md:hidden -mr-2 flex h-11 w-11 items-center justify-center text-charcoal touch-manipulation"
+                >
                     <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                         {menuOpen ? (
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
@@ -150,8 +157,6 @@ const Header: React.FC = () => {
                         )}
                     </svg>
                 </button>
-
-                <WhatsAppButton />
             </div>
 
             {/* Mobile drawer */}
@@ -183,6 +188,8 @@ const Header: React.FC = () => {
                 </div>
             )}
         </header>
+        <WhatsAppButton />
+        </>
     );
 };
 

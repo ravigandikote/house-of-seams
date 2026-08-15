@@ -30,7 +30,7 @@ const RegionSelector: React.FC<{ tone?: 'light' | 'dark'; className?: string }> 
                         setRegion(r);
                         applyRegion(r);
                     }}
-                    className={`label-caps text-[10px] px-3 py-1.5 rounded-full border transition-colors duration-300 ${
+                    className={`label-caps text-[10px] inline-flex min-h-[44px] items-center px-3 py-1.5 rounded-full border transition-colors duration-300 touch-manipulation ${
                         region === r ? base.active : base.idle
                     }`}
                     aria-pressed={region === r}

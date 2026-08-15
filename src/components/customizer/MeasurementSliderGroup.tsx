@@ -40,7 +40,7 @@ const MeasurementSliderGroup: React.FC<MeasurementSliderGroupProps> = ({
                 type="button"
                 onClick={() => setOpen((o) => !o)}
                 aria-expanded={open}
-                className="w-full flex items-end justify-between border-b border-champagne-gold/40 pb-2 mb-4 group"
+                className="w-full min-h-[44px] flex items-end justify-between border-b border-champagne-gold/40 pb-2 mb-4 group touch-manipulation"
             >
                 <span className="flex flex-col items-start text-left">
                     <span className="label-caps text-champagne-gold-dark">{group.label}</span>

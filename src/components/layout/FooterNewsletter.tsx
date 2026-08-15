@@ -54,12 +54,12 @@ const FooterNewsletter = () => {
                         placeholder="Enter your email"
                         value={email}
                         onChange={(e) => setEmail(e.target.value)}
-                        className="!bg-white/5 !border-champagne-gold/30 text-cream placeholder-cream/40 px-3 py-2.5 rounded-sm focus:!border-champagne-gold transition-colors duration-300"
+                        className="!bg-white/5 !border-champagne-gold/30 text-cream placeholder-cream/40 px-3 py-2.5 min-h-[44px] rounded-sm focus:!border-champagne-gold transition-colors duration-300"
                     />
                     <button
                         type="submit"
                         disabled={isSubmitting}
-                        className="label-caps bg-deep-rose text-white px-4 py-2.5 rounded-sm hover:bg-deep-rose-dark transition-colors duration-300 disabled:opacity-60"
+                        className="label-caps inline-flex min-h-[44px] items-center justify-center bg-deep-rose text-white px-4 py-2.5 rounded-sm transition-colors duration-300 touch-manipulation active:bg-deep-rose-dark disabled:opacity-60 [@media(hover:hover)]:hover:bg-deep-rose-dark"
                     >
                         {isSubmitting ? 'Joining…' : 'Subscribe'}
                     </button>

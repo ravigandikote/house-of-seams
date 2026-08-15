@@ -261,12 +261,14 @@ const BookingForm: React.FC<BookingFormProps> = ({ requestReference = null }) =>
                         treated as a no-show.
                     </li>
                 </ul>
-                <label className="flex items-start gap-2.5 mt-4 cursor-pointer">
+                {/* The label carries the tap target: a bare checkbox renders
+                    ~13px, far under a thumb's worth on a phone. */}
+                <label className="flex items-start gap-3 mt-4 min-h-[44px] py-2 cursor-pointer touch-manipulation">
                     <input
                         type="checkbox"
                         checked={form.policyAccepted}
                         onChange={(e) => setForm({ ...form, policyAccepted: e.target.checked })}
-                        className="mt-0.5 accent-deep-rose"
+                        className="mt-0.5 h-5 w-5 shrink-0 accent-deep-rose"
                         required
                     />
                     <span className="text-body-sm text-charcoal">
